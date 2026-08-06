@@ -13,6 +13,7 @@ PYTHON_URL="https://www.python.org/ftp/python/${PYTHON_VERSION}/${PYTHON_ARCHIVE
 PYTHON_SHA256="4acbed6dd1c744b0376e3b1cf57ce906f9dc9e95e68824584c8099a63025a3c3"
 PILLOW_VERSION="12.3.0"
 PY_SERIAL_VERSION="3.5"
+NUMPY_VERSION="2.5.1"
 SMARTSCREEN_COMMIT="918342ecbf33d210d41867f083142e3b5cbffcca"
 
 if [[ -x "$PROJECT_DIR/.venv/bin/python" ]]; then
@@ -61,7 +62,8 @@ printf '%s  %s\n' "$PYTHON_SHA256" "$CACHE_DIR/$PYTHON_ARCHIVE" | sha256sum --ch
     --abi cp312 \
     --only-binary=:all: \
     "Pillow==$PILLOW_VERSION" \
-    "pyserial==$PY_SERIAL_VERSION"
+    "pyserial==$PY_SERIAL_VERSION" \
+    "numpy==$NUMPY_VERSION"
 "$HOST_PYTHON" -m pip wheel \
     --no-deps \
     --wheel-dir "$CACHE_DIR" \
@@ -87,9 +89,9 @@ docker run --rm \
     --volume "$PROJECT_DIR:/work" \
     --workdir /work \
     ubuntu:24.04 \
-    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis packaging/windows/installer.nsi && chown "$HOST_UID:$HOST_GID" dist/USB-LCD-Dashboard-Setup-0.2.0.exe'
+    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis packaging/windows/installer.nsi && chown "$HOST_UID:$HOST_GID" dist/USB-LCD-Dashboard-Setup-0.2.1.exe'
 
-INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-0.2.0.exe"
+INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-0.2.1.exe"
 test -s "$INSTALLER"
 file "$INSTALLER"
 sha256sum "$INSTALLER"

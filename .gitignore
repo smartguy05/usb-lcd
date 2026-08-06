@@ -11,6 +11,7 @@ venv/
 # Build artifacts
 build/
 .build/
+packaging/windows/payload/
 
 # Local config
 config.toml

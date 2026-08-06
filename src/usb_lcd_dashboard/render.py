@@ -134,7 +134,8 @@ def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Imag
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle((22, 22, 458, 298), radius=22, fill=PANEL)
     draw.text((44, 51), title, font=_font(24, True), fill=MUTED)
-    clock = now.astimezone().strftime("%-I:%M")
+    local = now.astimezone()
+    clock = f"{local.hour % 12 or 12}:{local:%M}"
     clock_font = _font(98, True)
     draw.text(
         ((WIDTH - draw.textlength(clock, font=clock_font)) / 2, 93),
@@ -142,7 +143,7 @@ def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Imag
         font=clock_font,
         fill=TEXT,
     )
-    date = now.astimezone().strftime("%A · %B %-d")
+    date = f"{local:%A · %B} {local.day}"
     date_font = _font(22)
     draw.text(
         ((WIDTH - draw.textlength(date, font=date_font)) / 2, 218),

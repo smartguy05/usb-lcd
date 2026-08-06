@@ -8,7 +8,14 @@ from usb_lcd_dashboard.transport import bind_socket, receive_event, send_event
 
 
 def test_missing_daemon_is_nonblocking(tmp_path, monkeypatch):
-    config = Config()
+    # Point at an endpoint nothing is listening on, for whichever IPC mode this
+    # platform defaults to; on Windows that is TCP, where a live dashboard
+    # daemon on the default port would otherwise accept the event.
+    probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    probe.bind(("127.0.0.1", 0))
+    dead_port = probe.getsockname()[1]
+    probe.close()
+    config = Config(ipc_port=dead_port)
     monkeypatch.setattr(type(config), "socket_path", property(lambda self: tmp_path / "missing.sock"))
     assert send_event(config, "codex", {}) is False
 

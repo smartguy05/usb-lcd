@@ -76,7 +76,19 @@ def _command_prefix(explicit: str | None = None) -> str:
     script = Path(sys.executable).with_name(executable_name)
     if script.exists():
         return _quote_command([str(script)])
-    return _quote_command([sys.executable, "-m", "usb_lcd_dashboard"])
+    return _quote_command([_hook_interpreter(), "-m", "usb_lcd_dashboard"])
+
+
+def _hook_interpreter() -> str:
+    """Interpreter for hook commands.
+
+    Hooks fire on every tool call, so on Windows they must run under the
+    console-less pythonw.exe; python.exe flashes a terminal window each time.
+    """
+    if os.name != "nt":
+        return sys.executable
+    windowless = Path(sys.executable).with_name("pythonw.exe")
+    return str(windowless) if windowless.exists() else sys.executable
 
 
 def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -> None:
