@@ -10,7 +10,6 @@ venv/
 
 # Build artifacts
 build/
-dist/
 .build/
 
 # Local config
