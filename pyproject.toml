@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "usb-lcd-dashboard"
+version = "0.2.0"
+description = "Live Claude Code and Codex dashboard for a Turing 3.5-inch USB LCD"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "GPL-3.0-or-later" }
+dependencies = [
+  "pillow>=11.1,<13",
+  "pyserial>=3.5,<4",
+  "smartscreen-driver @ git+https://github.com/hchargois/smartscreen-driver.git@918342ecbf33d210d41867f083142e3b5cbffcca",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.3,<10"]
+
+[project.scripts]
+usb-lcd-dashboard = "usb_lcd_dashboard.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/usb_lcd_dashboard"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
