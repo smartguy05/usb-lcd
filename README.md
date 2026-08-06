@@ -19,9 +19,22 @@ name and tool input the hook delivers. That is more useful than a bare tool
 name, and it means the display can show file paths, search patterns, and command
 descriptions taken from the current tool call.
 
+## Several sessions at once
+
+The panel holds one session, so live sessions share it. A session takes the
+screen when it has an update that has not been shown yet and keeps it for
+`switch_dwell_seconds`; a pending approval preempts immediately. Without that
+floor a session emitting an event every second takes every frame, and quieter
+sessions are never on screen long enough to read.
+
+A session that has nothing new does not take a turn, so a busy session is not
+interrupted by an idle one. A session waiting on a tool call emits nothing until
+the tool returns, which is why work in flight expires on `tool_ttl_seconds`
+rather than the much shorter `active_ttl_seconds`.
+
 ## Windows 11
 
-Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.3.1.exe` installer. It
+Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.4.0.exe` installer. It
 bundles its own Python runtime and dependencies, auto-detects the display as a
 Windows COM port, installs Claude Code and Codex hooks, and starts at user login.
 See [WINDOWS.md](WINDOWS.md) for installation and diagnostics.

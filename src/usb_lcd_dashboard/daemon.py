@@ -23,6 +23,8 @@ class DashboardDaemon:
         self.store = StateStore(
             active_ttl=config.active_ttl_seconds,
             approval_ttl=config.approval_ttl_seconds,
+            tool_ttl=config.tool_ttl_seconds,
+            switch_dwell=config.switch_dwell_seconds,
         )
         self.running = True
         self.next_connect = 0.0

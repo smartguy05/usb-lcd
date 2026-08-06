@@ -167,6 +167,8 @@ def install(executable: str | None = None) -> None:
             "[dashboard]\n"
             "active_ttl_seconds = 180\n"
             "approval_ttl_seconds = 90\n"
+            "tool_ttl_seconds = 900\n"
+            "switch_dwell_seconds = 4.0\n"
             "idle_title = \"AI WORKBENCH\"\n\n"
             "[ipc]\n"
             f"mode = \"{ipc_mode}\"\n"

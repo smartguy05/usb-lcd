@@ -7,6 +7,8 @@ refresh_hz = 2.0
 [dashboard]
 active_ttl_seconds = 180
 approval_ttl_seconds = 90
+tool_ttl_seconds = 900
+switch_dwell_seconds = 4.0
 idle_title = "AI WORKBENCH"
 
 [ipc]

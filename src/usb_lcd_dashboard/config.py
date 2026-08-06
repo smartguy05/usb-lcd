@@ -42,6 +42,12 @@ class Config:
     refresh_hz: float = 2.0
     active_ttl_seconds: int = 180
     approval_ttl_seconds: int = 90
+    # A tool call can run for many minutes without the session emitting anything,
+    # so work in flight outlives the idle timeout.
+    tool_ttl_seconds: int = 900
+    # Once a session takes the screen it keeps it this long, so a chatty session
+    # cannot steal the frame before a quieter one has been readable.
+    switch_dwell_seconds: float = 4.0
     idle_title: str = "AI WORKBENCH"
     ipc_mode: str = "tcp" if os.name == "nt" else "unix"
     ipc_host: str = "127.0.0.1"
@@ -90,6 +96,10 @@ def load_config(path: Path | None = None) -> Config:
         ),
         approval_ttl_seconds=int(
             dashboard.get("approval_ttl_seconds", cfg.approval_ttl_seconds)
+        ),
+        tool_ttl_seconds=int(dashboard.get("tool_ttl_seconds", cfg.tool_ttl_seconds)),
+        switch_dwell_seconds=float(
+            dashboard.get("switch_dwell_seconds", cfg.switch_dwell_seconds)
         ),
         idle_title=str(dashboard.get("idle_title", cfg.idle_title)),
         ipc_mode=str(ipc.get("mode", cfg.ipc_mode)),

@@ -5,7 +5,7 @@ Unicode True
 !define APP_NAME "USB LCD Dashboard"
 ; build-installer.sh passes -DAPP_VERSION from pyproject.toml, the single source.
 !ifndef APP_VERSION
-    !define APP_VERSION "0.3.1"
+    !define APP_VERSION "0.4.0"
 !endif
 !define APP_PUBLISHER "USB LCD Dashboard"
 !define APP_KEY "Software\USB LCD Dashboard"
