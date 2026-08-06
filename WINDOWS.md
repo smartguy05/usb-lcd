@@ -1,9 +1,14 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.4.0.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.5.0.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
+
+> **0.5.0 has not been built yet.** `dist/` still holds the 0.4.0 installer,
+> which predates tile support. Run `packaging/windows/build-installer.sh`
+> (Docker or Podman required) to produce the 0.5.0 exe before installing it on
+> the home machine.
 
 ## Install
 
@@ -74,4 +79,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.4.0.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.5.0.exe`.

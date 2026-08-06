@@ -53,8 +53,10 @@ class StateStore:
         # What each session looked like the last time it was on screen, so a
         # session is only given a turn when it has something new to show.
         self.shown: dict[Key, datetime] = {}
-        self.showing: Key | None = None
-        self.showing_since: datetime | None = None
+        # One entry per tile that can hold a session, and when each was filled.
+        # The 3.5" panel is simply the one-slot case.
+        self.slots: list[Key | None] = []
+        self.since: list[datetime | None] = []
 
     def apply(self, update: SessionState) -> SessionState:
         key = (update.provider, update.session_id)
@@ -97,14 +99,35 @@ class StateStore:
         until the tool returns, which can take far longer than the idle TTL."""
         return self.tool_ttl if state.phase == "TOOL" else self.active_ttl
 
-    def active(self, now: datetime | None = None) -> SessionState | None:
-        """Pick the session to display.
+    def _resize(self, slots: int) -> None:
+        while len(self.slots) < slots:
+            self.slots.append(None)
+            self.since.append(None)
+        del self.slots[slots:]
+        del self.since[slots:]
 
-        The screen holds one session, so it has to be shared. A session takes
-        the screen when it has an update that has not been shown yet, and keeps
-        it for switch_dwell seconds; without that floor a session emitting an
-        event every second would take every frame and quieter sessions would
-        never be readable. A pending approval preempts immediately.
+    def _elapsed(self, index: int, now: datetime) -> float:
+        since = self.since[index]
+        return float("inf") if since is None else (now - since).total_seconds()
+
+    def active(self, now: datetime | None = None) -> SessionState | None:
+        """The session on a single-tile panel — the one-slot case of assign()."""
+        return self.assign(1, now)[0]
+
+    def assign(
+        self, slots: int, now: datetime | None = None
+    ) -> list[SessionState | None]:
+        """Place live sessions into `slots` tiles, newest-interesting first.
+
+        The tiles are the cap: with at most `slots` live sessions every one gets
+        a stable tile and nothing ever moves. Beyond that the surplus take turns,
+        under the same rules a single tile has always used — a session only takes
+        a turn when it has something new to show, it holds its tile for
+        switch_dwell seconds so it stays readable, and a pending approval jumps
+        the queue immediately.
+
+        A placed session is never relocated, only evicted, so nothing hops from
+        tile to tile between frames.
         """
         now = now or utc_now()
         live = {
@@ -115,45 +138,112 @@ class StateStore:
         }
         for stale in set(self.shown) - set(live):
             del self.shown[stale]
-        if not live:
-            self.showing = None
-            self.showing_since = None
-            return None
+        self._resize(slots)
+        if not live or slots <= 0:
+            self.slots = [None] * slots
+            self.since = [None] * slots
+            return [None] * slots
 
-        approvals = [
-            (key, state)
-            for key, state in live.items()
-            if state.phase == "APPROVAL"
-            and (now - state.updated_at).total_seconds() <= self.approval_ttl
-        ]
-        if approvals:
-            choice = max(approvals, key=lambda item: item[1].updated_at)
-        else:
-            held = self.showing if self.showing in live else None
-            elapsed = (
-                (now - self.showing_since).total_seconds()
-                if held and self.showing_since
-                else None
+        def approval(key: Key) -> bool:
+            state = live.get(key)
+            return (
+                state is not None
+                and state.phase == "APPROVAL"
+                and (now - state.updated_at).total_seconds() <= self.approval_ttl
             )
-            if held and elapsed is not None and elapsed < self.switch_dwell:
-                choice = (held, live[held])
-            else:
-                waiting = [
-                    (key, state)
-                    for key, state in live.items()
-                    if key != held and state.updated_at != self.shown.get(key)
-                ]
-                if waiting:
-                    choice = max(waiting, key=lambda item: item[1].updated_at)
-                elif held:
-                    choice = (held, live[held])
-                else:
-                    choice = max(live.items(), key=lambda item: item[1].updated_at)
 
-        key, state = choice
-        if key != self.showing:
-            self.showing = key
-            self.showing_since = now
-        self.shown[key] = state.updated_at
-        return state
+        def newest_first(keys) -> list[Key]:
+            return sorted(keys, key=lambda key: live[key].updated_at, reverse=True)
+
+        # Drop sessions that have expired, and any duplicate of one already held
+        # at a lower index, so a session can never occupy two tiles.
+        seen: set[Key] = set()
+        for index, key in enumerate(self.slots):
+            if key is None:
+                continue
+            if key not in live or key in seen:
+                self.slots[index] = None
+                self.since[index] = None
+            else:
+                seen.add(key)
+
+        approvals = newest_first([key for key in live if approval(key)])
+        fresh = newest_first(
+            [
+                key
+                for key in live
+                if key not in seen and live[key].updated_at != self.shown.get(key)
+            ]
+        )
+        # Tiles filled during this call are off limits below: without this a
+        # dwell of zero would let each candidate evict the previous one and the
+        # least interesting session would end up on screen.
+        placed: set[int] = set()
+
+        def place(index: int, key: Key) -> None:
+            self.slots[index] = key
+            self.since[index] = now
+            placed.add(index)
+
+        def on_screen() -> set[Key]:
+            return {key for key in self.slots if key is not None}
+
+        # An empty tile displaces nothing, so it fills without waiting on dwell.
+        # The third group keeps a tile from sitting blank while a session that
+        # simply has no news is available to show.
+        queue = [key for key in approvals if key not in seen]
+        queue += [key for key in fresh if key not in queue]
+        queue += [
+            key for key in newest_first(live) if key not in seen and key not in queue
+        ]
+        for index in range(slots):
+            if self.slots[index] is None and queue:
+                place(index, queue.pop(0))
+
+        # An approval ignores the dwell floor. It evicts the tile that has been
+        # sitting longest rather than always tile zero, so it displaces the least
+        # recently interesting session instead of one that just arrived.
+        for key in approvals:
+            if key in on_screen():
+                continue
+            victims = [
+                index
+                for index in range(slots)
+                if self.slots[index] is not None
+                and index not in placed
+                and not approval(self.slots[index])
+            ]
+            if victims:
+                index = max(victims, key=lambda i: (self._elapsed(i, now), i))
+            else:
+                occupied = [
+                    index
+                    for index in range(slots)
+                    if self.slots[index] is not None and index not in placed
+                ]
+                if not occupied:
+                    break
+                index = min(occupied, key=lambda i: live[self.slots[i]].updated_at)
+            place(index, key)
+
+        # Everything else waits for a tile to have been readable long enough.
+        for key in fresh:
+            if key in on_screen():
+                continue
+            eligible = [
+                index
+                for index in range(slots)
+                if self.slots[index] is not None
+                and index not in placed
+                and not approval(self.slots[index])
+                and self._elapsed(index, now) >= self.switch_dwell
+            ]
+            if not eligible:
+                break
+            place(max(eligible, key=lambda i: (self._elapsed(i, now), i)), key)
+
+        for key in self.slots:
+            if key is not None:
+                self.shown[key] = live[key].updated_at
+        return [live[key] if key is not None else None for key in self.slots]
 

@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .config import config_home
+from .config import config_home, default_config_toml
 
 
 COMMON_EVENTS = [
@@ -158,23 +158,7 @@ def install(executable: str | None = None) -> None:
     if not config_path.exists():
         device = "AUTO" if os.name == "nt" else "/dev/turing-lcd"
         ipc_mode = "tcp" if os.name == "nt" else "unix"
-        config_path.write_text(
-            "[display]\n"
-            f"device = \"{device}\"\n"
-            "orientation = \"landscape\"\n"
-            "brightness = 25\n"
-            "refresh_hz = 2.0\n\n"
-            "[dashboard]\n"
-            "active_ttl_seconds = 180\n"
-            "approval_ttl_seconds = 90\n"
-            "tool_ttl_seconds = 900\n"
-            "switch_dwell_seconds = 4.0\n"
-            "idle_title = \"AI WORKBENCH\"\n\n"
-            "[ipc]\n"
-            f"mode = \"{ipc_mode}\"\n"
-            "host = \"127.0.0.1\"\n"
-            "port = 45722\n"
-        )
+        config_path.write_text(default_config_toml(device, ipc_mode))
 
     state["command_prefix"] = command_prefix
     if os.name != "nt":

@@ -10,7 +10,8 @@ from serial.tools.list_ports import comports
 
 from .config import Config
 from .display import Display
-from .render import HEIGHT, WIDTH, _font
+from .layout import agent_slots
+from .render import BACKGROUND, CLAUDE, CODEX, MUTED, PANEL, TEXT, _fit
 
 
 TARGET_VID = 0x1A86
@@ -54,11 +55,20 @@ def _windows_startup_shortcut() -> Path:
 
 def checks(config: Config) -> list[tuple[str, bool, str]]:
     resolved = detected_device(config)
+    slots = agent_slots(config.tiles)
     items = [
         (
             "device",
             resolved is not None,
             resolved or f"waiting for {TARGET_VID:04x}:{TARGET_PID:04x}",
+        ),
+        (
+            "layout",
+            # A layout with nowhere to put a session would show the panel
+            # nothing but decoration, which is worth flagging.
+            slots > 0,
+            f"{config.display_kind} {config.width}x{config.height} · "
+            f"{len(config.tiles)} tiles · {slots} agent slots",
         ),
         (
             "Claude hooks",
@@ -100,16 +110,47 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
 
 
 def paint_test(config: Config) -> None:
+    """Put a card on the panel describing what the daemon thinks it is talking to.
+
+    Every line is derived rather than hardcoded, so this stays useful on a panel
+    that is not the 3.5" Turing — the old version drew a 480x320 card with the
+    Turing's USB id baked into it.
+    """
     display = Display(config)
     try:
         display.connect()
-        frame = Image.new("RGB", (WIDTH, HEIGHT), "#081018")
+        width, height = display.size
+        pad = max(12, round(width * 0.045))
+        frame = Image.new("RGB", (width, height), BACKGROUND)
         draw = ImageDraw.Draw(frame)
-        draw.rounded_rectangle((20, 20, WIDTH - 20, HEIGHT - 20), radius=22, fill="#101c28")
-        draw.text((44, 58), "USB LCD READY", font=_font(38, True), fill="#2bc48a")
-        draw.text((44, 132), "1a86:5722 · USB35INCHIPSV2", font=_font(18), fill="#f2f7fb")
-        draw.text((44, 181), "LANDSCAPE 480 × 320", font=_font(23, True), fill="#8aa0b2")
-        draw.text((44, 242), "Claude Code + Codex", font=_font(24, True), fill="#d97757")
+        draw.rounded_rectangle(
+            (pad, pad, width - pad, height - pad),
+            radius=max(8, round(min(width, height) * 0.07)),
+            fill=PANEL,
+        )
+        inner = max(1, width - 4 * pad)
+        lines = [
+            ("USB LCD READY", round(height * 0.119), True, CODEX),
+            (f"{config.display_kind} · {display.device}", round(height * 0.056), False, TEXT),
+            (
+                f"{config.orientation.upper()} {width} × {height}",
+                round(height * 0.072),
+                True,
+                MUTED,
+            ),
+            (
+                f"{len(config.tiles)} TILES · {agent_slots(config.tiles)} AGENT SLOTS",
+                round(height * 0.056),
+                True,
+                MUTED,
+            ),
+            ("Claude Code + Codex", round(height * 0.075), True, CLAUDE),
+        ]
+        y = pad * 2
+        for text, size, bold, colour in lines:
+            fitted, font = _fit(draw, text, inner, max(9, size), bold, min_size=9)
+            draw.text((pad * 2, y), fitted, font=font, fill=colour)
+            y += round(max(9, size) * 1.65)
         display.paint(frame, force=True)
     finally:
         display.close()

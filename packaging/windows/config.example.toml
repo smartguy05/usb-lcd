@@ -1,5 +1,8 @@
 [display]
+kind = "turing_rev_a"
 device = "AUTO"
+width = 480
+height = 320
 orientation = "landscape"
 brightness = 25
 refresh_hz = 2.0
@@ -15,3 +18,8 @@ idle_title = "AI WORKBENCH"
 mode = "tcp"
 host = "127.0.0.1"
 port = 45722
+
+# The settings editor, served on 127.0.0.1 only.
+[admin]
+enabled = true
+port = 45723
