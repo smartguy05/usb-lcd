@@ -10,12 +10,18 @@ serial USB35INCHIPSV2
 ```
 
 The program does not display prompts, responses, or transcript text. It shows
-only lifecycle metadata such as provider, model, project, current tool, elapsed
-time, permission requests, and context used when the CLI exposes it.
+only lifecycle metadata such as provider, model, project, elapsed time,
+permission requests, and context used when the CLI exposes it.
+
+The headline is the same activity line the agent prints above its own spinner —
+"Editing src/render.py", "Running the installer build" — rebuilt from the tool
+name and tool input the hook delivers. That is more useful than a bare tool
+name, and it means the display can show file paths, search patterns, and command
+descriptions taken from the current tool call.
 
 ## Windows 11
 
-Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.2.2.exe` installer. It
+Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.3.1.exe` installer. It
 bundles its own Python runtime and dependencies, auto-detects the display as a
 Windows COM port, installs Claude Code and Codex hooks, and starts at user login.
 See [WINDOWS.md](WINDOWS.md) for installation and diagnostics.

@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 
+from usb_lcd_dashboard.model import StateStore
 from usb_lcd_dashboard.normalize import normalize_event
 
 
@@ -95,6 +96,74 @@ def test_tool_and_approval_events():
     )
     assert (tool.phase, tool.detail) == ("TOOL", "Bash")
     assert (approval.phase, approval.detail) == ("APPROVAL", "Install device rule")
+
+
+def test_activity_replaces_the_tool_name_for_the_headline():
+    state = normalize_event(
+        "claude",
+        {
+            "session_id": "a",
+            "hook_event_name": "PreToolUse",
+            "tool_name": "Edit",
+            "tool_input": {"file_path": "/work/widget/src/render.py"},
+            "cwd": "/work/widget",
+        },
+        NOW,
+    )
+    assert state.activity == "Editing src/render.py"
+
+
+def test_activity_is_cleared_when_an_event_carries_no_tool():
+    store = StateStore()
+    store.apply(
+        normalize_event(
+            "claude",
+            {
+                "session_id": "a",
+                "hook_event_name": "PreToolUse",
+                "tool_name": "Bash",
+                "tool_input": {"description": "Build the installer"},
+            },
+            NOW,
+        )
+    )
+    working = store.apply(
+        normalize_event(
+            "claude",
+            {"session_id": "a", "hook_event_name": "PostToolUse", "tool_name": "Bash",
+             "tool_input": {"description": "Build the installer"}},
+            NOW,
+        )
+    )
+    prompt = store.apply(
+        normalize_event(
+            "claude",
+            {"session_id": "a", "hook_event_name": "UserPromptSubmit"},
+            NOW,
+        )
+    )
+    assert working.activity == "Running Build the installer"
+    assert prompt.activity == ""
+
+
+def test_statusline_keeps_the_activity_from_the_last_hook():
+    store = StateStore()
+    store.apply(
+        normalize_event(
+            "claude",
+            {
+                "session_id": "a",
+                "hook_event_name": "PreToolUse",
+                "tool_name": "Grep",
+                "tool_input": {"pattern": "render_dashboard"},
+            },
+            NOW,
+        )
+    )
+    status = store.apply(
+        normalize_event("claude", {"session_id": "a", "model": "Opus"}, NOW)
+    )
+    assert status.activity == "Searching for render_dashboard"
 
 
 def test_session_end_is_not_active():

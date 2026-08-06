@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .activity import describe_activity
 from .model import SessionState, utc_now
 
 
@@ -86,9 +87,10 @@ def normalize_event(
     )
     phase = PHASES.get(event, "ACTIVE")
     tool = str(payload.get("tool_name") or "")
+    tool_input = payload.get("tool_input")
+    tool_input = tool_input if isinstance(tool_input, dict) else {}
     detail = tool if phase in {"TOOL", "APPROVAL", "ERROR"} else ""
     if phase == "APPROVAL":
-        tool_input = payload.get("tool_input") or {}
         detail = str(tool_input.get("description") or tool or "User decision needed")
     if event == "StatusLine":
         phase = "ACTIVE"
@@ -112,6 +114,13 @@ def normalize_event(
     cost = payload.get("cost") or {}
     usage = _latest_codex_usage(payload.get("transcript_path")) if provider == "codex" else {}
 
+    cwd = str(
+        workspace.get("current_dir")
+        or payload.get("cwd")
+        or workspace.get("project_dir")
+        or ""
+    )
+
     return SessionState(
         provider=provider,
         session_id=session_id,
@@ -119,13 +128,9 @@ def normalize_event(
         started_at=now,
         phase=phase,
         detail=detail,
+        activity=describe_activity(tool, tool_input, cwd),
         model=model,
-        cwd=str(
-            workspace.get("current_dir")
-            or payload.get("cwd")
-            or workspace.get("project_dir")
-            or ""
-        ),
+        cwd=cwd,
         permission_mode=str(payload.get("permission_mode") or ""),
         context_percent=context_percent
         if context_percent is not None

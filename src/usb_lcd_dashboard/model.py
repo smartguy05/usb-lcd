@@ -18,6 +18,7 @@ class SessionState:
     started_at: datetime
     phase: str = "READY"
     detail: str = ""
+    activity: str = ""
     model: str = ""
     cwd: str = ""
     permission_mode: str = ""
@@ -46,12 +47,15 @@ class StateStore:
             if update.extra.get("event") == "StatusLine":
                 update.phase = previous.phase
                 update.detail = previous.detail
+                update.activity = previous.activity
                 update.ended = previous.ended
             values = {
                 name: getattr(update, name)
                 for name in update.__dataclass_fields__
                 if name not in {"extra", "started_at"}
             }
+            # "activity" is absent on purpose: a prompt or stop event carries no
+            # tool, and its empty activity must clear the stale one.
             for optional in (
                 "detail",
                 "model",

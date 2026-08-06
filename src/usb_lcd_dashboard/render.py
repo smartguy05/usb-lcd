@@ -42,11 +42,68 @@ def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default(size=size)
 
 
-def _fit(draw: ImageDraw.ImageDraw, text: str, width: int, size: int, bold: bool = False):
+def _fit(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    width: int,
+    size: int,
+    bold: bool = False,
+    min_size: int | None = None,
+):
     font = _font(size, bold)
+    while min_size and size > min_size and draw.textlength(text, font=font) > width:
+        size -= 2
+        font = _font(size, bold)
     while text and draw.textlength(text, font=font) > width:
         text = text[:-2].rstrip() + "…"
     return text, font
+
+
+def _wrap(
+    draw: ImageDraw.ImageDraw, text: str, width: int, font: ImageFont.FreeTypeFont
+) -> list[str]:
+    lines: list[str] = []
+    current = ""
+    for word in text.split():
+        candidate = f"{current} {word}" if current else word
+        if draw.textlength(candidate, font=font) <= width:
+            current = candidate
+            continue
+        if current:
+            lines.append(current)
+        current = ""
+        while draw.textlength(word, font=font) > width:
+            cut = 1
+            while cut < len(word) and draw.textlength(word[: cut + 1], font=font) <= width:
+                cut += 1
+            lines.append(word[:cut])
+            word = word[cut:]
+        current = word
+    if current:
+        lines.append(current)
+    return lines
+
+
+def _fit_headline(draw: ImageDraw.ImageDraw, text: str, width: int):
+    """One big line where it fits, otherwise two smaller ones.
+
+    Activity text ("Editing src/usb_lcd_dashboard/render.py") is far longer
+    than the phase words this line used to hold, and truncating it throws away
+    the part that identifies the work.
+    """
+    for size in (43, 39, 35, 31):
+        font = _font(size, True)
+        if draw.textlength(text, font=font) <= width:
+            return [text], font
+    for size in (30, 28, 26, 24):
+        font = _font(size, True)
+        lines = _wrap(draw, text, width, font)
+        if len(lines) <= 2:
+            return lines, font
+    font = _font(24, True)
+    lines = _wrap(draw, text, width, font)[:2]
+    lines[-1] = _fit(draw, lines[-1] + "…", width, 24, True)[0]
+    return lines, font
 
 
 def _duration(seconds: int) -> str:
@@ -88,22 +145,30 @@ def render_dashboard(state: SessionState, now: datetime) -> Image.Image:
     model, model_font = _fit(draw, state.model or "model pending", 245, 18)
     draw.text((455 - draw.textlength(model, font=model_font), 25), model, font=model_font, fill=MUTED)
 
-    phase = state.phase
-    if state.phase == "TOOL" and state.detail:
-        phase = f"TOOL · {state.detail}"
-    elif state.phase == "APPROVAL":
-        phase = "APPROVAL NEEDED"
-    phase, phase_font = _fit(draw, phase, 430, 43, True)
-    draw.text((24, 80), phase, font=phase_font, fill=accent)
+    # Prefer the agent's own activity text ("Editing render.py") over the phase
+    # word: it is the line the terminal shows, and it says far more than a tool
+    # name. Phases that are not work in progress keep their own label.
+    headline = state.phase
+    if state.phase == "APPROVAL":
+        headline = "APPROVAL NEEDED"
+    elif state.activity and state.phase in {"TOOL", "THINKING", "ACTIVE"}:
+        headline = state.activity
+    lines, headline_font = _fit_headline(draw, headline, 430)
+    headline_size = getattr(headline_font, "size", 43)
+    line_height = int(headline_size * 1.2)
+    top = 80 if len(lines) > 1 else 80 + (43 - headline_size) // 2
+    for index, line in enumerate(lines):
+        draw.text((24, top + index * line_height), line, font=headline_font, fill=accent)
 
+    project_y = max(139, top + len(lines) * line_height + 6)
     project = state.project
     branch = _branch(state.cwd)
     project_line = f"{project}  ·  {branch}" if branch else project
     project_line, project_font = _fit(draw, project_line, 430, 23, True)
-    draw.text((24, 139), project_line, font=project_font, fill=TEXT)
+    draw.text((24, project_y), project_line, font=project_font, fill=TEXT)
     if state.detail and state.phase in {"APPROVAL", "ERROR"}:
         detail, detail_font = _fit(draw, state.detail, 430, 17)
-        draw.text((24, 171), detail, font=detail_font, fill=MUTED)
+        draw.text((24, project_y + 32), detail, font=detail_font, fill=MUTED)
 
     y = 209
     draw.text((24, y), "CONTEXT USED", font=_font(15, True), fill=MUTED)
