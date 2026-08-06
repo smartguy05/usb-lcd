@@ -18,6 +18,7 @@ class Display:
         self.lcd = None
         self.device = config.device
         self.previous: Image.Image | None = None
+        self.serial_handle = None
 
     @property
     def connected(self) -> bool:
@@ -53,6 +54,7 @@ class Display:
         self.device = lcd.com_port
         self.lcd = lcd
         self.previous = None
+        self.serial_handle = getattr(lcd, "lcd_serial", None)
 
     def close(self) -> None:
         if self.lcd is not None:
@@ -60,6 +62,21 @@ class Display:
                 self.lcd.close_serial()
             finally:
                 self.lcd = None
+                self.serial_handle = None
+
+    def _driver_reopened(self) -> bool:
+        """Did the driver silently replace the serial port under us?
+
+        smartscreen_driver swallows a SerialException by closing the port,
+        reopening it and retrying the write. It does not replay
+        initialize_comm/screen_on/set_brightness/set_orientation, so the panel
+        comes back in its default orientation with a cleared framebuffer while
+        our handle still looks healthy. Unplugging the display triggers exactly
+        this, and the stale diff base then paints crops at the wrong offsets.
+        """
+        if self.lcd is None or self.serial_handle is None:
+            return False
+        return getattr(self.lcd, "lcd_serial", None) is not self.serial_handle
 
     def paint(self, image: Image.Image, force: bool = False) -> bool:
         if self.simulate:
@@ -68,6 +85,8 @@ class Display:
             return True
         if self.lcd is None:
             raise ConnectionError("display is not connected")
+        if self._driver_reopened():
+            raise ConnectionError("serial port was reopened by the driver")
 
         bbox = (
             None
@@ -89,6 +108,10 @@ class Display:
             else:
                 self.lcd.paint(image.crop(bbox), pos=(left, top))
                 LOG.debug("LCD partial frame written: %s", bbox)
+        if self._driver_reopened():
+            # The write above went to a panel that has since been reset. Leave
+            # self.previous alone so the reconnect repaints a full frame.
+            raise ConnectionError("serial port was reopened by the driver")
         self.previous = image.copy()
         return True
 

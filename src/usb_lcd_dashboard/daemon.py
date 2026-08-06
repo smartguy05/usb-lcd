@@ -74,12 +74,20 @@ class DashboardDaemon:
 
                 now = utc_now()
                 state = self.store.active(now)
-                frame = (
-                    render_dashboard(state, now)
-                    if state
-                    else render_idle(self.config.idle_title, now, self.display.connected)
-                )
-                if self.display.connected:
+                try:
+                    frame = (
+                        render_dashboard(state, now)
+                        if state
+                        else render_idle(
+                            self.config.idle_title, now, self.display.connected
+                        )
+                    )
+                except Exception:
+                    # A render fault must not take the daemon down: it would
+                    # strand the panel on its last frame with nothing to say why.
+                    LOG.exception("Frame render failed; skipping this frame")
+                    frame = None
+                if frame is not None and self.display.connected:
                     try:
                         self.display.paint(frame)
                     except Exception as exc:

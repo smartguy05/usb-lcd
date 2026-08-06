@@ -3,7 +3,10 @@ Unicode True
 !include "LogicLib.nsh"
 
 !define APP_NAME "USB LCD Dashboard"
-!define APP_VERSION "0.2.2"
+; build-installer.sh passes -DAPP_VERSION from pyproject.toml, the single source.
+!ifndef APP_VERSION
+    !define APP_VERSION "0.3.1"
+!endif
 !define APP_PUBLISHER "USB LCD Dashboard"
 !define APP_KEY "Software\USB LCD Dashboard"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\USB LCD Dashboard"
@@ -18,7 +21,7 @@ SetCompressor /SOLID lzma
 ShowInstDetails show
 ShowUninstDetails show
 
-VIProductVersion "0.2.2.0"
+VIProductVersion "${APP_VERSION}.0"
 VIAddVersionKey "ProductName" "${APP_NAME}"
 VIAddVersionKey "CompanyName" "${APP_PUBLISHER}"
 VIAddVersionKey "FileDescription" "Claude Code and Codex dashboard for Turing USB LCD"

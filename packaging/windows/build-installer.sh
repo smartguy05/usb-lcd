@@ -7,6 +7,8 @@ CACHE_DIR="$BUILD_DIR/cache"
 PAYLOAD_DIR="$PROJECT_DIR/packaging/windows/payload"
 SITE_DIR="$PAYLOAD_DIR/Lib/site-packages"
 DIST_DIR="$PROJECT_DIR/dist"
+APP_VERSION="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$PROJECT_DIR/pyproject.toml")"
+test -n "$APP_VERSION"
 PYTHON_VERSION="3.12.10"
 PYTHON_ARCHIVE="python-${PYTHON_VERSION}-embed-amd64.zip"
 PYTHON_URL="https://www.python.org/ftp/python/${PYTHON_VERSION}/${PYTHON_ARCHIVE}"
@@ -18,11 +20,31 @@ SMARTSCREEN_COMMIT="918342ecbf33d210d41867f083142e3b5cbffcca"
 
 if [[ -x "$PROJECT_DIR/.venv/bin/python" ]]; then
     HOST_PYTHON="$PROJECT_DIR/.venv/bin/python"
-else
+elif [[ -x "$PROJECT_DIR/.venv/Scripts/python.exe" ]]; then
+    HOST_PYTHON="$PROJECT_DIR/.venv/Scripts/python.exe"
+elif command -v python3 >/dev/null; then
     HOST_PYTHON="python3"
+else
+    HOST_PYTHON="python"
 fi
 
-for required in curl docker sha256sum; do
+# Podman serves the Docker API, so the default works for either runtime.
+CONTAINER_RUNTIME="${CONTAINER_RUNTIME:-docker}"
+
+# Git Bash rewrites arguments that look like absolute paths, which mangles both
+# the container-side mount point and the paths inside the container command. Turn
+# that off for container calls only: the native curl still needs the rewriting.
+MOUNT_DIR="$PROJECT_DIR"
+case "$(uname -s)" in
+    MINGW*|MSYS*) MOUNT_DIR="$(cd "$PROJECT_DIR" && pwd -W)" ;;
+esac
+
+container_run() {
+    MSYS2_ARG_CONV_EXCL='*' "$CONTAINER_RUNTIME" run --rm \
+        --volume "$MOUNT_DIR:/work" "$@"
+}
+
+for required in curl "$CONTAINER_RUNTIME" sha256sum; do
     if ! command -v "$required" >/dev/null; then
         echo "Missing required build command: $required" >&2
         exit 1
@@ -41,10 +63,10 @@ esac
 HOST_UID="$(id -u)"
 HOST_GID="$(id -g)"
 if [[ -d "$PAYLOAD_DIR" ]]; then
-    docker run --rm \
-        --volume "$PROJECT_DIR:/work" \
-        ubuntu:24.04 \
-        chown -R "$HOST_UID:$HOST_GID" /work/packaging/windows/payload
+    # Reclaim files a previous containerised build left owned by root. Windows
+    # mounts virtualise ownership, so failure here is not a build failure.
+    container_run ubuntu:24.04 \
+        chown -R "$HOST_UID:$HOST_GID" /work/packaging/windows/payload || true
 fi
 
 rm -rf "$BUILD_DIR" "$PAYLOAD_DIR"
@@ -83,15 +105,15 @@ PTH_FILE="$PAYLOAD_DIR/python312._pth"
 sed -i '/^\.$/a Lib/site-packages' "$PTH_FILE"
 sed -i 's/^#import site/import site/' "$PTH_FILE"
 
-docker run --rm \
+container_run \
     --env HOST_UID="$HOST_UID" \
     --env HOST_GID="$HOST_GID" \
-    --volume "$PROJECT_DIR:/work" \
+    --env APP_VERSION="$APP_VERSION" \
     --workdir /work \
     ubuntu:24.04 \
-    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis packaging/windows/installer.nsi && chown "$HOST_UID:$HOST_GID" dist/USB-LCD-Dashboard-Setup-0.2.2.exe'
+    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis -DAPP_VERSION="$APP_VERSION" packaging/windows/installer.nsi && { chown "$HOST_UID:$HOST_GID" "dist/USB-LCD-Dashboard-Setup-$APP_VERSION.exe" || true; }'
 
-INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-0.2.2.exe"
+INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-$APP_VERSION.exe"
 test -s "$INSTALLER"
 file "$INSTALLER"
 sha256sum "$INSTALLER"

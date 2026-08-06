@@ -1,6 +1,6 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.2.2.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.3.1.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
@@ -38,6 +38,25 @@ VID/PID `1A86:5722`. To force a particular port, edit:
 
 and change `device = "AUTO"` to a value such as `device = "COM4"`.
 
+### After unplugging the display
+
+Re-plugging the panel resets it: the framebuffer clears and the orientation
+returns to the hardware default. The driver hides this, because it recovers from
+the resulting write error by quietly reopening the COM port and retrying, without
+replaying the panel's initialisation. Before 0.3.1 that left a sideways, fuzzy or
+white screen, because the dashboard kept sending diff-sized crops to a panel that
+no longer matched its idea of what was on screen.
+
+The dashboard now notices that the port was reopened, reconnects, and repaints a
+full frame, so a re-plug recovers on its own within a few seconds. `dashboard.log`
+records it as:
+
+```text
+LCD write failed: serial port was reopened by the driver
+LCD connected at COM10
+LCD full frame written: 480x320
+```
+
 ## Remove
 
 Use **Settings → Apps → Installed apps → USB LCD Dashboard → Uninstall**. The
@@ -52,4 +71,4 @@ From Linux with Docker installed:
 packaging/windows/build-installer.sh
 ```
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.2.2.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.3.1.exe`.
