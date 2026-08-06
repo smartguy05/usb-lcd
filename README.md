@@ -15,7 +15,7 @@ time, permission requests, and context used when the CLI exposes it.
 
 ## Windows 11
 
-Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.2.1.exe` installer. It
+Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.2.2.exe` installer. It
 bundles its own Python runtime and dependencies, auto-detects the display as a
 Windows COM port, installs Claude Code and Codex hooks, and starts at user login.
 See [WINDOWS.md](WINDOWS.md) for installation and diagnostics.

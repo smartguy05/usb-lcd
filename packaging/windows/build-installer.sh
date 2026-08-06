@@ -89,9 +89,9 @@ docker run --rm \
     --volume "$PROJECT_DIR:/work" \
     --workdir /work \
     ubuntu:24.04 \
-    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis packaging/windows/installer.nsi && chown "$HOST_UID:$HOST_GID" dist/USB-LCD-Dashboard-Setup-0.2.1.exe'
+    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis packaging/windows/installer.nsi && chown "$HOST_UID:$HOST_GID" dist/USB-LCD-Dashboard-Setup-0.2.2.exe'
 
-INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-0.2.1.exe"
+INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-0.2.2.exe"
 test -s "$INSTALLER"
 file "$INSTALLER"
 sha256sum "$INSTALLER"

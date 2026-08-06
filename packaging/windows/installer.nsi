@@ -3,7 +3,7 @@ Unicode True
 !include "LogicLib.nsh"
 
 !define APP_NAME "USB LCD Dashboard"
-!define APP_VERSION "0.2.1"
+!define APP_VERSION "0.2.2"
 !define APP_PUBLISHER "USB LCD Dashboard"
 !define APP_KEY "Software\USB LCD Dashboard"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\USB LCD Dashboard"
@@ -18,7 +18,7 @@ SetCompressor /SOLID lzma
 ShowInstDetails show
 ShowUninstDetails show
 
-VIProductVersion "0.2.1.0"
+VIProductVersion "0.2.2.0"
 VIAddVersionKey "ProductName" "${APP_NAME}"
 VIAddVersionKey "CompanyName" "${APP_PUBLISHER}"
 VIAddVersionKey "FileDescription" "Claude Code and Codex dashboard for Turing USB LCD"

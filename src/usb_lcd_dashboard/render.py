@@ -7,6 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .config import NO_WINDOW
 from .model import SessionState
 
 
@@ -64,6 +65,7 @@ def _branch(cwd: str) -> str:
             capture_output=True,
             text=True,
             timeout=0.15,
+            creationflags=NO_WINDOW,
         )
         return result.stdout.strip()
     except (OSError, subprocess.TimeoutExpired):

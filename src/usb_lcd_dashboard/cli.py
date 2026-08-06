@@ -8,14 +8,11 @@ import os
 import subprocess
 import sys
 
-from .config import config_home, load_config
+from .config import NO_WINDOW, config_home, load_config
 from .daemon import DashboardDaemon
 from .doctor import paint_test, print_report
 from .install import install, uninstall
 from .transport import send_control, send_event
-
-
-_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
 def _json_stdin() -> tuple[bytes, dict]:
@@ -78,9 +75,7 @@ def main(argv: list[str] | None = None) -> int:
                     stdout=sys.stdout.buffer,
                     stderr=sys.stderr.buffer,
                     check=False,
-                    # Hooks run under console-less pythonw.exe, so the shell
-                    # would otherwise allocate a visible console per status line.
-                    creationflags=_NO_WINDOW,
+                    creationflags=NO_WINDOW,
                 )
                 return result.returncode
         return 0

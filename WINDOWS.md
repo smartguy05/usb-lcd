@@ -1,6 +1,6 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.2.1.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.2.2.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
@@ -52,4 +52,4 @@ From Linux with Docker installed:
 packaging/windows/build-installer.sh
 ```
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.2.1.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.2.2.exe`.

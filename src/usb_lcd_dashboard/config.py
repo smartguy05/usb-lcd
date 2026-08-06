@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import tomllib
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -11,6 +12,11 @@ DEVICE_BY_ID = (
     "usb-2017-2-25_UsbMonitor_USB35INCHIPSV2-if00"
 )
 DEFAULT_IPC_PORT = 45722
+
+# The daemon and the hooks both run under console-less pythonw.exe on Windows,
+# so any child process would otherwise allocate a console window of its own.
+# Zero on POSIX, where the flag does not exist.
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
 def config_home() -> Path:
