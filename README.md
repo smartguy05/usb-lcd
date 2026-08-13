@@ -9,7 +9,10 @@ one config file per machine:
 ```
 
 The 3.5" panel shows one session on one card. The ultra-wide is divided into
-**tiles**, each holding a widget — a clock, an agent card, and more later.
+**tiles**, each holding a widget — a clock, an agent card, or an animated crab.
+
+**To install it, jump to [Installing](#installing)** — there is a prebuilt
+package for [Windows 11](#windows-11) and for [Ubuntu](#ubuntu).
 
 The program does not display prompts, responses, or transcript text. It shows
 only lifecycle metadata such as provider, model, project, elapsed time,
@@ -261,12 +264,139 @@ echo '{"hook_event_name":"PreToolUse","session_id":"a","cwd":"'"$PWD"'",
     .venv/bin/usb-lcd-dashboard emit --provider claude
 ```
 
-## Windows 11
+## Installing
 
-Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.6.1.exe` installer. It
-bundles its own Python runtime and dependencies, auto-detects the display as a
-Windows COM port, installs Claude Code and Codex hooks, and starts at user login.
-See [WINDOWS.md](WINDOWS.md) for installation and diagnostics.
+There is a prebuilt installer for each platform in `dist/`. Both do the same two
+jobs — put the program on the machine, and wire it into your Claude and Codex
+sessions — but they are packaged differently, because the platforms differ:
+
+| | Windows 11 | Ubuntu 24.04+ |
+| --- | --- | --- |
+| Package | `USB-LCD-Dashboard-Setup-0.6.1.exe` | `usb-lcd-dashboard_0.6.1_all.deb` |
+| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
+| Size | ~20 MB | ~67 KB plus dependencies |
+| Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
+| Hooks wired by | The installer, automatically | You, with one command |
+
+Both are reversible, both preserve an existing Claude status line, and neither
+displays prompts or transcript text.
+
+Two things apply whichever you use. **A CLI that was already running will not
+have the hooks** — start a new session. And **Codex asks you to trust newly
+installed command hooks once**: run `/hooks` in Codex and trust the USB LCD
+Dashboard definitions, or it will never emit anything.
+
+### Windows 11
+
+Double-click `dist\USB-LCD-Dashboard-Setup-0.6.1.exe`, or from a terminal:
+
+```powershell
+.\dist\USB-LCD-Dashboard-Setup-0.6.1.exe
+```
+
+It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
+administrator rights needed — bundling its own Python runtime and dependencies.
+It then auto-detects the panel as a COM port, installs the Claude Code and Codex
+hooks for you, adds a startup shortcut, and launches the dashboard immediately.
+There is nothing else to run.
+
+The installer is not code-signed, so SmartScreen may interrupt with a blue
+warning — **More info → Run anyway**. Add `/S` to install silently instead.
+
+Check it afterwards from the Start menu's **Diagnostics** shortcut, or:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\USB LCD Dashboard\python.exe" -m usb_lcd_dashboard doctor
+```
+
+Uninstall from **Settings → Apps**, or the Start-menu Uninstall shortcut. That
+removes the hooks and restores your status line; your config and its backups are
+kept.
+
+See [WINDOWS.md](WINDOWS.md) for the tray icon, the log file, and diagnostics.
+
+### Ubuntu
+
+Installing is two steps, because the package covers two different scopes. The
+first is system-wide and needs root:
+
+```bash
+sudo apt install ./dist/usb-lcd-dashboard_0.6.1_all.deb
+```
+
+That lays down the program and the udev rule that creates `/dev/turing-lcd` and
+grants you access to it. The second is per-user — the hooks and the service live
+in your home directory — so run it **as yourself, not with `sudo`**:
+
+```bash
+usb-lcd-dashboard install
+usb-lcd-dashboard doctor
+```
+
+That merges the Claude and Codex hooks, writes
+`~/.config/usb-lcd-dashboard/config.toml`, and enables and starts the systemd
+user service. If the panel was already plugged in, replug it so your session
+picks up the new device permissions.
+
+```bash
+systemctl --user status usb-lcd-dashboard      # is it running
+journalctl --user -u usb-lcd-dashboard -f      # what it is doing
+```
+
+To uninstall, do the per-user half first, while the package is still installed:
+
+```bash
+usb-lcd-dashboard uninstall
+sudo apt remove usb-lcd-dashboard
+```
+
+See [LINUX.md](LINUX.md) for what goes where, keeping the panel alive without a
+graphical login, and the diagnostics table.
+
+### From source
+
+Either platform, for development or for a machine you would rather not install a
+package on. Use `.venv/Scripts/` instead of `.venv/bin/` on Windows:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e '.[test]'
+.venv/bin/usb-lcd-dashboard install
+```
+
+`install` merges the hooks, preserves any existing Claude status line behind a
+proxy, and on Linux writes and starts a systemd user unit. On Linux you also
+need the udev rule, which the `.deb` would have shipped for you:
+
+```bash
+sudo install -m 0644 packaging/99-turing-lcd.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=tty --attr-match=idVendor=1a86
+```
+
+`usb-lcd-dashboard uninstall` reverses all of it. The system udev rule is
+intentionally left for explicit removal.
+
+### Upgrading
+
+**Re-run `usb-lcd-dashboard install` after upgrading** — on Windows the
+installer does it for you, on Ubuntu `apt install` of a newer `.deb` does not,
+because the hooks are per-user. The set of hooks the dashboard registers grows
+occasionally (`Notification`, which drives the crab's alarm, is new), and an
+existing install keeps whatever it was set up with until `install` runs again. It
+merges rather than replaces, so re-running is safe and leaves your own hooks and
+status line alone.
+
+### Building the installers
+
+Both build in a container, so either can be built from either platform. Docker or
+Podman required; the version comes from `pyproject.toml`.
+
+```bash
+packaging/windows/build-installer.sh    # -> dist/USB-LCD-Dashboard-Setup-<version>.exe
+packaging/linux/build-deb.sh            # -> dist/usb-lcd-dashboard_<version>_all.deb
+packaging/linux/smoke-test.sh           # installs the .deb in a throwaway container
+```
 
 ## Development
 
@@ -279,61 +409,6 @@ python3 -m venv .venv
 ```
 
 The simulator writes the current frame to `screencap.png`.
-
-## Ubuntu
-
-Use the `.deb`, which carries the program, the udev rule and the vendored panel
-driver:
-
-```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.6.1_all.deb
-usb-lcd-dashboard install     # as yourself, not with sudo
-usb-lcd-dashboard doctor
-```
-
-It depends on the archive's `python3-pil`, `python3-serial` and `python3-numpy`
-rather than bundling a Python runtime the way the Windows installer does —
-Ubuntu 24.04 already ships all three, and the whole test suite passes against
-them. Build it with `packaging/linux/build-deb.sh` (Docker or Podman; it builds
-in a container, so it works from Windows too).
-
-See [LINUX.md](LINUX.md) for what goes where, the systemd user service, and
-uninstalling.
-
-## Installation from source
-
-The installer merges user-level Claude and Codex hooks, preserves the existing
-Claude status line, and installs and starts a systemd user unit:
-
-```bash
-.venv/bin/usb-lcd-dashboard install
-```
-
-**Re-run this after upgrading.** The set of hooks the dashboard registers grows
-occasionally — `Notification`, which drives the crab's alarm, is new — and an
-existing install keeps whatever hooks it was set up with until `install` runs
-again. It merges rather than replaces, so re-running is safe and leaves your own
-hooks and status line alone.
-
-USB access requires the included device-specific udev rule. The `.deb` ships it;
-a source install needs it by hand:
-
-```bash
-sudo install -m 0644 packaging/99-turing-lcd.rules /etc/udev/rules.d/
-sudo udevadm control --reload-rules
-sudo udevadm trigger --subsystem-match=tty --attr-match=idVendor=1a86
-```
-
-Then enable the service:
-
-```bash
-systemctl --user daemon-reload
-systemctl --user enable --now usb-lcd-dashboard.service
-```
-
-Use `usb-lcd-dashboard uninstall` to restore the backed-up CLI settings and
-remove the user service/configuration created by the installer. The system udev
-rule is intentionally left for explicit removal.
 
 ## Commands
 

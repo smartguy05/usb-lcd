@@ -37,6 +37,11 @@ If the panel was already plugged in when you installed the package, unplug and
 replug it — or just log out and back in — so your session picks up the new
 device permissions.
 
+A CLI that was already running will not have the hooks, so start a new session.
+Codex additionally asks you to trust newly installed command hooks once: run
+`/hooks` in Codex and trust the USB LCD Dashboard definitions, or it will never
+emit anything.
+
 ## What went where
 
 ```text
