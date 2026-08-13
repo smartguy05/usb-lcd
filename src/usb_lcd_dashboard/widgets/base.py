@@ -6,7 +6,7 @@ from typing import Any
 
 from PIL import Image, ImageColor, ImageDraw
 
-from ..render import PANEL
+from ..render import MUTED, PANEL, TEXT, TRACK, _font
 
 TRANSPARENT = ("transparent", "none", "")
 
@@ -41,3 +41,55 @@ def new_tile(
         radius = max(4, round(min(width, height) * 0.05))
         draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=radius, fill=fill)
     return image, draw
+
+
+def context_bar(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[float, float, float, float],
+    percent: float | None,
+    accent: str,
+    *,
+    label_size: int = 0,
+    gap: int | None = None,
+) -> None:
+    """The "CONTEXT USED" meter, caption and all, inside ``box``.
+
+    ``label_size`` of 0 draws the track alone, which is what a tile too short for
+    a caption wants — the bar still reads as a meter without it. ``gap`` is the
+    drop from the caption to the track, for a caller that wants it tied to the
+    tile's height rather than to the font.
+
+    render.py draws this a third time with its own literal coordinates. That copy
+    is deliberately left alone: test_legacy_identical.py pins the 3.5" panel's
+    output pixel for pixel, and the two differ in caption sizing and in the
+    minimum-fill floor, so folding it in here would grow this signature by three
+    parameters to serve one caller that must not change at all.
+    """
+    left, top, right, bottom = box
+    if label_size > 0:
+        font = _font(label_size, True)
+        draw.text((left, top), "CONTEXT USED", font=font, fill=MUTED)
+        draw.text(
+            (right, top),
+            f"{percent:.0f}%" if percent is not None else "—",
+            font=font,
+            fill=TEXT,
+            anchor="ra",
+        )
+        track_top = top + (round(label_size * 1.7) if gap is None else gap)
+    else:
+        track_top = top
+
+    if bottom - track_top < 3:
+        return
+    radius = max(3, round((bottom - track_top) / 2))
+    draw.rounded_rectangle((left, track_top, right, bottom), radius=radius, fill=TRACK)
+    if percent is None:
+        return
+    span = right - left
+    filled = left + round(span * max(0.0, min(percent, 100.0)) / 100)
+    draw.rounded_rectangle(
+        (left, track_top, max(left + radius * 2, filled), bottom),
+        radius=radius,
+        fill=accent,
+    )

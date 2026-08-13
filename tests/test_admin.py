@@ -159,8 +159,9 @@ def test_the_widgets_endpoint_describes_the_registry(server):
     base, _, _ = server
     _, body, _ = get(base, "/api/widgets")
     widgets = {w["name"]: w for w in json.loads(body)["widgets"]}
-    assert set(widgets) == {"agent", "clock", "legacy"}
+    assert set(widgets) == {"agent", "clock", "crab", "legacy"}
     assert widgets["agent"]["wants_session"] is True
+    assert widgets["crab"]["wants_session"] is True
     assert any(o["name"] == "hour12" for o in widgets["clock"]["options"])
 
 

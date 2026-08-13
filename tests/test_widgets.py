@@ -50,8 +50,9 @@ def full_session(**kwargs):
 # ------------------------------------------------------------------- registry
 
 def test_the_registry_exposes_the_expected_widgets():
-    assert set(WIDGETS) == {"agent", "clock", "legacy"}
+    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy"}
     assert WIDGETS["agent"].wants_session is True
+    assert WIDGETS["crab"].wants_session is True
     assert WIDGETS["clock"].wants_session is False
 
 

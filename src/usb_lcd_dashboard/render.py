@@ -26,6 +26,7 @@ CLAUDE = "#d97757"
 CODEX = "#2bc48a"
 WARNING = "#ffca3a"
 ERROR = "#ff5f69"
+TRACK = "#1d3040"
 
 
 @functools.lru_cache(maxsize=128)
@@ -207,6 +208,9 @@ def render_dashboard(state: SessionState, now: datetime) -> Image.Image:
         detail, detail_font = _fit(draw, state.detail, 430, 17)
         draw.text((24, project_y + 32), detail, font=detail_font, fill=MUTED)
 
+    # Not widgets.base.context_bar: this card's output is pinned pixel for pixel
+    # by test_legacy_identical.py, and its caption sizing and fill floor differ
+    # from the tile version's. The duplication is deliberate.
     y = 209
     draw.text((24, y), "CONTEXT USED", font=_font(15, True), fill=MUTED)
     percent = state.context_percent

@@ -12,7 +12,10 @@ width = 1920
 height = 462
 orientation = "landscape"
 brightness = 25
-refresh_hz = 2.0
+# 8Hz so the crab tile animates smoothly. Only the tiles that actually change
+# are pushed to the panel, so a still layout costs no more at 8 than at 2 — but
+# drop this back to 2.0 if you have no animated widget.
+refresh_hz = 8.0
 
 [display.background]
 color = "#081018"
@@ -37,8 +40,10 @@ enabled = true
 port = 45723
 
 # Tiles are explicit pixel rects: 12px outer margin, 12px gutters.
-# The number of "agent" tiles is the cap on how many sessions show at once —
-# three here, so a fourth live session takes turns in one of them.
+# The number of session tiles ("agent" and "crab" both count) is the cap on how
+# many sessions show at once — three here, so a fourth live session takes turns
+# in one of them. Note that the crab tile shows its OWN session, not a second
+# view of the one next to it.
 
 [[tile]]
 widget = "clock"
@@ -67,8 +72,12 @@ w = 486
 h = 438
 
 [[tile]]
-widget = "agent"
+widget = "crab"
 x = 1424
 y = 12
 w = 484
 h = 438
+[tile.options]
+# color = "#d97757"   # blank follows the provider: orange for Claude, green for Codex
+animate = true
+alarm = true

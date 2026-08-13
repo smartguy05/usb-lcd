@@ -30,7 +30,7 @@ its own `config.toml`.
 
 ```toml
 [[tile]]
-widget = "clock"          # clock | agent | legacy
+widget = "clock"          # clock | agent | crab | legacy
 x = 12
 y = 12
 w = 404
@@ -58,6 +58,92 @@ machines can name a wallpaper that only exists on one.
 
 See [config.example.wide.toml](config.example.wide.toml) for the full ultra-wide
 layout.
+
+## The crab
+
+The `agent` tile tells you everything and catches your eye with nothing. The
+`crab` tile is the other half of that trade: a crab in Claude orange that bobs,
+blinks, scuttles and changes expression with what the agent is doing, over the
+project name, the current activity line and the context-used bar.
+
+It is drawn, not drawn *from* anything — no sprite ships with this, and there is
+no asset directory. The crab is built out of Pillow primitives posed by a dozen
+numbers, so it scales from a 300px tile down to a 60px one, and its expressions
+are unit-testable without pinning a single pixel.
+
+**When the agent wants you, the crab makes a scene**: both claws waving overhead,
+wide unblinking eyes, an exclamation mark, and a border round the whole tile —
+four cues at once, because any one of them alone is missable on a panel nobody is
+looking at. That fires on `APPROVAL` (a permission prompt) and on `NOTICE` (the
+`Notification` hook, which Claude Code fires when it needs permission or when you
+have been sitting at a prompt). Approvals go warning yellow, notifications Claude
+orange, so the two are distinguishable across the room.
+
+The rest: `THINKING` looks up and away with a claw at its chin, `TOOL` scuttles
+and snips, `COMPACTING` crouches and visibly packs, `ERROR` goes red and
+crestfallen, `DONE` settles into a contented `^ ^`, and a finished or absent
+session sleeps in grey with a `z`.
+
+```toml
+[[tile]]
+widget = "crab"
+x = 1424
+y = 12
+w = 484
+h = 438
+[tile.options]
+color = ""             # blank follows the provider; orange for Claude, green for Codex
+animate = true         # off draws one still pose
+alarm = true           # off keeps the wave but drops the border
+show_project = true
+show_activity = true
+show_context = true
+```
+
+A `crab` tile **takes a session slot exactly as an `agent` tile does**, so a
+layout with one of each shows two different sessions, not one session two ways.
+
+The tile drops text before it drops the crab as it gets smaller — caption, then
+activity, then the whole text column (the crab moves beside the bar rather than
+above it), then everything but the crab and a sliver of meter. Below about 44px
+of crab there is no animal worth drawing, and the tile falls back to words.
+
+### Frame rate
+
+Animation needs frames. `refresh_hz` defaults to `2.0`; the crab wants about
+`8.0`, which is what `config.example.wide.toml` now sets. That costs less than it
+sounds: the panel is only sent the rectangle that actually changed, so a layout
+of still widgets is no more expensive at 8Hz than at 2Hz, and a crab tile costs a
+few percent of the frame budget.
+
+**On the 3.5" panel the serial link is the real limit, not the loop.** It is a
+115200-baud connection, and how fast a frame lands depends on how many pixels
+changed. Measured on the hardware, a full-tile crab redrawing its own box
+sustains about **2.4 frames a second**, and that is the ceiling however high
+`refresh_hz` goes. Raising `refresh_hz` still helps a little — the loop's poll
+timeout shrinks with it, which is worth about 0.4 fps between 2Hz and 8Hz — but
+the crab on this panel is expressive rather than smooth, and that is a property
+of the wire, not of the widget.
+
+Two consequences the widget is designed around:
+
+- **Nothing oscillates faster than 0.63Hz.** A wave needs roughly four samples
+  per cycle to read as a wave rather than as claws teleporting, and at 2.4 fps
+  that puts the ceiling near 0.6Hz. Faster is not merely wasted here, it looks
+  worse.
+- **The alarm border does not pulse.** Anything that animates at the tile's
+  outer edge dirties the whole tile every frame instead of just the crab's box.
+  Measured, a breathing border dropped the alarm from 2.2 fps to 0.8 fps — three
+  times the bytes at the one moment responsiveness matters, to produce a pulse
+  slower than the frame rate that read as random flicker. The border is a solid
+  slab of colour; the claws, eyes and glyph carry the motion.
+
+One more, still theoretical: the dirty-rect diff computes a **single** bounding
+box, so two crabs at opposite ends of the ultra-wide union into a near-full-width
+rect and fall back to full-frame writes.
+
+If you would rather not raise the refresh rate, set `animate = false` and the
+crab still changes expression with the phase — it just does not move.
 
 ## The settings editor
 
@@ -117,7 +203,8 @@ There is no tray icon on Linux, where the install is a systemd user unit and
 
 ## Several sessions at once
 
-**The number of `agent` tiles is the cap on how many sessions show at once.**
+**The number of session tiles (`agent` and `crab` alike) is the cap on how many
+sessions show at once.**
 With no more live sessions than tiles, every session gets its own tile and
 nothing ever moves. Beyond that the surplus take turns.
 

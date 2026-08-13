@@ -23,6 +23,7 @@ from PIL import Image
 from ..layout import TileContext
 from .agent import render_agent
 from .clock import render_clock
+from .crab import render_crab
 from .legacy import render_legacy
 
 Renderer = Callable[[TileContext], Image.Image]
@@ -63,6 +64,22 @@ WIDGETS: dict[str, WidgetSpec] = {
         options=dict(COMMON_OPTIONS),
         help="A Claude Code or Codex session. The number of these caps how many "
         "sessions show at once.",
+    ),
+    "crab": WidgetSpec(
+        render_crab,
+        wants_session=True,
+        options={
+            "color": Option("color", "", "Crab colour; blank follows the provider"),
+            "animate": Option("bool", True, "Move. Off draws one still pose"),
+            "show_project": Option("bool", True, "Project name and branch"),
+            "show_activity": Option("bool", True, "What the agent is doing now"),
+            "show_context": Option("bool", True, "Context-used bar along the bottom"),
+            "alarm": Option("bool", True, "Pulse the border when an approval waits"),
+            **COMMON_OPTIONS,
+        },
+        help="A session as an animated crab that reacts to what the agent is "
+        "doing, and waves both claws when it needs you. Like the agent card, "
+        "each of these takes a session slot.",
     ),
     "clock": WidgetSpec(
         render_clock,

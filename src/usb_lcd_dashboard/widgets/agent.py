@@ -24,9 +24,7 @@ from ..render import (
     _fit_headline,
     _font,
 )
-from .base import new_tile
-
-TRACK = "#1d3040"
+from .base import context_bar, new_tile
 
 
 def _accent(phase: str, provider: str) -> str:
@@ -139,27 +137,15 @@ def render_agent(ctx: TileContext) -> Image.Image:
     # Context bar.
     label_size = max(9, round(height * 0.047))
     bar_y = round(height * 0.653)
-    draw.text((pad, bar_y), "CONTEXT USED", font=_font(label_size, True), fill=MUTED)
-    percent = state.context_percent
-    draw.text(
-        (right, bar_y),
-        f"{percent:.0f}%" if percent is not None else "—",
-        font=_font(label_size, True),
-        fill=TEXT,
-        anchor="ra",
+    gap = round(height * 0.078)
+    context_bar(
+        draw,
+        (pad, bar_y, right, bar_y + gap + max(6, round(height * 0.044))),
+        state.context_percent,
+        accent,
+        label_size=label_size,
+        gap=gap,
     )
-    track_top = bar_y + round(height * 0.078)
-    track_bottom = track_top + max(6, round(height * 0.044))
-    track_radius = max(3, round(height * 0.022))
-    draw.rounded_rectangle((pad, track_top, right, track_bottom), radius=track_radius, fill=TRACK)
-    if percent is not None:
-        span = right - pad
-        filled = pad + round(span * max(0, min(percent, 100)) / 100)
-        draw.rounded_rectangle(
-            (pad, track_top, max(pad + track_radius * 2, filled), track_bottom),
-            radius=track_radius,
-            fill=accent,
-        )
 
     # Footer.
     footer_y = round(height * 0.869)
