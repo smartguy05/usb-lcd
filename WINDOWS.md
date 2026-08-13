@@ -5,10 +5,14 @@
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
 
-> **0.5.0 has not been built yet.** `dist/` still holds the 0.4.0 installer,
-> which predates tile support. Run `packaging/windows/build-installer.sh`
-> (Docker or Podman required) to produce the 0.5.0 exe before installing it on
-> the home machine.
+Built 2026-08-11 with tile support and the tray icon:
+
+```text
+dist/USB-LCD-Dashboard-Setup-0.5.0.exe
+sha256 11dcf8638c768554125ffe0f0238d3f6b609a956d3b9fbe04ed2031c697c0f5e
+```
+
+`dist/` also still holds the 0.4.0 installer, which predates both features.
 
 ## Install
 
@@ -24,6 +28,21 @@ The installer adds global Claude Code and Codex hooks without replacing other
 configured hooks. If either CLI was already open, start a new session. Codex
 requires newly installed command hooks to be reviewed once: run `/hooks` and
 trust the USB LCD Dashboard definitions.
+
+## The tray icon
+
+The dashboard shows an icon in the notification area whenever it is running:
+green with the LCD attached, grey while it is still looking for it, with the
+resolved COM port in the hover text. Left-click opens the settings editor;
+right-click offers the editor, the log folder, and **Quit**, which stops the
+background process the same way the uninstaller does.
+
+Windows 11 puts a newly registered icon behind the chevron (`^`) at the left of
+the notification area. Drag it out onto the taskbar to keep it in view.
+
+To run without one, set `enabled = false` under `[tray]` in `config.toml`. Note
+that with no icon and no console window there is then nothing to stop the
+dashboard with except `python.exe -m usb_lcd_dashboard shutdown`.
 
 ## Diagnostics
 

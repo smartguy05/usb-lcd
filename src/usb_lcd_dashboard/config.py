@@ -84,6 +84,9 @@ class Config:
     # deliberately not bindable to anything routable.
     admin_enabled: bool = True
     admin_port: int = DEFAULT_ADMIN_PORT
+    # The system tray icon: proof the daemon is running, and the way to stop it.
+    # Windows only; there is no tray to put it in under a systemd user unit.
+    tray_enabled: bool = True
 
     @property
     def size(self) -> tuple[int, int]:
@@ -129,6 +132,10 @@ port = {ipc_port}
 [admin]
 enabled = {admin_enabled}
 port = {admin_port}
+
+# The system tray icon (Windows only).
+[tray]
+enabled = {tray_enabled}
 """
 
 
@@ -163,6 +170,7 @@ def default_config_toml(device: str | None = None, ipc_mode: str | None = None) 
         ipc_port=cfg.ipc_port,
         admin_enabled="true" if cfg.admin_enabled else "false",
         admin_port=cfg.admin_port,
+        tray_enabled="true" if cfg.tray_enabled else "false",
     )
 
 
@@ -232,6 +240,9 @@ def dump_config_toml(cfg: Config) -> str:
         "[admin]",
         f"enabled = {_toml_value(cfg.admin_enabled)}",
         f"port = {_toml_value(cfg.admin_port)}",
+        "",
+        "[tray]",
+        f"enabled = {_toml_value(cfg.tray_enabled)}",
     ]
     for tile in cfg.tiles:
         lines += [
@@ -352,6 +363,7 @@ def parse_config(data: dict) -> Config:
     dashboard = data.get("dashboard", {})
     ipc = data.get("ipc", {})
     admin = data.get("admin", {})
+    tray = data.get("tray", {})
     cfg = replace(
         cfg,
         device=str(display.get("device", cfg.device)),
@@ -379,6 +391,7 @@ def parse_config(data: dict) -> Config:
         ipc_port=int(ipc.get("port", cfg.ipc_port)),
         admin_enabled=bool(admin.get("enabled", cfg.admin_enabled)),
         admin_port=int(admin.get("port", cfg.admin_port)),
+        tray_enabled=bool(tray.get("enabled", cfg.tray_enabled)),
     )
     if cfg.orientation not in {"portrait", "landscape"}:
         raise ValueError("display.orientation must be portrait or landscape")

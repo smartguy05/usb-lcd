@@ -92,6 +92,29 @@ which drops any comments you added by hand. And `[ipc]` and `[admin]` are shown
 but not editable there: changing the IPC transport would orphan the installed
 hooks, and changing the editor's own port would cut off the page you are using.
 
+## The tray icon (Windows)
+
+On Windows the daemon runs under console-less `pythonw.exe`, so without an icon
+there is nothing to say it is alive and nothing to click to stop it. It puts one
+in the notification area: **green when the LCD is attached, grey while it is
+still looking**, with the resolved port in the hover text.
+
+- **Left click** opens the settings editor.
+- **Right click** gives a menu: the current state, the settings editor, the log
+  folder, and **Quit** — which is the same shutdown path as `SIGTERM` and the
+  `shutdown` command, so the panel is released cleanly.
+
+Windows 11 hides new icons behind the notification-area chevron; drag it onto
+the taskbar to keep it visible. Turn the icon off with:
+
+```toml
+[tray]
+enabled = true
+```
+
+There is no tray icon on Linux, where the install is a systemd user unit and
+`systemctl --user stop usb-lcd-dashboard` is the stop button.
+
 ## Several sessions at once
 
 **The number of `agent` tiles is the cap on how many sessions show at once.**
@@ -189,7 +212,8 @@ rule is intentionally left for explicit removal.
 
 ## Commands
 
-- `run`: run the dashboard daemon, and the settings editor with it.
+- `run`: run the dashboard daemon, with the settings editor and (on Windows) the
+  tray icon alongside it.
 - `doctor`: inspect configuration, USB identity, permissions, hooks, and service.
 - `doctor --paint-test`: display a test frame on the physical LCD.
 - `emit --provider claude|codex`: consume one hook JSON object from stdin.

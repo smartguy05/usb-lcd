@@ -193,6 +193,62 @@ def test_a_port_already_in_use_does_not_stop_the_daemon(tmp_path, caplog):
         holder.close()
 
 
+# ----------------------------------------------------------------- the tray
+
+class FakeTray:
+    """Stands in for the Win32 icon, which needs a shell to talk to."""
+
+    def __init__(self):
+        self.states = []
+        self.configs = []
+        self.stopped = False
+
+    def set_connected(self, connected):
+        self.states.append(connected)
+
+    def update_config(self, config):
+        self.configs.append(config)
+
+    def stop(self):
+        self.stopped = True
+
+
+def test_the_tray_is_not_started_when_disabled(tmp_path):
+    daemon, _ = daemon_for(tmp_path, WIDE + "\n[tray]\nenabled = false\n")
+    daemon._start_tray()
+    assert daemon.tray is None
+
+
+def test_a_failing_tray_does_not_stop_the_daemon(tmp_path, monkeypatch, caplog):
+    import usb_lcd_dashboard.tray as tray_module
+
+    daemon, _ = daemon_for(tmp_path)
+    monkeypatch.setattr(
+        tray_module, "start", lambda *a, **k: (_ for _ in ()).throw(OSError("no shell"))
+    )
+    with caplog.at_level("WARNING"):
+        daemon._start_tray()
+    assert daemon.tray is None
+    assert any("Tray icon unavailable" in r.message for r in caplog.records)
+
+
+def test_quitting_from_the_tray_stops_the_daemon(tmp_path):
+    """The menu's Quit is wired to the same stop() that SIGTERM is."""
+    daemon, _ = daemon_for(tmp_path)
+    assert daemon.running is True
+    daemon.stop()
+    assert daemon.running is False
+
+
+def test_an_edited_config_reaches_the_tray(tmp_path):
+    daemon, path = daemon_for(tmp_path)
+    daemon.tray = FakeTray()
+    rewrite(path, replace(daemon.config, device="COM9"))
+    force_check(daemon)
+    daemon._reload_config()
+    assert daemon.tray.configs[-1].device == "COM9"
+
+
 def test_the_preview_frame_starts_empty(tmp_path):
     daemon, _ = daemon_for(tmp_path)
     assert daemon.last_frame is None

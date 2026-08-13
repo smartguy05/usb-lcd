@@ -23,3 +23,7 @@ port = 45722
 [admin]
 enabled = true
 port = 45723
+
+# The system tray icon (Windows only).
+[tray]
+enabled = true

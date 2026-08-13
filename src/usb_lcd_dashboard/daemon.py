@@ -31,6 +31,7 @@ class DashboardDaemon:
         # The last composed frame, for the settings editor's preview.
         self.last_frame = None
         self.admin = None
+        self.tray = None
 
     def _apply_config(self, config: Config) -> None:
         """Adopt a config, whether at startup or after an edit."""
@@ -41,6 +42,11 @@ class DashboardDaemon:
         self.store.switch_dwell = config.switch_dwell_seconds
         # The tiles are the cap on how many sessions can be on screen at once.
         self.slot_count = agent_slots(config.tiles)
+        # getattr, because this runs once before the tray exists.
+        if getattr(self, "tray", None) is not None:
+            # The tooltip names the device and the menu offers the editor, both
+            # of which an edit can change.
+            self.tray.update_config(config)
 
     def _config_signature(self) -> bytes | None:
         """The config's contents, as the thing to notice changes in.
@@ -112,6 +118,18 @@ class DashboardDaemon:
             # The editor is a convenience; the panel is the job.
             LOG.warning("Settings editor unavailable: %s", exc)
 
+    def _start_tray(self) -> None:
+        if not self.config.tray_enabled:
+            return
+        try:
+            from .tray import start
+
+            self.tray = start(self.config, self.stop)
+        except Exception as exc:
+            # Same bargain as the editor: the panel is the job, and a daemon
+            # with no icon is still a working daemon.
+            LOG.warning("Tray icon unavailable: %s", exc)
+
     def stop(self, *_args) -> None:
         self.running = False
 
@@ -131,9 +149,12 @@ class DashboardDaemon:
         signal.signal(signal.SIGTERM, self.stop)
         server = bind_socket(self.config)
         self._start_admin()
+        self._start_tray()
         try:
             while self.running:
                 self._connect()
+                if self.tray is not None:
+                    self.tray.set_connected(self.display.connected)
                 self._reload_config()
                 try:
                     data = receive_event(server, self.config)
@@ -197,5 +218,7 @@ class DashboardDaemon:
             if self.admin is not None:
                 self.admin.shutdown()
                 self.admin.server_close()
+            if self.tray is not None:
+                self.tray.stop()
             self.display.close()
 
