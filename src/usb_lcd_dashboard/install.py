@@ -95,6 +95,53 @@ def _hook_interpreter() -> str:
     return str(windowless) if windowless.exists() else sys.executable
 
 
+UNIT_NAME = "usb-lcd-dashboard.service"
+
+
+def _systemctl(*args: str) -> bool:
+    """Run `systemctl --user`, reporting whether it worked.
+
+    Never fatal. There is no user manager to talk to inside a container, a
+    chroot, or a Docker build, and a package that fails to install because it
+    could not start a service in a build sandbox would be worse than one that
+    installs and needs starting by hand.
+    """
+    systemctl = shutil.which("systemctl")
+    if systemctl is None:
+        return False
+    try:
+        result = subprocess.run(
+            [systemctl, "--user", *args],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=20,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
+
+
+def _systemd_enable() -> bool:
+    """Load the new unit and start it, the way the Windows installer starts the app.
+
+    Writing the unit file and leaving it is a half-installed state: the panel
+    stays dark until the user finds the three systemctl commands in the README.
+    """
+    if not _systemctl("daemon-reload"):
+        return False
+    return _systemctl("enable", "--now", UNIT_NAME)
+
+
+def _systemd_disable() -> None:
+    """Stop and unwire the unit before its file is deleted.
+
+    Order matters: deleting the unit first leaves a dangling symlink in
+    default.target.wants and leaves the daemon running with the panel held open.
+    """
+    _systemctl("disable", "--now", UNIT_NAME)
+
+
 def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -> None:
     hooks = settings.setdefault("hooks", {})
     command = f"{command_prefix} emit --provider {provider}"
@@ -186,6 +233,7 @@ def install(executable: str | None = None) -> None:
             "WantedBy=default.target\n"
         )
         state["unit_path"] = str(unit_path)
+        state["unit_started"] = _systemd_enable()
 
     _atomic_json(state_path, state)
     print(f"Installed Claude hooks: {claude_path}")
@@ -195,6 +243,14 @@ def install(executable: str | None = None) -> None:
     else:
         unit_path = state.get("unit_path", "")
         print(f"Installed user unit:    {unit_path}")
+        if state.get("unit_started"):
+            print("Started the dashboard:  systemctl --user status usb-lcd-dashboard")
+        else:
+            # A build sandbox or a chroot has no user manager. Say so plainly
+            # rather than leaving the panel dark with no explanation.
+            print("Could not start it here; once logged in, run:")
+            print("  systemctl --user daemon-reload")
+            print("  systemctl --user enable --now usb-lcd-dashboard")
     print("The existing Claude status-line command is preserved behind a proxy.")
 
 
@@ -228,8 +284,11 @@ def uninstall() -> None:
     _atomic_json(codex_path, codex)
 
     if os.name != "nt":
-        default_unit = config_home() / "systemd/user/usb-lcd-dashboard.service"
+        default_unit = config_home() / f"systemd/user/{UNIT_NAME}"
         unit_path = Path(state.get("unit_path") or default_unit)
+        # Before the file goes, not after.
+        _systemd_disable()
         unit_path.unlink(missing_ok=True)
+        _systemctl("daemon-reload")
     print("Removed USB LCD hooks and restored the prior Claude status line.")
     print("The dashboard configuration and backups were retained.")

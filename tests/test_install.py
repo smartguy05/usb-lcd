@@ -1,3 +1,6 @@
+from types import SimpleNamespace
+
+from usb_lcd_dashboard import install as install_mod
 from usb_lcd_dashboard.install import EVENTS_BY_PROVIDER, _merge_hooks
 from usb_lcd_dashboard.normalize import PHASES
 
@@ -61,3 +64,53 @@ def test_merging_twice_does_not_duplicate_our_hook():
         if "usb-lcd-dashboard" in entry["command"]
     ]
     assert len(ours) == 1
+
+
+# ------------------------------------------------------- the systemd user unit
+
+def test_the_unit_is_enabled_and_started(monkeypatch):
+    """Writing the unit and stopping there is a half-installed state: the panel
+    stays dark until the user finds the systemctl commands in the README."""
+    calls = []
+    monkeypatch.setattr(install_mod.shutil, "which", lambda name: "/bin/systemctl")
+    monkeypatch.setattr(
+        install_mod.subprocess,
+        "run",
+        lambda cmd, **kw: calls.append(cmd) or SimpleNamespace(returncode=0),
+    )
+    assert install_mod._systemd_enable() is True
+    assert calls[0][:3] == ["/bin/systemctl", "--user", "daemon-reload"]
+    assert calls[1][2:] == ["enable", "--now", "usb-lcd-dashboard.service"]
+
+
+def test_the_unit_is_disabled_before_its_file_is_removed(monkeypatch):
+    """Deleting the unit first leaves a dangling default.target.wants symlink
+    and leaves the daemon running with the panel still held open."""
+    calls = []
+    monkeypatch.setattr(install_mod.shutil, "which", lambda name: "/bin/systemctl")
+    monkeypatch.setattr(
+        install_mod.subprocess,
+        "run",
+        lambda cmd, **kw: calls.append(cmd) or SimpleNamespace(returncode=0),
+    )
+    install_mod._systemd_disable()
+    assert calls[0][2:] == ["disable", "--now", "usb-lcd-dashboard.service"]
+
+
+def test_a_missing_systemctl_is_not_fatal(monkeypatch):
+    """No user manager exists in a container, a chroot or a package build. An
+    installer that failed there would be worse than one that needs a manual
+    start."""
+    monkeypatch.setattr(install_mod.shutil, "which", lambda name: None)
+    assert install_mod._systemd_enable() is False
+    install_mod._systemd_disable()  # must not raise
+
+
+def test_a_failing_systemctl_is_not_fatal(monkeypatch):
+    monkeypatch.setattr(install_mod.shutil, "which", lambda name: "/bin/systemctl")
+
+    def boom(cmd, **kwargs):
+        raise OSError("no session bus")
+
+    monkeypatch.setattr(install_mod.subprocess, "run", boom)
+    assert install_mod._systemd_enable() is False
