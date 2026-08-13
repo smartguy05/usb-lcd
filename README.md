@@ -280,10 +280,30 @@ python3 -m venv .venv
 
 The simulator writes the current frame to `screencap.png`.
 
-## Installation
+## Ubuntu
+
+Use the `.deb`, which carries the program, the udev rule and the vendored panel
+driver:
+
+```bash
+sudo apt install ./dist/usb-lcd-dashboard_0.6.1_all.deb
+usb-lcd-dashboard install     # as yourself, not with sudo
+usb-lcd-dashboard doctor
+```
+
+It depends on the archive's `python3-pil`, `python3-serial` and `python3-numpy`
+rather than bundling a Python runtime the way the Windows installer does —
+Ubuntu 24.04 already ships all three, and the whole test suite passes against
+them. Build it with `packaging/linux/build-deb.sh` (Docker or Podman; it builds
+in a container, so it works from Windows too).
+
+See [LINUX.md](LINUX.md) for what goes where, the systemd user service, and
+uninstalling.
+
+## Installation from source
 
 The installer merges user-level Claude and Codex hooks, preserves the existing
-Claude status line, and installs a systemd user unit:
+Claude status line, and installs and starts a systemd user unit:
 
 ```bash
 .venv/bin/usb-lcd-dashboard install
@@ -295,7 +315,8 @@ existing install keeps whatever hooks it was set up with until `install` runs
 again. It merges rather than replaces, so re-running is safe and leaves your own
 hooks and status line alone.
 
-USB access requires the included device-specific udev rule:
+USB access requires the included device-specific udev rule. The `.deb` ships it;
+a source install needs it by hand:
 
 ```bash
 sudo install -m 0644 packaging/99-turing-lcd.rules /etc/udev/rules.d/

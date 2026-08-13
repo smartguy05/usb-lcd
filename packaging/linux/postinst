@@ -1,0 +1,37 @@
+#!/bin/sh
+# Only the system-wide half belongs here. The hooks and the systemd user
+# service are per-user state under $HOME, and this script runs as root — wiring
+# them here would install them for root and for nobody else.
+set -e
+
+case "$1" in
+    configure)
+        # The rule is what creates /dev/turing-lcd and grants the logged-in
+        # user access. Reloading makes it apply to an already-plugged panel
+        # without a replug. udevadm is absent in a container or chroot, and a
+        # failure to reload is not a reason to fail the installation.
+        if [ -d /run/udev ] && command -v udevadm >/dev/null 2>&1; then
+            udevadm control --reload-rules >/dev/null 2>&1 || true
+            udevadm trigger --subsystem-match=tty --attr-match=idVendor=1a86 \
+                >/dev/null 2>&1 || true
+        fi
+
+        cat <<'EOF'
+
+usb-lcd-dashboard is installed. To wire it into your own sessions, run as
+yourself (not as root):
+
+    usb-lcd-dashboard install
+    usb-lcd-dashboard doctor
+
+That merges the Claude and Codex hooks, writes ~/.config/usb-lcd-dashboard/
+config.toml, and enables the systemd user service. See
+/usr/share/doc/usb-lcd-dashboard/README.Debian for the rest.
+
+EOF
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+esac
+
+exit 0

@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "GPL-3.0-or-later" }
 dependencies = [
-  "pillow>=11.1,<13",
+  # 10.1 is the real floor: ImageFont.load_default gained its size argument
+  # there, and the whole suite passes against Ubuntu 24.04's 10.2, which is
+  # what the .deb depends on rather than bundling a Pillow of its own.
+  "pillow>=10.1,<13",
   "pyserial>=3.5,<4",
   "smartscreen-driver @ git+https://github.com/hchargois/smartscreen-driver.git@918342ecbf33d210d41867f083142e3b5cbffcca",
 ]

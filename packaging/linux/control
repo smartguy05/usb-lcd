@@ -1,0 +1,29 @@
+Package: usb-lcd-dashboard
+Version: @VERSION@
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: USB LCD Dashboard <noreply@users.noreply.github.com>
+Installed-Size: @INSTALLED_SIZE@
+Depends: python3 (>= 3.12), python3-pil (>= 10.1), python3-serial (>= 3.5),
+ python3-numpy, fonts-dejavu-core
+Recommends: systemd, git, fonts-ubuntu
+Homepage: https://github.com/smartguy05/usb-lcd
+Description: Live Claude Code and Codex dashboard for a USB LCD panel
+ Drives a Turing/UsbMonitor 3.5-inch USB LCD as a status display for Claude
+ Code and Codex sessions, showing the provider, model, project, elapsed time,
+ permission requests and context used. It never displays prompts, responses or
+ transcript text — only lifecycle metadata.
+ .
+ The panel is divided into tiles, each holding a widget: a clock, an agent
+ card, or an animated crab that changes expression with what the agent is
+ doing and waves both claws when it needs your attention.
+ .
+ Installing this package puts the program and its udev rule in place. Wiring it
+ into your own Claude and Codex sessions is a per-user step: run
+ "usb-lcd-dashboard install" as yourself, which merges the hooks and enables a
+ systemd user service.
+ .
+ fonts-dejavu-core is a hard dependency rather than a recommendation: a minimal
+ Ubuntu ships no TrueType font at all, and the panel would silently fall back to
+ a bitmap face on a device whose whole purpose is legible text.
