@@ -65,10 +65,15 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
         (
             "layout",
             # A layout with nowhere to put a session would show the panel
-            # nothing but decoration, which is worth flagging.
-            slots > 0,
-            f"{config.display_kind} {config.width}x{config.height} · "
-            f"{len(config.tiles)} tiles · {slots} agent slots",
+            # nothing but decoration, which is worth flagging. A layout that
+            # will not load at all is worth reporting rather than crashing on:
+            # this is the command you run *because* something is wrong.
+            not config.layout_error and slots > 0,
+            config.layout_error
+            or (
+                f"{config.display_kind} {config.width}x{config.height} · "
+                f"{len(config.tiles)} tiles · {slots} agent slots"
+            ),
         ),
         (
             "Claude hooks",

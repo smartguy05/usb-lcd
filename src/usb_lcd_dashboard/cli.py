@@ -50,7 +50,16 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         **log_options,
     )
-    config = load_config()
+    # Only the commands that put pixels on the panel need a layout they can
+    # actually draw. A hook needs the IPC address and nothing else, and
+    # install/uninstall need the paths — so a bad tile rect must not fail them.
+    # It used to: one unknown widget name in config.toml made every hook in
+    # every Claude and Codex session exit with a traceback, and blocked the one
+    # command that could put the file right again.
+    # `doctor` is lenient too, and reports the bad layout as a failed check —
+    # crashing would be a poor answer from the command you run to find out
+    # what is wrong.
+    config = load_config(strict=args.command == "run")
 
     if args.command == "run":
         DashboardDaemon(config, simulate=args.simulate).run()

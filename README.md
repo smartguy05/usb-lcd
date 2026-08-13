@@ -48,6 +48,17 @@ Overlapping tiles, tiles that run off the panel, and unknown widget names are al
 rejected when the config loads, naming the offending tile. Gaps are fine — the
 background shows through them.
 
+**Only the daemon is that strict.** A tile rect is a display setting, and the
+hooks never draw one — they need the IPC address and nothing else. So `emit`,
+the status-line proxy, `install` and `uninstall` load a bad layout leniently,
+warn, and carry on with the default one. Without that, a single typo'd widget
+name makes every hook in every Claude and Codex session exit with a traceback,
+and blocks the `install` that would repair the file. Everything outside the
+layout is still checked for them, because a wrong `ipc.port` would silently send
+the events nowhere. `doctor` is lenient too, and reports the bad layout as a
+`FAIL` line naming the tile — it is the command you run precisely when something
+is wrong.
+
 A config with no `[[tile]]` table gets the 3.5" panel's full-screen layout, so an
 existing install keeps working with no edits at all.
 
@@ -252,7 +263,7 @@ echo '{"hook_event_name":"PreToolUse","session_id":"a","cwd":"'"$PWD"'",
 
 ## Windows 11
 
-Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.5.0.exe` installer. It
+Use the self-contained `dist/USB-LCD-Dashboard-Setup-0.6.1.exe` installer. It
 bundles its own Python runtime and dependencies, auto-detects the display as a
 Windows COM port, installs Claude Code and Codex hooks, and starts at user login.
 See [WINDOWS.md](WINDOWS.md) for installation and diagnostics.

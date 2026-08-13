@@ -235,3 +235,71 @@ def test_a_missing_config_file_still_gets_the_legacy_layout(tmp_path):
     cfg = load_config(tmp_path / "absent.toml")
     assert cfg.tiles == (Tile("legacy", 0, 0, 480, 320),)
     assert cfg.size == (480, 320)
+
+
+# A layout only matters to the command that draws it. These guard the blast
+# radius: one bad tile used to make every hook in every Claude and Codex session
+# exit with a traceback, and blocked the install that would have repaired it.
+
+BROKEN_LAYOUT = """\
+[display]
+width = 480
+height = 320
+
+[ipc]
+mode = "tcp"
+port = 45999
+
+[[tile]]
+widget = "nonesuch"
+x = 0
+y = 0
+w = 480
+h = 320
+"""
+
+
+def test_a_broken_layout_is_still_fatal_when_the_caller_draws(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(BROKEN_LAYOUT)
+    with pytest.raises(ValueError, match="not a known widget"):
+        load_config(path)
+
+
+def test_a_broken_layout_does_not_stop_a_caller_that_never_draws(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(BROKEN_LAYOUT)
+    cfg = load_config(path, strict=False)
+    # The layout falls back, but everything the hook actually needs survives.
+    assert cfg.tiles == (Tile("legacy", 0, 0, 480, 320),)
+    assert cfg.ipc_port == 45999
+    assert cfg.ipc_mode == "tcp"
+
+
+@pytest.mark.parametrize(
+    "text,match",
+    [
+        ("[ipc]\nport = 70000\n", "ipc.port"),
+        ('[display]\nkind = "nope"\n', "display.kind"),
+        ("[display]\nwidth = 0\n", "display.width"),
+    ],
+)
+def test_everything_but_the_layout_is_still_checked_when_lenient(tmp_path, text, match):
+    """A wrong ipc.port would send the events nowhere, silently. Only the
+    layout is forgiven, because only the layout is irrelevant to a hook."""
+    path = tmp_path / "config.toml"
+    path.write_text(text)
+    with pytest.raises(ValueError, match=match):
+        load_config(path, strict=False)
+
+
+def test_an_overlapping_layout_is_also_forgiven_when_lenient(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(
+        '[display]\nwidth = 480\nheight = 320\n'
+        '[[tile]]\nwidget = "agent"\nx = 0\ny = 0\nw = 300\nh = 300\n'
+        '[[tile]]\nwidget = "clock"\nx = 100\ny = 100\nw = 300\nh = 200\n'
+    )
+    with pytest.raises(ValueError, match="overlaps"):
+        load_config(path)
+    assert load_config(path, strict=False).tiles == (Tile("legacy", 0, 0, 480, 320),)

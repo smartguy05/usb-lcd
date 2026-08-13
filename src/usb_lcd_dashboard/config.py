@@ -87,6 +87,11 @@ class Config:
     # The system tray icon: proof the daemon is running, and the way to stop it.
     # Windows only; there is no tray to put it in under a systemd user unit.
     tray_enabled: bool = True
+    # Why the configured layout was rejected, when it was loaded leniently and
+    # replaced by the default. Carried rather than discarded so `doctor` can say
+    # what is wrong with the file instead of reporting a layout nobody wrote.
+    # Always empty on a strict load, which raises instead.
+    layout_error: str = ""
 
     @property
     def size(self) -> tuple[int, int]:
@@ -326,26 +331,48 @@ def _parse_tiles(raw: list) -> tuple["Tile", ...]:
     return tuple(tiles)
 
 
-def _with_layout(cfg: Config) -> Config:
-    """Fill in and check the layout, defaulting to the legacy full-screen tile."""
+def _with_layout(cfg: Config, *, strict: bool = True) -> Config:
+    """Fill in and check the layout, defaulting to the legacy full-screen tile.
+
+    ``strict=False`` keeps everything else in the config and substitutes the
+    default layout when the configured one will not validate. That is for the
+    callers that never draw a tile — see load_config.
+    """
     from .layout import Tile, validate
 
-    tiles = cfg.tiles or (Tile("legacy", 0, 0, cfg.width, cfg.height),)
-    validate(tiles, cfg.size)
+    default = (Tile("legacy", 0, 0, cfg.width, cfg.height),)
+    tiles = cfg.tiles or default
+    try:
+        validate(tiles, cfg.size)
+    except ValueError as exc:
+        if strict:
+            raise
+        LOG.warning("Ignoring an unusable layout (%s); this command does not draw", exc)
+        return replace(cfg, tiles=default, layout_error=str(exc))
     return replace(cfg, tiles=tiles)
 
 
-def load_config(path: Path | None = None) -> Config:
+def load_config(path: Path | None = None, *, strict: bool = True) -> Config:
+    """Load the config, validating the layout only when the caller draws it.
+
+    ``strict=False`` is for the commands that need nothing but the IPC address
+    and the paths — the hooks, and install/uninstall. A tile rect is a display
+    setting, and letting one fail those commands means a single bad widget name
+    makes *every* hook in *every* Claude and Codex session dump a traceback, and
+    blocks the very command that would repair the file. Everything except the
+    layout is still validated, because a wrong ipc.port would silently send the
+    events nowhere.
+    """
     selected = path or default_path()
     if not selected.exists():
         cfg = Config()
         if not Path(cfg.device).exists() and Path(DEVICE_BY_ID).exists():
             cfg = replace(cfg, device=DEVICE_BY_ID)
-        return _with_layout(cfg)
+        return _with_layout(cfg, strict=strict)
 
     with selected.open("rb") as handle:
         data = tomllib.load(handle)
-    return parse_config(data)
+    return parse_config(data, strict=strict)
 
 
 def parse_config_text(text: str) -> Config:
@@ -357,7 +384,7 @@ def parse_config_text(text: str) -> Config:
     return parse_config(tomllib.loads(text))
 
 
-def parse_config(data: dict) -> Config:
+def parse_config(data: dict, *, strict: bool = True) -> Config:
     cfg = Config()
     display = data.get("display", {})
     dashboard = data.get("dashboard", {})
@@ -409,5 +436,5 @@ def parse_config(data: dict) -> Config:
         raise ValueError("admin.port must be between 1024 and 65535")
     if cfg.admin_port == cfg.ipc_port:
         raise ValueError("admin.port and ipc.port must differ")
-    return _with_layout(cfg)
+    return _with_layout(cfg, strict=strict)
 
