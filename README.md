@@ -278,6 +278,12 @@ Claude status line, and installs a systemd user unit:
 .venv/bin/usb-lcd-dashboard install
 ```
 
+**Re-run this after upgrading.** The set of hooks the dashboard registers grows
+occasionally — `Notification`, which drives the crab's alarm, is new — and an
+existing install keeps whatever hooks it was set up with until `install` runs
+again. It merges rather than replaces, so re-running is safe and leaves your own
+hooks and status line alone.
+
 USB access requires the included device-specific udev rule:
 
 ```bash

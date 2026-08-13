@@ -20,6 +20,10 @@ COMMON_EVENTS = [
     "PreToolUse",
     "PermissionRequest",
     "PostToolUse",
+    # Fires when the agent needs permission or has been waiting at a prompt,
+    # which is the "your attention is needed" signal the crab widget alarms on.
+    # Without it the NOTICE phase is mapped but unreachable.
+    "Notification",
     "Stop",
     "SessionEnd",
 ]

@@ -11,7 +11,7 @@ from .display import Display
 from .layout import agent_slots, compose
 from .model import StateStore, utc_now
 from .normalize import normalize_event
-from .transport import bind_socket, receive_event
+from .transport import bind_socket, poll_timeout, receive_event
 
 LOG = logging.getLogger(__name__)
 
@@ -210,7 +210,13 @@ class DashboardDaemon:
                         LOG.warning("LCD write failed: %s", exc)
                         self.display.close()
                         self.next_connect = time.monotonic() + 2
-                time.sleep(max(0.0, self.config.frame_interval - 0.2))
+                # The receive above already blocked for up to the poll timeout,
+                # so only the remainder of the frame is left to wait out. Both
+                # come from the live config, so an edited refresh_hz takes
+                # effect on the next iteration without a restart.
+                timeout = poll_timeout(self.config)
+                server.settimeout(timeout)
+                time.sleep(max(0.0, self.config.frame_interval - timeout))
         finally:
             server.close()
             if self.config.ipc_mode == "unix":

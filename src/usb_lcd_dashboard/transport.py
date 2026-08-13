@@ -69,8 +69,20 @@ def bind_socket(config: Config) -> socket.socket:
         server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         server.bind(str(path))
         path.chmod(0o600)
-    server.settimeout(0.2)
+    server.settimeout(poll_timeout(config))
     return server
+
+
+def poll_timeout(config: Config) -> float:
+    """How long a receive may block before the loop goes round again.
+
+    This is the real floor on the frame rate: the loop blocks here, then sleeps
+    the remainder of the frame, so a fixed 0.2s timeout capped the panel at 5Hz
+    however high refresh_hz was set. Tying it to the frame interval lets an
+    animated widget actually reach the rate it was configured for, while a slow
+    panel keeps the old 0.2s responsiveness to an incoming event.
+    """
+    return min(0.2, config.frame_interval)
 
 
 def receive_event(server: socket.socket, config: Config) -> bytes:
