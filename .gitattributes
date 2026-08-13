@@ -1,0 +1,12 @@
+# Anything that a Linux shell has to execute must keep LF endings, whatever the
+# checkout does. A CRLF here is not cosmetic: bash reads "set -euo pipefail\r"
+# as an invalid option name, and dpkg would ship a postinst that cannot run.
+*.sh text eol=lf
+packaging/linux/postinst text eol=lf
+packaging/linux/postrm text eol=lf
+packaging/99-turing-lcd.rules text eol=lf
+packaging/linux/control text eol=lf
+packaging/linux/copyright text eol=lf
+packaging/linux/changelog text eol=lf
+
+*.exe binary

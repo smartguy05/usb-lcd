@@ -1,92 +1,67 @@
 from __future__ import annotations
 
 import logging
-import os
-from pathlib import Path
 
 from PIL import Image, ImageChops
 
 from .config import Config
+from .device import PanelDevice, make_device
 
 LOG = logging.getLogger(__name__)
 
 
 class Display:
-    def __init__(self, config: Config, simulate: bool = False):
+    """Decides what to send to a panel, and how little of it.
+
+    The transport lives behind a PanelDevice; what stays here is the dirty-rect
+    diffing, which is transport-independent and hard-won.
+    """
+
+    def __init__(
+        self,
+        config: Config,
+        simulate: bool = False,
+        panel: PanelDevice | None = None,
+    ):
         self.config = config
         self.simulate = simulate
-        self.lcd = None
+        self.panel = panel
+        self.opened = False
         self.device = config.device
         self.previous: Image.Image | None = None
-        self.serial_handle = None
+        if panel is not None:
+            self.device = panel.device
+
+    @property
+    def size(self) -> tuple[int, int]:
+        return self.panel.size if self.panel is not None else self.config.size
 
     @property
     def connected(self) -> bool:
-        return self.simulate or self.lcd is not None
+        return self.opened
 
     def connect(self) -> None:
-        if self.simulate:
-            return
-        from smartscreen_driver.lcd_comm import Orientation
-        from smartscreen_driver.lcd_comm_rev_a import LcdCommRevA
-
-        device = self.config.device or "AUTO"
-        if (
-            os.name != "nt"
-            and device.upper() != "AUTO"
-            and not Path(device).exists()
-        ):
-            raise FileNotFoundError(device)
-        lcd = LcdCommRevA(
-            com_port=device,
-            display_width=320,
-            display_height=480,
-        )
-        lcd.initialize_comm()
-        lcd.screen_on()
-        lcd.set_brightness(self.config.brightness)
-        orientation = (
-            Orientation.LANDSCAPE
-            if self.config.orientation == "landscape"
-            else Orientation.PORTRAIT
-        )
-        lcd.set_orientation(orientation)
-        self.device = lcd.com_port
-        self.lcd = lcd
+        panel = self.panel or make_device(self.config, simulate=self.simulate)
+        panel.open()
+        self.panel = panel
+        self.device = panel.device
+        self.opened = True
         self.previous = None
-        self.serial_handle = getattr(lcd, "lcd_serial", None)
 
     def close(self) -> None:
-        if self.lcd is not None:
+        # Not gated on self.opened: the daemon calls close() after a failed
+        # connect(), and a panel that got half-way through opening still has a
+        # port to release. Every panel's close() tolerates never having opened.
+        if self.panel is not None:
             try:
-                self.lcd.close_serial()
+                self.panel.close()
             finally:
-                self.lcd = None
-                self.serial_handle = None
-
-    def _driver_reopened(self) -> bool:
-        """Did the driver silently replace the serial port under us?
-
-        smartscreen_driver swallows a SerialException by closing the port,
-        reopening it and retrying the write. It does not replay
-        initialize_comm/screen_on/set_brightness/set_orientation, so the panel
-        comes back in its default orientation with a cleared framebuffer while
-        our handle still looks healthy. Unplugging the display triggers exactly
-        this, and the stale diff base then paints crops at the wrong offsets.
-        """
-        if self.lcd is None or self.serial_handle is None:
-            return False
-        return getattr(self.lcd, "lcd_serial", None) is not self.serial_handle
+                self.opened = False
 
     def paint(self, image: Image.Image, force: bool = False) -> bool:
-        if self.simulate:
-            image.save("screencap.png")
-            self.previous = image.copy()
-            return True
-        if self.lcd is None:
+        if self.panel is None or not self.opened:
             raise ConnectionError("display is not connected")
-        if self._driver_reopened():
-            raise ConnectionError("serial port was reopened by the driver")
+        self.panel.health_check()
 
         bbox = (
             None
@@ -95,23 +70,24 @@ class Display:
         )
         if not force and self.previous is not None and bbox is None:
             return False
-        if force or self.previous is None:
-            self.lcd.paint(image)
+        if force or self.previous is None or not self.panel.supports_partial():
+            self.panel.write(image)
             LOG.info("LCD full frame written: %sx%s", image.width, image.height)
         else:
             assert bbox is not None
             left, top, right, bottom = bbox
             area = (right - left) * (bottom - top)
             if area > image.width * image.height * 0.7:
-                self.lcd.paint(image)
+                self.panel.write(image)
                 LOG.debug("LCD full frame written after large diff")
             else:
-                self.lcd.paint(image.crop(bbox), pos=(left, top))
+                self.panel.write(image.crop(bbox), pos=(left, top))
                 LOG.debug("LCD partial frame written: %s", bbox)
-        if self._driver_reopened():
+        try:
+            self.panel.health_check()
+        except ConnectionError:
             # The write above went to a panel that has since been reset. Leave
             # self.previous alone so the reconnect repaints a full frame.
-            raise ConnectionError("serial port was reopened by the driver")
+            raise
         self.previous = image.copy()
         return True
-

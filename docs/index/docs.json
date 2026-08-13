@@ -1,0 +1,689 @@
+{
+ "generated": "2026-08-13T21:04:52Z",
+ "documents": [
+  {
+   "path": "docs/admin/README.md",
+   "title": "Admin surfaces",
+   "headings": [
+    "The most useful thing here for an agent",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 135
+  },
+  {
+   "path": "docs/admin/settings-editor.md",
+   "title": "The settings editor",
+   "headings": [
+    "API",
+    "Routes",
+    "Security model",
+    "Saving",
+    "How the daemon notices",
+    "The form builds itself",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/admin.py",
+    "src/usb_lcd_dashboard/admin_page.py"
+   ],
+   "citations": [
+    "admin.py:194",
+    "admin.py:207",
+    "admin.py:217",
+    "admin.py:314",
+    "admin.py:41"
+   ],
+   "words": 639
+  },
+  {
+   "path": "docs/admin/tray.md",
+   "title": "tray.py \u2014 the Windows notification-area icon",
+   "headings": [
+    "API",
+    "States",
+    "Behaviour",
+    "Why Win32 rather than pystray",
+    "Failure is never fatal",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/tray.py"
+   ],
+   "citations": [
+    "daemon.py:121",
+    "tray.py:139",
+    "tray.py:321",
+    "tray.py:69",
+    "tray.py:76",
+    "tray.py:8",
+    "tray.py:97"
+   ],
+   "words": 461
+  },
+  {
+   "path": "docs/architecture/frame-budget.md",
+   "title": "The frame budget",
+   "headings": [
+    "The chain",
+    "Measurements",
+    "What this forces",
+    "If the ultra-wide ever works",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [
+    "crab.py:151"
+   ],
+   "words": 547
+  },
+  {
+   "path": "docs/architecture/invariants.md",
+   "title": "Invariants",
+   "headings": [
+    "Failures degrade, they never take the panel down",
+    "Strict for drawing, lenient for everything else",
+    "The 3.5\" panel is pixel-frozen",
+    "config.py is the single source of config truth",
+    "The config file is the only channel between the editor and the daemon",
+    "The serial link, not the code, caps the frame rate",
+    "Widgets are pure functions of their context",
+    "Session slots come from the layout",
+    "LF endings in anything Linux executes",
+    "Live-daemon hazard",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 702
+  },
+  {
+   "path": "docs/architecture/overview.md",
+   "title": "How a frame happens",
+   "headings": [
+    "The two halves",
+    "Where the interesting decisions live",
+    "Two panels",
+    "Entry points",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/__init__.py",
+    "src/usb_lcd_dashboard/__main__.py"
+   ],
+   "citations": [],
+   "words": 458
+  },
+  {
+   "path": "docs/architecture/README.md",
+   "title": "Architecture",
+   "headings": [
+    "The one-paragraph version",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 183
+  },
+  {
+   "path": "docs/integration/cli.md",
+   "title": "cli.py \u2014 every entry point",
+   "headings": [
+    "Commands",
+    "The hook commands never draw",
+    "Strict loading is decided here",
+    "doctor",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/cli.py",
+    "src/usb_lcd_dashboard/doctor.py"
+   ],
+   "citations": [
+    "cli.py:18",
+    "cli.py:26",
+    "cli.py:53"
+   ],
+   "words": 519
+  },
+  {
+   "path": "docs/integration/install.md",
+   "title": "install.py \u2014 wiring into Claude and Codex",
+   "headings": [
+    "API",
+    "Registered events",
+    "How the command is resolved",
+    "What `install()` does",
+    "The unit",
+    "`uninstall()`",
+    "Re-run after upgrading",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/install.py"
+   ],
+   "citations": [
+    "install.py:123",
+    "install.py:17",
+    "install.py:201",
+    "install.py:74",
+    "install.py:98"
+   ],
+   "words": 684
+  },
+  {
+   "path": "docs/integration/README.md",
+   "title": "Integration",
+   "headings": [
+    "Where to start",
+    "The rule that governs this whole area",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 196
+  },
+  {
+   "path": "docs/packaging/linux.md",
+   "title": "The Ubuntu package",
+   "headings": [
+    "Why it is shaped differently from the Windows installer",
+    "Layout",
+    "Dependencies, and why",
+    "The system / per-user split",
+    "The udev rule",
+    "Build notes worth knowing",
+    "The smoke test",
+    "Versioning",
+    "See also"
+   ],
+   "covers": [
+    "packaging/linux/build-deb.sh",
+    "packaging/linux/build-deb-inner.sh",
+    "packaging/linux/control",
+    "packaging/linux/postinst",
+    "packaging/linux/postrm",
+    "packaging/linux/copyright",
+    "packaging/linux/changelog",
+    "packaging/linux/smoke-test.sh",
+    "packaging/linux/smoke-test-inner.sh",
+    "packaging/linux/smoke-test-user.sh",
+    "packaging/99-turing-lcd.rules"
+   ],
+   "citations": [],
+   "words": 774
+  },
+  {
+   "path": "docs/packaging/README.md",
+   "title": "Packaging",
+   "headings": [
+    "Why they differ",
+    "Build",
+    "Two traps",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 245
+  },
+  {
+   "path": "docs/packaging/windows.md",
+   "title": "The Windows installer",
+   "headings": [
+    "The build",
+    "What the installer does",
+    "The payload directory is generated",
+    "Windows-specific runtime notes",
+    "See also"
+   ],
+   "covers": [
+    "packaging/windows/build-installer.sh",
+    "packaging/windows/installer.nsi",
+    "packaging/windows/config.example.toml"
+   ],
+   "citations": [],
+   "words": 510
+  },
+  {
+   "path": "docs/README.md",
+   "title": "Documentation",
+   "headings": [
+    "The map",
+    "Common tasks",
+    "How this documentation is kept honest",
+    "What is not here"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 452
+  },
+  {
+   "path": "docs/reference/commands.md",
+   "title": "Recipes",
+   "headings": [
+    "Development",
+    "Drive the simulator with a fake event",
+    "See the frame that is actually on the panel",
+    "Stop a daemon",
+    "Documentation indexes",
+    "Packaging",
+    "Linux service",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 313
+  },
+  {
+   "path": "docs/reference/config-schema.md",
+   "title": "config.toml",
+   "headings": [
+    "image = \"C:/Users/you/Pictures/wallpaper.png\"",
+    "per-widget; see the table below",
+    "Tile options",
+    "Rules enforced at load",
+    "Examples in the repo"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 455
+  },
+  {
+   "path": "docs/reference/phases.md",
+   "title": "Phases",
+   "headings": [
+    "The table",
+    "Who cares about which",
+    "Adding a phase",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [
+    "crab.py:58",
+    "install.py:26",
+    "normalize.py:12"
+   ],
+   "words": 409
+  },
+  {
+   "path": "docs/reference/README.md",
+   "title": "Reference",
+   "headings": [
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 90
+  },
+  {
+   "path": "docs/rendering/crab.md",
+   "title": "crab.py \u2014 the animated widget",
+   "headings": [
+    "API",
+    "Animation is a pure function of `ctx.now`",
+    "Phase changes must not rewind it",
+    "Two constraints from the hardware",
+    "Nothing oscillates above 0.63 Hz",
+    "Why the alarm border does not pulse",
+    "Drawing notes that will bite you",
+    "Size ladder",
+    "Testing it",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/widgets/crab.py"
+   ],
+   "citations": [
+    "crab.py:158",
+    "crab.py:181",
+    "crab.py:216",
+    "crab.py:548",
+    "crab.py:65",
+    "crab.py:705",
+    "crab.py:9"
+   ],
+   "words": 967
+  },
+  {
+   "path": "docs/rendering/layout.md",
+   "title": "layout.py \u2014 tiles and composition",
+   "headings": [
+    "API",
+    "Tile",
+    "TileContext",
+    "Validation",
+    "Slot numbering",
+    "Fault isolation",
+    "The legacy fast path",
+    "background.py",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/layout.py",
+    "src/usb_lcd_dashboard/background.py"
+   ],
+   "citations": [
+    "background.py:23",
+    "background.py:79",
+    "layout.py:112",
+    "layout.py:127",
+    "layout.py:18",
+    "layout.py:48",
+    "layout.py:68",
+    "layout.py:98"
+   ],
+   "words": 745
+  },
+  {
+   "path": "docs/rendering/README.md",
+   "title": "Rendering",
+   "headings": [
+    "Where to start",
+    "Two things that look like bugs and are not",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 207
+  },
+  {
+   "path": "docs/rendering/render.md",
+   "title": "render.py \u2014 palette, fonts, text helpers, legacy card",
+   "headings": [
+    "The palette",
+    "Fonts",
+    "Text helpers",
+    "The legacy card",
+    "Do not deduplicate the context bar",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/render.py"
+   ],
+   "citations": [
+    "render.py:20",
+    "render.py:33"
+   ],
+   "words": 573
+  },
+  {
+   "path": "docs/rendering/widgets.md",
+   "title": "The widget registry",
+   "headings": [
+    "The registry",
+    "Adding a widget",
+    "base.py \u2014 shared scaffolding",
+    "agent.py",
+    "clock.py",
+    "legacy.py",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/widgets/__init__.py",
+    "src/usb_lcd_dashboard/widgets/base.py",
+    "src/usb_lcd_dashboard/widgets/agent.py",
+    "src/usb_lcd_dashboard/widgets/clock.py",
+    "src/usb_lcd_dashboard/widgets/legacy.py"
+   ],
+   "citations": [
+    "agent.py:67",
+    "base.py:14",
+    "base.py:32",
+    "base.py:46",
+    "clock.py:16",
+    "legacy.py:18",
+    "widgets/__init__.py:60"
+   ],
+   "words": 707
+  },
+  {
+   "path": "docs/runtime/config.md",
+   "title": "config.py \u2014 the single source of config truth",
+   "headings": [
+    "API",
+    "Selected fields",
+    "Strict vs lenient loading",
+    "Adding a setting",
+    "Other gotchas",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/config.py"
+   ],
+   "citations": [
+    "config.py:23",
+    "config.py:356",
+    "config.py:55"
+   ],
+   "words": 747
+  },
+  {
+   "path": "docs/runtime/daemon.md",
+   "title": "daemon.py \u2014 the process and its loop",
+   "headings": [
+    "API",
+    "Instance state",
+    "The loop, step by step",
+    "One event per tick",
+    "Config hot-reload",
+    "Invariants",
+    "Failure modes",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/daemon.py"
+   ],
+   "citations": [
+    "daemon.py:133",
+    "daemon.py:147",
+    "daemon.py:19",
+    "daemon.py:196",
+    "daemon.py:20",
+    "daemon.py:51",
+    "daemon.py:64",
+    "daemon.py:67"
+   ],
+   "words": 1017
+  },
+  {
+   "path": "docs/runtime/device.md",
+   "title": "device.py \u2014 the wire to a panel",
+   "headings": [
+    "The protocol",
+    "SerialPanel",
+    "`health_check` exists because the driver lies",
+    "SimulatedPanel",
+    "WindowPanel",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/device.py"
+   ],
+   "citations": [
+    "device.py:113",
+    "device.py:143",
+    "device.py:161",
+    "device.py:23",
+    "device.py:27",
+    "device.py:42",
+    "device.py:98"
+   ],
+   "words": 564
+  },
+  {
+   "path": "docs/runtime/display.md",
+   "title": "display.py \u2014 dirty-rect diffing",
+   "headings": [
+    "API",
+    "What `paint()` decides",
+    "Invariants",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/display.py"
+   ],
+   "citations": [
+    "display.py:14",
+    "display.py:20",
+    "display.py:35",
+    "display.py:39",
+    "display.py:43",
+    "display.py:51",
+    "display.py:61",
+    "display.py:88"
+   ],
+   "words": 505
+  },
+  {
+   "path": "docs/runtime/README.md",
+   "title": "Runtime",
+   "headings": [
+    "Where to start",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 173
+  },
+  {
+   "path": "docs/runtime/transport.md",
+   "title": "transport.py \u2014 the IPC wire",
+   "headings": [
+    "API",
+    "The envelope",
+    "Two transports",
+    "`poll_timeout` is the real frame-rate floor",
+    "A hook must never crash because the daemon is down",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/transport.py"
+   ],
+   "citations": [
+    "daemon.py:166",
+    "transport.py:10",
+    "transport.py:14",
+    "transport.py:23",
+    "transport.py:29",
+    "transport.py:47",
+    "transport.py:51",
+    "transport.py:58",
+    "transport.py:65",
+    "transport.py:76",
+    "transport.py:88",
+    "transport.py:90",
+    "transport.py:92"
+   ],
+   "words": 525
+  },
+  {
+   "path": "docs/sessions/model.md",
+   "title": "model.py \u2014 session state and tile arbitration",
+   "headings": [
+    "API",
+    "Store attributes",
+    "`apply()` \u2014 merge rules",
+    "`assign()` \u2014 the arbiter",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/model.py"
+   ],
+   "citations": [
+    "model.py:113",
+    "model.py:117",
+    "model.py:13",
+    "model.py:32",
+    "model.py:41",
+    "model.py:61",
+    "model.py:75",
+    "model.py:9"
+   ],
+   "words": 729
+  },
+  {
+   "path": "docs/sessions/normalize.md",
+   "title": "normalize.py \u2014 hook payload to SessionState",
+   "headings": [
+    "API",
+    "Field sources",
+    "Phases",
+    "Context usage differs by provider",
+    "The activity line",
+    "Tests",
+    "See also"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/normalize.py",
+    "src/usb_lcd_dashboard/activity.py"
+   ],
+   "citations": [
+    "activity.py:17",
+    "activity.py:60",
+    "activity.py:98",
+    "normalize.py:12",
+    "normalize.py:41",
+    "normalize.py:75"
+   ],
+   "words": 661
+  },
+  {
+   "path": "docs/sessions/README.md",
+   "title": "Sessions",
+   "headings": [
+    "Where to start",
+    "The subtlest code in the repository",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 193
+  },
+  {
+   "path": "docs/testing/README.md",
+   "title": "Testing",
+   "headings": [
+    "Inventory",
+    "Shared idioms",
+    "`differs()` needs `alpha_only=False`",
+    "Patterns to follow",
+    "The pixel-frozen contract",
+    "Hazards",
+    "See also"
+   ],
+   "covers": [
+    "tests"
+   ],
+   "citations": [
+    "test_widgets.py:21"
+   ],
+   "words": 877
+  },
+  {
+   "path": "docs/tools/README.md",
+   "title": "The documentation tools",
+   "headings": [
+    "search.py \u2014 find things cheaply",
+    "build_index.py \u2014 rebuild them",
+    "Keeping documentation honest",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [
+    "src/usb_lcd_dashboard/model.py:117"
+   ],
+   "words": 266
+  }
+ ]
+}

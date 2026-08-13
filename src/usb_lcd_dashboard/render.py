@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import functools
 import os
 import subprocess
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -11,7 +13,11 @@ from .config import NO_WINDOW
 from .model import SessionState
 
 
-WIDTH, HEIGHT = 480, 320
+# The 3.5" Turing panel's own dimensions. Every coordinate in render_dashboard
+# and render_idle is a literal derived from these two numbers, which is why they
+# stay here rather than becoming a global claim about "the display": a second
+# panel has its own size and gets it from the config.
+LEGACY_WIDTH, LEGACY_HEIGHT = 480, 320
 BACKGROUND = "#081018"
 PANEL = "#101c28"
 TEXT = "#f2f7fb"
@@ -20,9 +26,17 @@ CLAUDE = "#d97757"
 CODEX = "#2bc48a"
 WARNING = "#ffca3a"
 ERROR = "#ff5f69"
+TRACK = "#1d3040"
 
 
+@functools.lru_cache(maxsize=128)
 def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+    """Cached because a tiled frame asks for a lot of fonts.
+
+    render_dashboard alone calls this ~10 times per frame; four tiles make it
+    ~40, each one otherwise parsing a TrueType file again. Font objects are
+    reusable across ImageDraw instances, so the cache changes no pixels.
+    """
     windows_fonts = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts"
     names = [
         str(windows_fonts / ("segoeuib.ttf" if bold else "segoeui.ttf")),
@@ -84,25 +98,32 @@ def _wrap(
     return lines
 
 
-def _fit_headline(draw: ImageDraw.ImageDraw, text: str, width: int):
+def _fit_headline(draw: ImageDraw.ImageDraw, text: str, width: int, max_size: int = 43):
     """One big line where it fits, otherwise two smaller ones.
 
     Activity text ("Editing src/usb_lcd_dashboard/render.py") is far longer
     than the phase words this line used to hold, and truncating it throws away
     the part that identifies the work.
+
+    The size ladder is tuned for the 3.5" panel's 430px headline. max_size
+    scales it so a taller tile can start bigger and a cramped one smaller; the
+    default reproduces the original ladder exactly.
     """
-    for size in (43, 39, 35, 31):
+    scale = max_size / 43
+    single = [max(8, round(size * scale)) for size in (43, 39, 35, 31)]
+    double = [max(8, round(size * scale)) for size in (30, 28, 26, 24)]
+    for size in single:
         font = _font(size, True)
         if draw.textlength(text, font=font) <= width:
             return [text], font
-    for size in (30, 28, 26, 24):
+    for size in double:
         font = _font(size, True)
         lines = _wrap(draw, text, width, font)
         if len(lines) <= 2:
             return lines, font
-    font = _font(24, True)
+    font = _font(double[-1], True)
     lines = _wrap(draw, text, width, font)[:2]
-    lines[-1] = _fit(draw, lines[-1] + "…", width, 24, True)[0]
+    lines[-1] = _fit(draw, lines[-1] + "…", width, double[-1], True)[0]
     return lines, font
 
 
@@ -112,9 +133,24 @@ def _duration(seconds: int) -> str:
     return f"{hours:d}:{minutes:02d}:{secs:02d}" if hours else f"{minutes:02d}:{secs:02d}"
 
 
+_BRANCH_TTL = 15.0
+_BRANCH_CACHE: dict[str, tuple[float, str]] = {}
+
+
 def _branch(cwd: str) -> str:
+    """The current git branch, cached for _BRANCH_TTL seconds.
+
+    This spawns a process, and a tiled frame calls it once per agent tile: three
+    tiles at 2 Hz is six git invocations a second, each with a 150ms timeout.
+    A branch does not change that fast. Empty results are cached too, so a
+    non-repo cwd stops paying for the lookup at all.
+    """
     if not cwd or not Path(cwd).is_dir():
         return ""
+    cached = _BRANCH_CACHE.get(cwd)
+    now = time.monotonic()
+    if cached is not None and now - cached[0] < _BRANCH_TTL:
+        return cached[1]
     try:
         result = subprocess.run(
             ["git", "-C", cwd, "branch", "--show-current"],
@@ -124,13 +160,15 @@ def _branch(cwd: str) -> str:
             timeout=0.15,
             creationflags=NO_WINDOW,
         )
-        return result.stdout.strip()
+        branch = result.stdout.strip()
     except (OSError, subprocess.TimeoutExpired):
-        return ""
+        branch = ""
+    _BRANCH_CACHE[cwd] = (now, branch)
+    return branch
 
 
 def render_dashboard(state: SessionState, now: datetime) -> Image.Image:
-    image = Image.new("RGB", (WIDTH, HEIGHT), BACKGROUND)
+    image = Image.new("RGB", (LEGACY_WIDTH, LEGACY_HEIGHT), BACKGROUND)
     draw = ImageDraw.Draw(image)
     accent = CLAUDE if state.provider == "claude" else CODEX
     if state.phase == "APPROVAL":
@@ -170,6 +208,9 @@ def render_dashboard(state: SessionState, now: datetime) -> Image.Image:
         detail, detail_font = _fit(draw, state.detail, 430, 17)
         draw.text((24, project_y + 32), detail, font=detail_font, fill=MUTED)
 
+    # Not widgets.base.context_bar: this card's output is pinned pixel for pixel
+    # by test_legacy_identical.py, and its caption sizing and fill floor differ
+    # from the tile version's. The duplication is deliberate.
     y = 209
     draw.text((24, y), "CONTEXT USED", font=_font(15, True), fill=MUTED)
     percent = state.context_percent
@@ -197,7 +238,7 @@ def render_dashboard(state: SessionState, now: datetime) -> Image.Image:
 
 
 def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Image:
-    image = Image.new("RGB", (WIDTH, HEIGHT), BACKGROUND)
+    image = Image.new("RGB", (LEGACY_WIDTH, LEGACY_HEIGHT), BACKGROUND)
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle((22, 22, 458, 298), radius=22, fill=PANEL)
     draw.text((44, 51), title, font=_font(24, True), fill=MUTED)
@@ -205,7 +246,7 @@ def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Imag
     clock = f"{local.hour % 12 or 12}:{local:%M}"
     clock_font = _font(98, True)
     draw.text(
-        ((WIDTH - draw.textlength(clock, font=clock_font)) / 2, 93),
+        ((LEGACY_WIDTH - draw.textlength(clock, font=clock_font)) / 2, 93),
         clock,
         font=clock_font,
         fill=TEXT,
@@ -213,7 +254,7 @@ def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Imag
     date = f"{local:%A · %B} {local.day}"
     date_font = _font(22)
     draw.text(
-        ((WIDTH - draw.textlength(date, font=date_font)) / 2, 218),
+        ((LEGACY_WIDTH - draw.textlength(date, font=date_font)) / 2, 218),
         date,
         font=date_font,
         fill=MUTED,
@@ -222,7 +263,7 @@ def render_idle(title: str, now: datetime, connected: bool = True) -> Image.Imag
     color = CODEX if connected else WARNING
     status_font = _font(14, True)
     draw.text(
-        ((WIDTH - draw.textlength(status, font=status_font)) / 2, 267),
+        ((LEGACY_WIDTH - draw.textlength(status, font=status_font)) / 2, 267),
         status,
         font=status_font,
         fill=color,

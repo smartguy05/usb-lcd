@@ -1,0 +1,5639 @@
+{
+ "generated": "2026-08-13T21:04:52Z",
+ "symbols": [
+  {
+   "name": "__init__",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/__init__.py",
+   "line": 1,
+   "signature": "module __init__",
+   "summary": "Claude Code and Codex dashboard for Turing USB LCDs.",
+   "parent": ""
+  },
+  {
+   "name": "__main__",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/__main__.py",
+   "line": 1,
+   "signature": "module __main__",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "activity",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 1,
+   "signature": "module activity",
+   "summary": "Human-readable descriptions of what an agent is currently doing.",
+   "parent": ""
+  },
+  {
+   "name": "SUMMARY_LIMIT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 17,
+   "signature": "SUMMARY_LIMIT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_truncate",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 20,
+   "signature": "def _truncate(value: Any, limit: int=SUMMARY_LIMIT) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_short_path",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 27,
+   "signature": "def _short_path(value: Any, cwd: str) -> str",
+   "summary": "Shorten a path the way Claude Code prints it: relative to the session",
+   "parent": ""
+  },
+  {
+   "name": "_text",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 46,
+   "signature": "def _text(value: Any) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_first",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 52,
+   "signature": "def _first(data: dict[str, Any], *keys: str) -> Any",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "describe_activity",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/activity.py",
+   "line": 60,
+   "signature": "def describe_activity(tool: str, tool_input: Any, cwd: str='') -> str",
+   "summary": "Describe a tool call the way the agent's own status line would.",
+   "parent": ""
+  },
+  {
+   "name": "admin",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 1,
+   "signature": "module admin",
+   "summary": "The settings editor: a small HTTP server the daemon runs on loopback.",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 32,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ALLOWED_HOSTS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 34,
+   "signature": "ALLOWED_HOSTS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MAX_BODY_BYTES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 35,
+   "signature": "MAX_BODY_BYTES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DRAIN_LIMIT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 38,
+   "signature": "DRAIN_LIMIT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_host_is_loopback",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 41,
+   "signature": "def _host_is_loopback(header: str | None) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "config_to_json",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 57,
+   "signature": "def config_to_json(cfg: Config) -> dict[str, Any]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "config_from_json",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 106,
+   "signature": "def config_from_json(current: Config, payload: dict[str, Any]) -> Config",
+   "summary": "Build a candidate Config from the editor's JSON.",
+   "parent": ""
+  },
+  {
+   "name": "AdminState",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 194,
+   "signature": "class AdminState",
+   "summary": "What the editor needs from the daemon, and nothing more.",
+   "parent": ""
+  },
+  {
+   "name": "AdminState.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 197,
+   "signature": "def __init__(self, config_path: Path, get_config: Callable[[], Config], get_preview: Callable[[], Image.Image | None])",
+   "summary": "",
+   "parent": "AdminState"
+  },
+  {
+   "name": "AdminState.save",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 207,
+   "signature": "def save(self, payload: dict[str, Any]) -> Config",
+   "summary": "Validate through the loader, then replace config.toml atomically.",
+   "parent": "AdminState"
+  },
+  {
+   "name": "make_handler",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 217,
+   "signature": "def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "start",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/admin.py",
+   "line": 314,
+   "signature": "def start(state: AdminState, port: int) -> ThreadingHTTPServer",
+   "summary": "Serve the editor on a daemon thread, so it never holds up shutdown.",
+   "parent": ""
+  },
+  {
+   "name": "admin_page",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/admin_page.py",
+   "line": 1,
+   "signature": "module admin_page",
+   "summary": "The settings editor page.",
+   "parent": ""
+  },
+  {
+   "name": "PAGE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/admin_page.py",
+   "line": 8,
+   "signature": "PAGE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "background",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 1,
+   "signature": "module background",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 11,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "FIT_MODES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 13,
+   "signature": "FIT_MODES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Background",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 24,
+   "signature": "class Background",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Background.color",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 25,
+   "signature": "color: str = BACKGROUND",
+   "summary": "",
+   "parent": "Background"
+  },
+  {
+   "name": "Background.image",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 26,
+   "signature": "image: Path | None = None",
+   "summary": "",
+   "parent": "Background"
+  },
+  {
+   "name": "Background.fit",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 27,
+   "signature": "fit: str = 'cover'",
+   "summary": "",
+   "parent": "Background"
+  },
+  {
+   "name": "_scaled",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 30,
+   "signature": "def _scaled(image: Image.Image, size: tuple[int, int], fit: str, color: str) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "background_layer",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/background.py",
+   "line": 47,
+   "signature": "def background_layer(bg: Background, size: tuple[int, int]) -> Image.Image",
+   "summary": "The base layer a frame is composed onto: an RGB image of exactly `size`.",
+   "parent": ""
+  },
+  {
+   "name": "cli",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/cli.py",
+   "line": 1,
+   "signature": "module cli",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_json_stdin",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/cli.py",
+   "line": 18,
+   "signature": "def _json_stdin() -> tuple[bytes, dict]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "main",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/cli.py",
+   "line": 26,
+   "signature": "def main(argv: list[str] | None=None) -> int",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "config",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 1,
+   "signature": "module config",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 15,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DEVICE_BY_ID",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 17,
+   "signature": "DEVICE_BY_ID = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DEFAULT_IPC_PORT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 21,
+   "signature": "DEFAULT_IPC_PORT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DEFAULT_ADMIN_PORT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 22,
+   "signature": "DEFAULT_ADMIN_PORT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ADMIN_HOST",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 26,
+   "signature": "ADMIN_HOST = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DISPLAY_KINDS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 32,
+   "signature": "DISPLAY_KINDS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NO_WINDOW",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 37,
+   "signature": "NO_WINDOW = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "config_home",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 40,
+   "signature": "def config_home() -> Path",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "runtime_dir",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 48,
+   "signature": "def runtime_dir() -> Path",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Config",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 56,
+   "signature": "class Config",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Config.device",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 57,
+   "signature": "device: str = 'AUTO' if os.name == 'nt' else '/dev/turing-lcd'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.display_kind",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 58,
+   "signature": "display_kind: str = 'turing_rev_a'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.width",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 59,
+   "signature": "width: int = 480",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.height",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 60,
+   "signature": "height: int = 320",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.orientation",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 61,
+   "signature": "orientation: str = 'landscape'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.brightness",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 62,
+   "signature": "brightness: int = 25",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.refresh_hz",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 63,
+   "signature": "refresh_hz: float = 2.0",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.background",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 67,
+   "signature": "background: 'Background | None' = None",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.tiles",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 70,
+   "signature": "tiles: tuple['Tile', ...] = field(default=())",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.active_ttl_seconds",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 71,
+   "signature": "active_ttl_seconds: int = 180",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.approval_ttl_seconds",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 72,
+   "signature": "approval_ttl_seconds: int = 90",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.tool_ttl_seconds",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 75,
+   "signature": "tool_ttl_seconds: int = 900",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.switch_dwell_seconds",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 78,
+   "signature": "switch_dwell_seconds: float = 4.0",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.idle_title",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 79,
+   "signature": "idle_title: str = 'AI WORKBENCH'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.ipc_mode",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 80,
+   "signature": "ipc_mode: str = 'tcp' if os.name == 'nt' else 'unix'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.ipc_host",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 81,
+   "signature": "ipc_host: str = '127.0.0.1'",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.ipc_port",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 82,
+   "signature": "ipc_port: int = DEFAULT_IPC_PORT",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.admin_enabled",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 85,
+   "signature": "admin_enabled: bool = True",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.admin_port",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 86,
+   "signature": "admin_port: int = DEFAULT_ADMIN_PORT",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.tray_enabled",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 89,
+   "signature": "tray_enabled: bool = True",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.layout_error",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 94,
+   "signature": "layout_error: str = ''",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.size",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 97,
+   "signature": "def size(self) -> tuple[int, int]",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.socket_path",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 101,
+   "signature": "def socket_path(self) -> Path",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.ipc_address",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 106,
+   "signature": "def ipc_address(self) -> tuple[str, int]",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.frame_interval",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 110,
+   "signature": "def frame_interval(self) -> float",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "DEFAULT_CONFIG_TOML",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 114,
+   "signature": "DEFAULT_CONFIG_TOML = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "default_config_toml",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 147,
+   "signature": "def default_config_toml(device: str | None=None, ipc_mode: str | None=None) -> str",
+   "summary": "The starting config, rendered from the Config defaults themselves.",
+   "parent": ""
+  },
+  {
+   "name": "_toml_value",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 182,
+   "signature": "def _toml_value(value) -> str",
+   "summary": "Render a Python value as TOML.",
+   "parent": ""
+  },
+  {
+   "name": "dump_config_toml",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 206,
+   "signature": "def dump_config_toml(cfg: Config) -> str",
+   "summary": "Serialise a Config back to a config.toml the loader accepts.",
+   "parent": ""
+  },
+  {
+   "name": "write_config",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 269,
+   "signature": "def write_config(cfg: Config, path: Path | None=None) -> Path",
+   "summary": "Replace config.toml in one step.",
+   "parent": ""
+  },
+  {
+   "name": "default_path",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 284,
+   "signature": "def default_path() -> Path",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_parse_background",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 289,
+   "signature": "def _parse_background(table: dict) -> 'Background | None'",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_parse_tiles",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 311,
+   "signature": "def _parse_tiles(raw: list) -> tuple['Tile', ...]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_with_layout",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 334,
+   "signature": "def _with_layout(cfg: Config, *, strict: bool=True) -> Config",
+   "summary": "Fill in and check the layout, defaulting to the legacy full-screen tile.",
+   "parent": ""
+  },
+  {
+   "name": "load_config",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 355,
+   "signature": "def load_config(path: Path | None=None, *, strict: bool=True) -> Config",
+   "summary": "Load the config, validating the layout only when the caller draws it.",
+   "parent": ""
+  },
+  {
+   "name": "parse_config_text",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 378,
+   "signature": "def parse_config_text(text: str) -> Config",
+   "summary": "Validate a config document without going through the filesystem.",
+   "parent": ""
+  },
+  {
+   "name": "parse_config",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 387,
+   "signature": "def parse_config(data: dict, *, strict: bool=True) -> Config",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "daemon",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 1,
+   "signature": "module daemon",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 16,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DashboardDaemon",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 19,
+   "signature": "class DashboardDaemon",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DashboardDaemon.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 20,
+   "signature": "def __init__(self, config: Config, simulate: bool=False, config_path=None)",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._apply_config",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 36,
+   "signature": "def _apply_config(self, config: Config) -> None",
+   "summary": "Adopt a config, whether at startup or after an edit.",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._config_signature",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 51,
+   "signature": "def _config_signature(self) -> bytes | None",
+   "summary": "The config's contents, as the thing to notice changes in.",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._reload_config",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 64,
+   "signature": "def _reload_config(self) -> None",
+   "summary": "Pick up an edited config.toml without a restart.",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._start_admin",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 103,
+   "signature": "def _start_admin(self) -> None",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._start_tray",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 121,
+   "signature": "def _start_tray(self) -> None",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon.stop",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 133,
+   "signature": "def stop(self, *_args) -> None",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon._connect",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 136,
+   "signature": "def _connect(self) -> None",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "DashboardDaemon.run",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/daemon.py",
+   "line": 147,
+   "signature": "def run(self) -> None",
+   "summary": "",
+   "parent": "DashboardDaemon"
+  },
+  {
+   "name": "device",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 1,
+   "signature": "module device",
+   "summary": "Panel transports.",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 21,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LEGACY_SIZE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 23,
+   "signature": "LEGACY_SIZE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PanelDevice",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 27,
+   "signature": "class PanelDevice(Protocol)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PanelDevice.size",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 28,
+   "signature": "size: tuple[int, int]",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.device",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 29,
+   "signature": "device: str",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.open",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 31,
+   "signature": "def open(self) -> None",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.close",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 33,
+   "signature": "def close(self) -> None",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.write",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 35,
+   "signature": "def write(self, image: Image.Image, pos: tuple[int, int]=(0, 0)) -> None",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.supports_partial",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 37,
+   "signature": "def supports_partial(self) -> bool",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "PanelDevice.health_check",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 39,
+   "signature": "def health_check(self) -> None",
+   "summary": "",
+   "parent": "PanelDevice"
+  },
+  {
+   "name": "SerialPanel",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 42,
+   "signature": "class SerialPanel",
+   "summary": "The Turing/UsbMonitor 3.5\" panel over its CDC-ACM serial bridge.",
+   "parent": ""
+  },
+  {
+   "name": "SerialPanel.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 45,
+   "signature": "def __init__(self, config: Config)",
+   "summary": "",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SerialPanel.open",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 58,
+   "signature": "def open(self) -> None",
+   "summary": "",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SerialPanel.close",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 81,
+   "signature": "def close(self) -> None",
+   "summary": "",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SerialPanel.write",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 89,
+   "signature": "def write(self, image: Image.Image, pos: tuple[int, int]=(0, 0)) -> None",
+   "summary": "",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SerialPanel.supports_partial",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 94,
+   "signature": "def supports_partial(self) -> bool",
+   "summary": "",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SerialPanel.health_check",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 97,
+   "signature": "def health_check(self) -> None",
+   "summary": "Did the driver silently replace the serial port under us?",
+   "parent": "SerialPanel"
+  },
+  {
+   "name": "SimulatedPanel",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 113,
+   "signature": "class SimulatedPanel",
+   "summary": "Writes the frame to screencap.png instead of a panel.",
+   "parent": ""
+  },
+  {
+   "name": "SimulatedPanel.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 120,
+   "signature": "def __init__(self, config: Config, path: str='screencap.png')",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "SimulatedPanel.open",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 126,
+   "signature": "def open(self) -> None",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "SimulatedPanel.close",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 129,
+   "signature": "def close(self) -> None",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "SimulatedPanel.write",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 132,
+   "signature": "def write(self, image: Image.Image, pos: tuple[int, int]=(0, 0)) -> None",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "SimulatedPanel.supports_partial",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 135,
+   "signature": "def supports_partial(self) -> bool",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "SimulatedPanel.health_check",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 139,
+   "signature": "def health_check(self) -> None",
+   "summary": "",
+   "parent": "SimulatedPanel"
+  },
+  {
+   "name": "WindowPanel",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 143,
+   "signature": "class WindowPanel",
+   "summary": "A panel the OS enumerates as a monitor. Not implemented yet.",
+   "parent": ""
+  },
+  {
+   "name": "WindowPanel.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 153,
+   "signature": "def __init__(self, config: Config)",
+   "summary": "",
+   "parent": "WindowPanel"
+  },
+  {
+   "name": "make_device",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/device.py",
+   "line": 161,
+   "signature": "def make_device(config: Config, simulate: bool=False) -> PanelDevice",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "display",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 1,
+   "signature": "module display",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 10,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Display",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 13,
+   "signature": "class Display",
+   "summary": "Decides what to send to a panel, and how little of it.",
+   "parent": ""
+  },
+  {
+   "name": "Display.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 20,
+   "signature": "def __init__(self, config: Config, simulate: bool=False, panel: PanelDevice | None=None)",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "Display.size",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 36,
+   "signature": "def size(self) -> tuple[int, int]",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "Display.connected",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 40,
+   "signature": "def connected(self) -> bool",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "Display.connect",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 43,
+   "signature": "def connect(self) -> None",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "Display.close",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 51,
+   "signature": "def close(self) -> None",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "Display.paint",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/display.py",
+   "line": 61,
+   "signature": "def paint(self, image: Image.Image, force: bool=False) -> bool",
+   "summary": "",
+   "parent": "Display"
+  },
+  {
+   "name": "doctor",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 1,
+   "signature": "module doctor",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TARGET_VID",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 17,
+   "signature": "TARGET_VID = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TARGET_PID",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 18,
+   "signature": "TARGET_PID = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TARGET_SERIAL",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 19,
+   "signature": "TARGET_SERIAL = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_hook_present",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 22,
+   "signature": "def _hook_present(path: Path) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "detected_device",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 30,
+   "signature": "def detected_device(config: Config) -> str | None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_windows_startup_shortcut",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 50,
+   "signature": "def _windows_startup_shortcut() -> Path",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "checks",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 56,
+   "signature": "def checks(config: Config) -> list[tuple[str, bool, str]]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "paint_test",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 117,
+   "signature": "def paint_test(config: Config) -> None",
+   "summary": "Put a card on the panel describing what the daemon thinks it is talking to.",
+   "parent": ""
+  },
+  {
+   "name": "print_report",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/doctor.py",
+   "line": 164,
+   "signature": "def print_report(config: Config) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "install",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 1,
+   "signature": "module install",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "COMMON_EVENTS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 17,
+   "signature": "COMMON_EVENTS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "EVENTS_BY_PROVIDER",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 30,
+   "signature": "EVENTS_BY_PROVIDER = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_read_json",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 36,
+   "signature": "def _read_json(path: Path) -> dict[str, Any]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_atomic_json",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 43,
+   "signature": "def _atomic_json(path: Path, data: dict[str, Any]) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_backup",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 50,
+   "signature": "def _backup(path: Path) -> str | None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_contains_ours",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 59,
+   "signature": "def _contains_ours(value: Any) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_strip_ours",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 64,
+   "signature": "def _strip_ours(groups: list[Any]) -> list[Any]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_quote_command",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 68,
+   "signature": "def _quote_command(parts: list[str]) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_command_prefix",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 74,
+   "signature": "def _command_prefix(explicit: str | None=None) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_hook_interpreter",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 86,
+   "signature": "def _hook_interpreter() -> str",
+   "summary": "Interpreter for hook commands.",
+   "parent": ""
+  },
+  {
+   "name": "UNIT_NAME",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 98,
+   "signature": "UNIT_NAME = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_systemctl",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 101,
+   "signature": "def _systemctl(*args: str) -> bool",
+   "summary": "Run `systemctl --user`, reporting whether it worked.",
+   "parent": ""
+  },
+  {
+   "name": "_systemd_enable",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 125,
+   "signature": "def _systemd_enable() -> bool",
+   "summary": "Load the new unit and start it, the way the Windows installer starts the app.",
+   "parent": ""
+  },
+  {
+   "name": "_systemd_disable",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 136,
+   "signature": "def _systemd_disable() -> None",
+   "summary": "Stop and unwire the unit before its file is deleted.",
+   "parent": ""
+  },
+  {
+   "name": "_merge_hooks",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 145,
+   "signature": "def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "install",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 170,
+   "signature": "def install(executable: str | None=None) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "uninstall",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/install.py",
+   "line": 257,
+   "signature": "def uninstall() -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "layout",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 1,
+   "signature": "module layout",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 14,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Tile",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 18,
+   "signature": "class Tile",
+   "summary": "A rectangle of the panel and the widget that owns it.",
+   "parent": ""
+  },
+  {
+   "name": "Tile.widget",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 26,
+   "signature": "widget: str",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.x",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 27,
+   "signature": "x: int",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.y",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 28,
+   "signature": "y: int",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.w",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 29,
+   "signature": "w: int",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.h",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 30,
+   "signature": "h: int",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.options",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 31,
+   "signature": "options: dict[str, Any] = field(default_factory=dict)",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.size",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 34,
+   "signature": "def size(self) -> tuple[int, int]",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.origin",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 38,
+   "signature": "def origin(self) -> tuple[int, int]",
+   "summary": "",
+   "parent": "Tile"
+  },
+  {
+   "name": "Tile.rect",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 42,
+   "signature": "def rect(self) -> tuple[int, int, int, int]",
+   "summary": "left, top, right, bottom \u2014 right/bottom exclusive, as Pillow wants.",
+   "parent": "Tile"
+  },
+  {
+   "name": "TileContext",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 48,
+   "signature": "class TileContext",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TileContext.size",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 49,
+   "signature": "size: tuple[int, int]",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.now",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 50,
+   "signature": "now: datetime",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.options",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 51,
+   "signature": "options: dict[str, Any]",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.session",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 52,
+   "signature": "session: SessionState | None = None",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.slot",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 53,
+   "signature": "slot: int = -1",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.connected",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 54,
+   "signature": "connected: bool = True",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "TileContext.idle_title",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 55,
+   "signature": "idle_title: str = ''",
+   "summary": "",
+   "parent": "TileContext"
+  },
+  {
+   "name": "_overlap",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 58,
+   "signature": "def _overlap(a: Tile, b: Tile) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "validate",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 68,
+   "signature": "def validate(tiles: Sequence[Tile], size: tuple[int, int]) -> None",
+   "summary": "Reject a broken layout at config-load time, not at frame time.",
+   "parent": ""
+  },
+  {
+   "name": "agent_slots",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 98,
+   "signature": "def agent_slots(tiles: Sequence[Tile]) -> int",
+   "summary": "How many sessions can be on screen at once.",
+   "parent": ""
+  },
+  {
+   "name": "_fault_tile",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 110,
+   "signature": "def _fault_tile(size: tuple[int, int], widget: str) -> Image.Image",
+   "summary": "What a tile shows when its widget raised.",
+   "parent": ""
+  },
+  {
+   "name": "compose",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/layout.py",
+   "line": 127,
+   "signature": "def compose(tiles: Sequence[Tile], size: tuple[int, int], *, sessions: Sequence[SessionState | None]=(), now: datetime, background: Background | None=None, connected: bool=True, idle_title: str='') -> Image.Image",
+   "summary": "Render every tile and composite them into one frame.",
+   "parent": ""
+  },
+  {
+   "name": "model",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 1,
+   "signature": "module model",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "utc_now",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 9,
+   "signature": "def utc_now() -> datetime",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SessionState",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 14,
+   "signature": "class SessionState",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SessionState.provider",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 15,
+   "signature": "provider: str",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.session_id",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 16,
+   "signature": "session_id: str",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.updated_at",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 17,
+   "signature": "updated_at: datetime",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.started_at",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 18,
+   "signature": "started_at: datetime",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.phase",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 19,
+   "signature": "phase: str = 'READY'",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.detail",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 20,
+   "signature": "detail: str = ''",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.activity",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 21,
+   "signature": "activity: str = ''",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.model",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 22,
+   "signature": "model: str = ''",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.cwd",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 23,
+   "signature": "cwd: str = ''",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.permission_mode",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 24,
+   "signature": "permission_mode: str = ''",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.context_percent",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 25,
+   "signature": "context_percent: float | None = None",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.input_tokens",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 26,
+   "signature": "input_tokens: int | None = None",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.output_tokens",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 27,
+   "signature": "output_tokens: int | None = None",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.cost_usd",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 28,
+   "signature": "cost_usd: float | None = None",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.ended",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 29,
+   "signature": "ended: bool = False",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.extra",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 30,
+   "signature": "extra: dict[str, Any] = field(default_factory=dict)",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "SessionState.project",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 33,
+   "signature": "def project(self) -> str",
+   "summary": "",
+   "parent": "SessionState"
+  },
+  {
+   "name": "StateStore",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 40,
+   "signature": "class StateStore",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "StateStore.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 41,
+   "signature": "def __init__(self, active_ttl: int=180, approval_ttl: int=90, tool_ttl: int=900, switch_dwell: float=4.0)",
+   "summary": "",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore.apply",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 61,
+   "signature": "def apply(self, update: SessionState) -> SessionState",
+   "summary": "",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore._ttl",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 97,
+   "signature": "def _ttl(self, state: SessionState) -> float",
+   "summary": "A session waiting on a tool has work in flight and emits nothing",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore._resize",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 102,
+   "signature": "def _resize(self, slots: int) -> None",
+   "summary": "",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore._elapsed",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 109,
+   "signature": "def _elapsed(self, index: int, now: datetime) -> float",
+   "summary": "",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore.active",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 113,
+   "signature": "def active(self, now: datetime | None=None) -> SessionState | None",
+   "summary": "The session on a single-tile panel \u2014 the one-slot case of assign().",
+   "parent": "StateStore"
+  },
+  {
+   "name": "StateStore.assign",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/model.py",
+   "line": 117,
+   "signature": "def assign(self, slots: int, now: datetime | None=None) -> list[SessionState | None]",
+   "summary": "Place live sessions into `slots` tiles, newest-interesting first.",
+   "parent": "StateStore"
+  },
+  {
+   "name": "normalize",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 1,
+   "signature": "module normalize",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PHASES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 12,
+   "signature": "PHASES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_number",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 28,
+   "signature": "def _number(value: Any) -> float | None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_used_percent",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 35,
+   "signature": "def _used_percent(used: float | None) -> float | None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_latest_codex_usage",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 41,
+   "signature": "def _latest_codex_usage(path: str | None) -> dict[str, Any]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "normalize_event",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/normalize.py",
+   "line": 75,
+   "signature": "def normalize_event(provider: str, payload: dict[str, Any], now: datetime | None=None) -> SessionState",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "render",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 1,
+   "signature": "module render",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "BACKGROUND",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 21,
+   "signature": "BACKGROUND = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PANEL",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 22,
+   "signature": "PANEL = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TEXT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 23,
+   "signature": "TEXT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MUTED",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 24,
+   "signature": "MUTED = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "CLAUDE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 25,
+   "signature": "CLAUDE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "CODEX",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 26,
+   "signature": "CODEX = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WARNING",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 27,
+   "signature": "WARNING = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ERROR",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 28,
+   "signature": "ERROR = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TRACK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 29,
+   "signature": "TRACK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_font",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 33,
+   "signature": "def _font(size: int, bold: bool=False) -> ImageFont.FreeTypeFont",
+   "summary": "Cached because a tiled frame asks for a lot of fonts.",
+   "parent": ""
+  },
+  {
+   "name": "_fit",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 59,
+   "signature": "def _fit(draw: ImageDraw.ImageDraw, text: str, width: int, size: int, bold: bool=False, min_size: int | None=None)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_wrap",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 76,
+   "signature": "def _wrap(draw: ImageDraw.ImageDraw, text: str, width: int, font: ImageFont.FreeTypeFont) -> list[str]",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_fit_headline",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 101,
+   "signature": "def _fit_headline(draw: ImageDraw.ImageDraw, text: str, width: int, max_size: int=43)",
+   "summary": "One big line where it fits, otherwise two smaller ones.",
+   "parent": ""
+  },
+  {
+   "name": "_duration",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 130,
+   "signature": "def _duration(seconds: int) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_BRANCH_TTL",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 136,
+   "signature": "_BRANCH_TTL = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_branch",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 140,
+   "signature": "def _branch(cwd: str) -> str",
+   "summary": "The current git branch, cached for _BRANCH_TTL seconds.",
+   "parent": ""
+  },
+  {
+   "name": "render_dashboard",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 170,
+   "signature": "def render_dashboard(state: SessionState, now: datetime) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "render_idle",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/render.py",
+   "line": 240,
+   "signature": "def render_idle(title: str, now: datetime, connected: bool=True) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "transport",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 1,
+   "signature": "module transport",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MAX_WIRE_BYTES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 10,
+   "signature": "MAX_WIRE_BYTES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_wire_data",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 13,
+   "signature": "def _wire_data(provider: str, payload: dict[str, Any]) -> bytes",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_send",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 22,
+   "signature": "def _send(config: Config, data: bytes) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "send_event",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 47,
+   "signature": "def send_event(config: Config, provider: str, payload: dict[str, Any]) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "send_control",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 51,
+   "signature": "def send_control(config: Config, control: str) -> bool",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "bind_socket",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 58,
+   "signature": "def bind_socket(config: Config) -> socket.socket",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "poll_timeout",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 76,
+   "signature": "def poll_timeout(config: Config) -> float",
+   "summary": "How long a receive may block before the loop goes round again.",
+   "parent": ""
+  },
+  {
+   "name": "receive_event",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/transport.py",
+   "line": 88,
+   "signature": "def receive_event(server: socket.socket, config: Config) -> bytes",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "tray",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 1,
+   "signature": "module tray",
+   "summary": "A system tray icon, so the daemon is visible and can be stopped.",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 37,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "APP_NAME",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 39,
+   "signature": "APP_NAME = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ID_STATUS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 42,
+   "signature": "ID_STATUS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ID_SETTINGS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 43,
+   "signature": "ID_SETTINGS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ID_LOGS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 44,
+   "signature": "ID_LOGS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ID_QUIT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 45,
+   "signature": "ID_QUIT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "FRAME_LIVE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 49,
+   "signature": "FRAME_LIVE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "FRAME_DARK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 50,
+   "signature": "FRAME_DARK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SCREEN_LIVE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 51,
+   "signature": "SCREEN_LIVE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SCREEN_DARK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 52,
+   "signature": "SCREEN_DARK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "GLOW_LIVE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 53,
+   "signature": "GLOW_LIVE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "GLOW_DARK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 54,
+   "signature": "GLOW_DARK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ICON_SIZES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 56,
+   "signature": "ICON_SIZES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MenuItem",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 60,
+   "signature": "class MenuItem",
+   "summary": "One row of the tray menu, independent of Win32.",
+   "parent": ""
+  },
+  {
+   "name": "MenuItem.command",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 63,
+   "signature": "command: int",
+   "summary": "",
+   "parent": "MenuItem"
+  },
+  {
+   "name": "MenuItem.label",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 64,
+   "signature": "label: str",
+   "summary": "",
+   "parent": "MenuItem"
+  },
+  {
+   "name": "MenuItem.enabled",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 65,
+   "signature": "enabled: bool = True",
+   "summary": "",
+   "parent": "MenuItem"
+  },
+  {
+   "name": "MenuItem.default",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 66,
+   "signature": "default: bool = False",
+   "summary": "",
+   "parent": "MenuItem"
+  },
+  {
+   "name": "tooltip",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 69,
+   "signature": "def tooltip(connected: bool, device: str) -> str",
+   "summary": "The hover text. Win32 truncates past 127 characters, so keep it short.",
+   "parent": ""
+  },
+  {
+   "name": "menu_items",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 76,
+   "signature": "def menu_items(config: Config, connected: bool) -> list[MenuItem]",
+   "summary": "The menu, as data.",
+   "parent": ""
+  },
+  {
+   "name": "icon_image",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 97,
+   "signature": "def icon_image(connected: bool, size: int=64) -> Image.Image",
+   "summary": "Draw the tray glyph at one size.",
+   "parent": ""
+  },
+  {
+   "name": "icon_path",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 139,
+   "signature": "def icon_path(connected: bool, directory: Path) -> Path",
+   "summary": "Write the multi-size .ico for one state, and return where it landed.",
+   "parent": ""
+  },
+  {
+   "name": "open_settings",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 153,
+   "signature": "def open_settings(config: Config) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "open_logs",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 157,
+   "signature": "def open_logs() -> None",
+   "summary": "Show the folder holding dashboard.log, config.toml and the install state.",
+   "parent": ""
+  },
+  {
+   "name": "WM_DESTROY",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 169,
+   "signature": "WM_DESTROY = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_CLOSE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 170,
+   "signature": "WM_CLOSE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_COMMAND",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 171,
+   "signature": "WM_COMMAND = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_LBUTTONUP",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 172,
+   "signature": "WM_LBUTTONUP = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_LBUTTONDBLCLK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 173,
+   "signature": "WM_LBUTTONDBLCLK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_RBUTTONUP",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 174,
+   "signature": "WM_RBUTTONUP = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_APP",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 175,
+   "signature": "WM_APP = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_TRAY",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 178,
+   "signature": "WM_TRAY = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WM_TRAY_STATE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 179,
+   "signature": "WM_TRAY_STATE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIM_ADD",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 181,
+   "signature": "NIM_ADD = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIM_MODIFY",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 182,
+   "signature": "NIM_MODIFY = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIM_DELETE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 183,
+   "signature": "NIM_DELETE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIF_MESSAGE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 184,
+   "signature": "NIF_MESSAGE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIF_ICON",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 185,
+   "signature": "NIF_ICON = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NIF_TIP",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 186,
+   "signature": "NIF_TIP = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "IMAGE_ICON",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 188,
+   "signature": "IMAGE_ICON = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "LR_LOADFROMFILE",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 189,
+   "signature": "LR_LOADFROMFILE = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SM_CXSMICON",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 190,
+   "signature": "SM_CXSMICON = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SM_CYSMICON",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 191,
+   "signature": "SM_CYSMICON = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MF_STRING",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 193,
+   "signature": "MF_STRING = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MF_SEPARATOR",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 194,
+   "signature": "MF_SEPARATOR = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MF_GRAYED",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 195,
+   "signature": "MF_GRAYED = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MF_DEFAULT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 196,
+   "signature": "MF_DEFAULT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TPM_RIGHTBUTTON",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 197,
+   "signature": "TPM_RIGHTBUTTON = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TPM_RETURNCMD",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 198,
+   "signature": "TPM_RETURNCMD = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "TPM_NONOTIFY",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 199,
+   "signature": "TPM_NONOTIFY = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "CW_USEDEFAULT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 201,
+   "signature": "CW_USEDEFAULT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WS_OVERLAPPED",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 202,
+   "signature": "WS_OVERLAPPED = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "NOTIFYICONDATAW",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 205,
+   "signature": "class NOTIFYICONDATAW(ctypes.Structure)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_bind",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 247,
+   "signature": "def _bind() -> tuple",
+   "summary": "Declare the handful of Win32 calls used, with real argument types.",
+   "parent": ""
+  },
+  {
+   "name": "TrayIcon",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 313,
+   "signature": "class TrayIcon",
+   "summary": "The tray icon and its thread.",
+   "parent": ""
+  },
+  {
+   "name": "TrayIcon.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 321,
+   "signature": "def __init__(self, config: Config, on_quit: Callable[[], None], state_dir: Path)",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon.start",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 336,
+   "signature": "def start(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon.update_config",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 342,
+   "signature": "def update_config(self, config: Config) -> None",
+   "summary": "Adopt an edited config: the tooltip and the menu both read from it.",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon.set_connected",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 348,
+   "signature": "def set_connected(self, connected: bool) -> None",
+   "summary": "Called once per frame from the daemon; a no-op unless it changed.",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon.stop",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 355,
+   "signature": "def stop(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._run",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 363,
+   "signature": "def _run(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._icon_handle",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 399,
+   "signature": "def _icon_handle(self, connected: bool) -> int",
+   "summary": "Load (once) the HICON for a state.",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._notify_data",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 417,
+   "signature": "def _notify_data(self) -> NOTIFYICONDATAW",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._add_icon",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 428,
+   "signature": "def _add_icon(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._update_icon",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 432,
+   "signature": "def _update_icon(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._remove_icon",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 435,
+   "signature": "def _remove_icon(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._show_menu",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 442,
+   "signature": "def _show_menu(self) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._invoke",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 471,
+   "signature": "def _invoke(self, command: int) -> None",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "TrayIcon._wndproc",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 486,
+   "signature": "def _wndproc(self, hwnd, message, wparam, lparam)",
+   "summary": "",
+   "parent": "TrayIcon"
+  },
+  {
+   "name": "start",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/tray.py",
+   "line": 522,
+   "signature": "def start(config: Config, on_quit: Callable[[], None], state_dir: Path | None=None)",
+   "summary": "Start the tray icon, or return None where there is no tray to start.",
+   "parent": ""
+  },
+  {
+   "name": "__init__",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 1,
+   "signature": "module __init__",
+   "summary": "Widgets: plain functions that render one tile.",
+   "parent": ""
+  },
+  {
+   "name": "OPTION_TYPES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 31,
+   "signature": "OPTION_TYPES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Option",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 35,
+   "signature": "class Option",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "Option.type",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 36,
+   "signature": "type: str",
+   "summary": "",
+   "parent": "Option"
+  },
+  {
+   "name": "Option.default",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 37,
+   "signature": "default: Any = None",
+   "summary": "",
+   "parent": "Option"
+  },
+  {
+   "name": "Option.help",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 38,
+   "signature": "help: str = ''",
+   "summary": "",
+   "parent": "Option"
+  },
+  {
+   "name": "WidgetSpec",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 51,
+   "signature": "class WidgetSpec",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "WidgetSpec.render",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 52,
+   "signature": "render: Renderer",
+   "summary": "",
+   "parent": "WidgetSpec"
+  },
+  {
+   "name": "WidgetSpec.wants_session",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 55,
+   "signature": "wants_session: bool = False",
+   "summary": "",
+   "parent": "WidgetSpec"
+  },
+  {
+   "name": "WidgetSpec.options",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 56,
+   "signature": "options: dict[str, Option] = field(default_factory=dict)",
+   "summary": "",
+   "parent": "WidgetSpec"
+  },
+  {
+   "name": "WidgetSpec.help",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 57,
+   "signature": "help: str = ''",
+   "summary": "",
+   "parent": "WidgetSpec"
+  },
+  {
+   "name": "describe",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/__init__.py",
+   "line": 105,
+   "signature": "def describe() -> list[dict[str, Any]]",
+   "summary": "The registry as JSON for the settings editor.",
+   "parent": ""
+  },
+  {
+   "name": "agent",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/agent.py",
+   "line": 1,
+   "signature": "module agent",
+   "summary": "The Claude Code / Codex session card, sized to whatever tile it is given.",
+   "parent": ""
+  },
+  {
+   "name": "_accent",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/agent.py",
+   "line": 30,
+   "signature": "def _accent(phase: str, provider: str) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_headline",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/agent.py",
+   "line": 38,
+   "signature": "def _headline(state) -> str",
+   "summary": "Prefer the agent's own activity line over the phase word.",
+   "parent": ""
+  },
+  {
+   "name": "_empty",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/agent.py",
+   "line": 51,
+   "signature": "def _empty(ctx: TileContext) -> Image.Image",
+   "summary": "A tile with no session. Deliberately quiet \u2014 several of these at once",
+   "parent": ""
+  },
+  {
+   "name": "render_agent",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/agent.py",
+   "line": 67,
+   "signature": "def render_agent(ctx: TileContext) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "base",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/base.py",
+   "line": 1,
+   "signature": "module base",
+   "summary": "Shared scaffolding for tile widgets.",
+   "parent": ""
+  },
+  {
+   "name": "TRANSPARENT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/base.py",
+   "line": 11,
+   "signature": "TRANSPARENT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "panel_fill",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/base.py",
+   "line": 14,
+   "signature": "def panel_fill(options: dict[str, Any]) -> tuple[int, int, int, int] | None",
+   "summary": "The tile's own backdrop, or None to let the background show through.",
+   "parent": ""
+  },
+  {
+   "name": "new_tile",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/base.py",
+   "line": 32,
+   "signature": "def new_tile(size: tuple[int, int], options: dict[str, Any]) -> tuple[Image.Image, ImageDraw.ImageDraw]",
+   "summary": "A transparent tile-sized canvas with the configured card drawn on it.",
+   "parent": ""
+  },
+  {
+   "name": "context_bar",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/base.py",
+   "line": 46,
+   "signature": "def context_bar(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], percent: float | None, accent: str, *, label_size: int=0, gap: int | None=None) -> None",
+   "summary": "The \"CONTEXT USED\" meter, caption and all, inside ``box``.",
+   "parent": ""
+  },
+  {
+   "name": "clock",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/clock.py",
+   "line": 1,
+   "signature": "module clock",
+   "summary": "A clock tile.",
+   "parent": ""
+  },
+  {
+   "name": "render_clock",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/clock.py",
+   "line": 16,
+   "signature": "def render_clock(ctx: TileContext) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "crab",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 1,
+   "signature": "module crab",
+   "summary": "A session as an animated crab.",
+   "parent": ""
+  },
+  {
+   "name": "ASPECT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 52,
+   "signature": "ASPECT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "MIN_CRAB_HEIGHT",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 56,
+   "signature": "MIN_CRAB_HEIGHT = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "ALARM_PHASES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 58,
+   "signature": "ALARM_PHASES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SLEEPING_PHASES",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 59,
+   "signature": "SLEEPING_PHASES = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "CrabPose",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 66,
+   "signature": "class CrabPose",
+   "summary": "Everything about the crab that moves, as plain numbers.",
+   "parent": ""
+  },
+  {
+   "name": "CrabPose.bob",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 73,
+   "signature": "bob: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.lean",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 74,
+   "signature": "lean: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.squash",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 75,
+   "signature": "squash: float = 1.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.eye_open",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 76,
+   "signature": "eye_open: float = 1.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.happy_eyes",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 77,
+   "signature": "happy_eyes: bool = False",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.pupil_dx",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 78,
+   "signature": "pupil_dx: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.pupil_dy",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 79,
+   "signature": "pupil_dy: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.claw_l",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 80,
+   "signature": "claw_l: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.claw_r",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 81,
+   "signature": "claw_r: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.gape_l",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 82,
+   "signature": "gape_l: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.gape_r",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 83,
+   "signature": "gape_r: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.brow",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 84,
+   "signature": "brow: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.mouth",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 85,
+   "signature": "mouth: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.mouth_open",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 86,
+   "signature": "mouth_open: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.leg_phase",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 87,
+   "signature": "leg_phase: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.leg_amp",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 88,
+   "signature": "leg_amp: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.glyph",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 89,
+   "signature": "glyph: str = ''",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.glyph_pulse",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 90,
+   "signature": "glyph_pulse: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.border",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 91,
+   "signature": "border: float = 0.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "CrabPose.sweep",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 92,
+   "signature": "sweep: float = -1.0",
+   "summary": "",
+   "parent": "CrabPose"
+  },
+  {
+   "name": "_MASK",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 97,
+   "signature": "_MASK = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "BLINK_BUCKET",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 99,
+   "signature": "BLINK_BUCKET = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "BLINK_DURATION",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 100,
+   "signature": "BLINK_DURATION = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_mix",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 103,
+   "signature": "def _mix(n: int) -> float",
+   "summary": "splitmix64, returning 0..1.",
+   "parent": ""
+  },
+  {
+   "name": "_blink_shape",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 118,
+   "signature": "def _blink_shape(dt: float) -> float",
+   "summary": "How open the eye is ``dt`` seconds into a blink.",
+   "parent": ""
+  },
+  {
+   "name": "_eye_open",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 126,
+   "signature": "def _eye_open(t: float, rate: float) -> float",
+   "summary": "A blink schedule that looks irregular but is a pure function of time.",
+   "parent": ""
+  },
+  {
+   "name": "_oscillators",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 151,
+   "signature": "def _oscillators(t: float) -> tuple[float, float, float, float, float]",
+   "summary": "The whole animation's motive power.",
+   "parent": ""
+  },
+  {
+   "name": "_unit",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 176,
+   "signature": "def _unit(value: float) -> float",
+   "summary": "An oscillator remapped from -1..1 to 0..1.",
+   "parent": ""
+  },
+  {
+   "name": "crab_pose",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 181,
+   "signature": "def crab_pose(phase: str | None, t: float, *, alarm: bool=True) -> CrabPose",
+   "summary": "The crab's pose for a phase at an absolute time.",
+   "parent": ""
+  },
+  {
+   "name": "_rotate",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 322,
+   "signature": "def _rotate(x: float, y: float, degrees: float) -> tuple[float, float]",
+   "summary": "Rotate a vector, positive degrees reading as anticlockwise on screen.",
+   "parent": ""
+  },
+  {
+   "name": "_shade",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 334,
+   "signature": "def _shade(colour: str, factor: float) -> tuple[int, int, int]",
+   "summary": "Lighten (factor > 0) or darken (factor < 0) towards white or black.",
+   "parent": ""
+  },
+  {
+   "name": "_Frame",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 342,
+   "signature": "class _Frame",
+   "summary": "Maps the crab's unit coordinates onto a pixel box.",
+   "parent": ""
+  },
+  {
+   "name": "_Frame.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 353,
+   "signature": "def __init__(self, box: tuple[float, float, float, float], pose: CrabPose)",
+   "summary": "",
+   "parent": "_Frame"
+  },
+  {
+   "name": "_Frame.at",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 361,
+   "signature": "def at(self, u: float, v: float) -> tuple[float, float]",
+   "summary": "",
+   "parent": "_Frame"
+  },
+  {
+   "name": "_Frame.box",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 367,
+   "signature": "def box(self, u0: float, v0: float, u1: float, v1: float)",
+   "summary": "",
+   "parent": "_Frame"
+  },
+  {
+   "name": "_Frame.polar",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 372,
+   "signature": "def polar(self, radius: float, degrees: float) -> tuple[float, float]",
+   "summary": "A limb offset in pixels; positive degrees point up-and-out.",
+   "parent": "_Frame"
+  },
+  {
+   "name": "_Frame.stroke",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 379,
+   "signature": "def stroke(self, weight: float, floor: int=1) -> int",
+   "summary": "",
+   "parent": "_Frame"
+  },
+  {
+   "name": "_JAW_FIXED",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 385,
+   "signature": "_JAW_FIXED = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_JAW_MOVING",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 386,
+   "signature": "_JAW_MOVING = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_draw_claw",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 389,
+   "signature": "def _draw_claw(draw: ImageDraw.ImageDraw, frame: _Frame, shoulder: tuple[float, float], elevation: float, gape: float, colour, outward: int) -> None",
+   "summary": "One arm and its pincer, at any elevation and any opening.",
+   "parent": ""
+  },
+  {
+   "name": "_draw_legs",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 431,
+   "signature": "def _draw_legs(draw: ImageDraw.ImageDraw, frame: _Frame, pose: CrabPose, colour, count: int) -> None",
+   "summary": "Three legs a side, each a knee-and-foot polyline.",
+   "parent": ""
+  },
+  {
+   "name": "_draw_sweep",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 453,
+   "signature": "def _draw_sweep(draw: ImageDraw.ImageDraw, shell, position: float, fill) -> None",
+   "summary": "A vertical band of light crossing the shell, clipped to it.",
+   "parent": ""
+  },
+  {
+   "name": "_draw_eye",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 482,
+   "signature": "def _draw_eye(draw: ImageDraw.ImageDraw, frame: _Frame, centre_u: float, pose: CrabPose, colour) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_draw_mouth",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 524,
+   "signature": "def _draw_mouth(draw: ImageDraw.ImageDraw, frame: _Frame, pose: CrabPose) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "draw_crab",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 548,
+   "signature": "def draw_crab(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], pose: CrabPose, colour: str, *, detail: str='full') -> None",
+   "summary": "Draw the crab into ``box``, back to front.",
+   "parent": ""
+  },
+  {
+   "name": "_supersample",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 620,
+   "signature": "def _supersample(size: tuple[int, int], pose: CrabPose, colour: str, detail: str) -> Image.Image",
+   "summary": "Draw the crab oversized and box-filter it down.",
+   "parent": ""
+  },
+  {
+   "name": "_colour_for",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 649,
+   "signature": "def _colour_for(phase: str | None, provider: str, override: str) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_accent_for",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 659,
+   "signature": "def _accent_for(phase: str | None) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_detail_for",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 669,
+   "signature": "def _detail_for(height: int) -> str",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_paste_crab",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 677,
+   "signature": "def _paste_crab(image: Image.Image, region, pose: CrabPose, colour: str) -> None",
+   "summary": "Fit the crab into ``region`` at its native aspect and composite it.",
+   "parent": ""
+  },
+  {
+   "name": "_draw_glyph",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 691,
+   "signature": "def _draw_glyph(draw, pose: CrabPose, region, accent: str, short: int) -> None",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "render_crab",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/crab.py",
+   "line": 705,
+   "signature": "def render_crab(ctx: TileContext) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "legacy",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/widgets/legacy.py",
+   "line": 1,
+   "signature": "module legacy",
+   "summary": "The 3.5\" panel's existing layout, as a single full-screen widget.",
+   "parent": ""
+  },
+  {
+   "name": "render_legacy",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/widgets/legacy.py",
+   "line": 18,
+   "signature": "def render_legacy(ctx: TileContext) -> Image.Image",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_descriptions_match_the_agent_status_line",
+   "kind": "test",
+   "file": "tests/test_activity.py",
+   "line": 28,
+   "signature": "def test_descriptions_match_the_agent_status_line(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_paths_outside_the_session_directory_are_kept_absolute",
+   "kind": "test",
+   "file": "tests/test_activity.py",
+   "line": 32,
+   "signature": "def test_paths_outside_the_session_directory_are_kept_absolute(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_long_descriptions_are_truncated",
+   "kind": "test",
+   "file": "tests/test_activity.py",
+   "line": 38,
+   "signature": "def test_long_descriptions_are_truncated(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_non_dict_tool_input_is_tolerated",
+   "kind": "test",
+   "file": "tests/test_activity.py",
+   "line": 44,
+   "signature": "def test_non_dict_tool_input_is_tolerated(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_config_to_json_carries_the_layout_and_marks_ipc_readonly",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 85,
+   "signature": "def test_config_to_json_carries_the_layout_and_marks_ipc_readonly(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_json_round_trips_a_config",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 96,
+   "signature": "def test_json_round_trips_a_config(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_config_from_json_applies_edits",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 103,
+   "signature": "def test_config_from_json_applies_edits(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_config_from_json_rejects_bad_shapes",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 133,
+   "signature": "def test_config_from_json_rejects_bad_shapes(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_page_is_served",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 141,
+   "signature": "def test_the_page_is_served(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_config_endpoint_returns_the_layout",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 149,
+   "signature": "def test_the_config_endpoint_returns_the_layout(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_widgets_endpoint_describes_the_registry",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 158,
+   "signature": "def test_the_widgets_endpoint_describes_the_registry(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_preview_says_so_when_no_frame_exists_yet",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 168,
+   "signature": "def test_the_preview_says_so_when_no_frame_exists_yet(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_preview_serves_the_daemons_frame",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 175,
+   "signature": "def test_the_preview_serves_the_daemons_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_unknown_route_is_a_404",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 184,
+   "signature": "def test_an_unknown_route_is_a_404(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_saving_writes_the_config_file",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 193,
+   "signature": "def test_saving_writes_the_config_file(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_saving_an_overlapping_layout_is_refused_with_the_reason",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 207,
+   "signature": "def test_saving_an_overlapping_layout_is_refused_with_the_reason(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_every_loader_rule_is_enforced_on_save",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 229,
+   "signature": "def test_every_loader_rule_is_enforced_on_save(...)",
+   "summary": "The editor validates by round-tripping through the real loader, so it",
+   "parent": ""
+  },
+  {
+   "name": "test_invalid_json_is_reported",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 240,
+   "signature": "def test_invalid_json_is_reported(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_implausibly_large_body_is_refused",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 252,
+   "signature": "def test_an_implausibly_large_body_is_refused(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_only_loopback_hosts_are_accepted",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 280,
+   "signature": "def test_only_loopback_hosts_are_accepted(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_foreign_host_header_is_refused",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 284,
+   "signature": "def test_a_foreign_host_header_is_refused(...)",
+   "summary": "Blunts DNS rebinding: a page on the web resolving its own name to",
+   "parent": ""
+  },
+  {
+   "name": "test_the_server_binds_loopback_only",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 295,
+   "signature": "def test_the_server_binds_loopback_only(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_plain_colour_fills_the_frame",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 31,
+   "signature": "def test_a_plain_colour_fills_the_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_every_fit_mode_returns_exactly_the_requested_size",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 40,
+   "signature": "def test_every_fit_mode_returns_exactly_the_requested_size(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_cover_leaves_no_matting",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 46,
+   "signature": "def test_cover_leaves_no_matting(...)",
+   "summary": "cover crops the overflow, so every pixel comes from the image.",
+   "parent": ""
+  },
+  {
+   "name": "test_contain_mats_the_edges_with_the_colour",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 55,
+   "signature": "def test_contain_mats_the_edges_with_the_colour(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_center_keeps_the_native_size_and_mats_around_it",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 63,
+   "signature": "def test_center_keeps_the_native_size_and_mats_around_it(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_missing_image_falls_back_to_the_colour_without_raising",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 71,
+   "signature": "def test_a_missing_image_falls_back_to_the_colour_without_raising(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_unreadable_image_falls_back_to_the_colour",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 78,
+   "signature": "def test_an_unreadable_image_falls_back_to_the_colour(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_warning_is_only_logged_once_per_path",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 85,
+   "signature": "def test_the_warning_is_only_logged_once_per_path(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_scaled_image_is_cached",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 93,
+   "signature": "def test_the_scaled_image_is_cached(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_changed_file_invalidates_the_cache",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 101,
+   "signature": "def test_a_changed_file_invalidates_the_cache(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_different_size_or_fit_is_not_served_from_the_cache",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 112,
+   "signature": "def test_a_different_size_or_fit_is_not_served_from_the_cache(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_caller_gets_a_copy_it_can_paste_onto",
+   "kind": "test",
+   "file": "tests/test_background.py",
+   "line": 119,
+   "signature": "def test_the_caller_gets_a_copy_it_can_paste_onto(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_example_configs_have_not_drifted_from_the_defaults",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 32,
+   "signature": "def test_example_configs_have_not_drifted_from_the_defaults(...)",
+   "summary": "The example files are generated from Config(), so they cannot disagree.",
+   "parent": ""
+  },
+  {
+   "name": "test_example_configs_load_to_the_defaults",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 43,
+   "signature": "def test_example_configs_load_to_the_defaults(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_default_config_toml_is_parseable",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 59,
+   "signature": "def test_default_config_toml_is_parseable(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_tile_layout_parses_with_its_rects_and_options",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 94,
+   "signature": "def test_a_tile_layout_parses_with_its_rects_and_options(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_no_background_table_means_no_background",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 108,
+   "signature": "def test_no_background_table_means_no_background(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_background_image_that_is_absent_warns_but_loads",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 112,
+   "signature": "def test_a_background_image_that_is_absent_warns_but_loads(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_broken_layout_is_rejected_at_load_time",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 141,
+   "signature": "def test_a_broken_layout_is_rejected_at_load_time(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_dump_round_trips_through_the_loader",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 148,
+   "signature": "def test_dump_round_trips_through_the_loader(...)",
+   "summary": "The editor writes config.toml, so what we emit must be what we read.",
+   "parent": ""
+  },
+  {
+   "name": "test_dump_round_trips_the_default_config",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 155,
+   "signature": "def test_dump_round_trips_the_default_config(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_dump_preserves_tile_options_of_every_type",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 160,
+   "signature": "def test_dump_preserves_tile_options_of_every_type(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_dump_survives_a_windows_path_in_the_background_image",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 179,
+   "signature": "def test_dump_survives_a_windows_path_in_the_background_image(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_write_config_replaces_the_file_atomically",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 191,
+   "signature": "def test_write_config_replaces_the_file_atomically(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_write_config_creates_the_parent_directory",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 201,
+   "signature": "def test_write_config_creates_the_parent_directory(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_admin_editor_is_enabled_on_a_loopback_port_by_default",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 209,
+   "signature": "def test_the_admin_editor_is_enabled_on_a_loopback_port_by_default(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_admin_block_is_parsed",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 216,
+   "signature": "def test_the_admin_block_is_parsed(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_bad_admin_port_is_rejected",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 229,
+   "signature": "def test_a_bad_admin_port_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_missing_config_file_still_gets_the_legacy_layout",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 234,
+   "signature": "def test_a_missing_config_file_still_gets_the_legacy_layout(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_broken_layout_is_still_fatal_when_the_caller_draws",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 262,
+   "signature": "def test_a_broken_layout_is_still_fatal_when_the_caller_draws(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_broken_layout_does_not_stop_a_caller_that_never_draws",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 269,
+   "signature": "def test_a_broken_layout_does_not_stop_a_caller_that_never_draws(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_everything_but_the_layout_is_still_checked_when_lenient",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 287,
+   "signature": "def test_everything_but_the_layout_is_still_checked_when_lenient(...)",
+   "summary": "A wrong ipc.port would send the events nowhere, silently. Only the",
+   "parent": ""
+  },
+  {
+   "name": "test_an_overlapping_layout_is_also_forgiven_when_lenient",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 296,
+   "signature": "def test_an_overlapping_layout_is_also_forgiven_when_lenient(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_blink_mixer_is_pinned",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 72,
+   "signature": "def test_the_blink_mixer_is_pinned(...)",
+   "summary": "Guards the schedule against someone reaching for hash().",
+   "parent": ""
+  },
+  {
+   "name": "test_the_crab_blinks",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 85,
+   "signature": "def test_the_crab_blinks(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_blinks_are_irregular",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 93,
+   "signature": "def test_blinks_are_irregular(...)",
+   "summary": "A fixed period reads as a machine; the gaps have to vary.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_alarm_never_blinks",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 103,
+   "signature": "def test_the_alarm_never_blinks(...)",
+   "summary": "A blink is a moment of looking away, which an alarm cannot afford.",
+   "parent": ""
+  },
+  {
+   "name": "test_every_pose_stays_within_its_documented_range",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 111,
+   "signature": "def test_every_pose_stays_within_its_documented_range(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_motion_is_continuous",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 126,
+   "signature": "def test_motion_is_continuous(...)",
+   "summary": "Catches a wrapping clock: nothing may jump between adjacent frames.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_phase_change_does_not_rewind_the_crab",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 144,
+   "signature": "def test_a_phase_change_does_not_rewind_the_crab(...)",
+   "summary": "TOOL and ACTIVE share an oscillator, so their bob stays in step.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_alarm_is_louder_than_any_calm_phase",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 159,
+   "signature": "def test_the_alarm_is_louder_than_any_calm_phase(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_alarm_option_silences_the_border_but_not_the_crab",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 172,
+   "signature": "def test_the_alarm_option_silences_the_border_but_not_the_crab(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_sleeping_crab_is_shut_eyed",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 181,
+   "signature": "def test_a_sleeping_crab_is_shut_eyed(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_crab_fills_exactly_its_tile",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 191,
+   "signature": "def test_the_crab_fills_exactly_its_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_crab_tile_with_no_session_renders",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 198,
+   "signature": "def test_a_crab_tile_with_no_session_renders(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_crab_session_with_nothing_filled_in_still_renders",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 203,
+   "signature": "def test_a_crab_session_with_nothing_filled_in_still_renders(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_every_phase_renders_a_crab",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 211,
+   "signature": "def test_every_phase_renders_a_crab(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_crab_context_bar_copes_with_every_percentage",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 217,
+   "signature": "def test_the_crab_context_bar_copes_with_every_percentage(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_crab_never_paints_over_the_edge_of_its_tile",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 223,
+   "signature": "def test_the_crab_never_paints_over_the_edge_of_its_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_crab_moves_between_frames",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 239,
+   "signature": "def test_the_crab_moves_between_frames(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_animation_off_freezes_the_crab",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 248,
+   "signature": "def test_animation_off_freezes_the_crab(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_alarm_paints_a_border",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 266,
+   "signature": "def test_the_alarm_paints_a_border(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_calm_crab_paints_no_border",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 275,
+   "signature": "def test_a_calm_crab_paints_no_border(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_alarm_option_removes_the_border_but_keeps_the_alarm",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 283,
+   "signature": "def test_the_alarm_option_removes_the_border_but_keeps_the_alarm(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_two_alarms_are_told_apart_by_colour",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 296,
+   "signature": "def test_the_two_alarms_are_told_apart_by_colour(...)",
+   "summary": "Same urgency, different hue: warning yellow for an approval, Claude",
+   "parent": ""
+  },
+  {
+   "name": "test_a_cramped_tile_drops_the_text_rather_than_overflowing",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 311,
+   "signature": "def test_a_cramped_tile_drops_the_text_rather_than_overflowing(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_roomy_tile_honours_the_text_options",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 318,
+   "signature": "def test_a_roomy_tile_honours_the_text_options(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_tile_too_short_for_a_crab_falls_back_to_words",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 325,
+   "signature": "def test_a_tile_too_short_for_a_crab_falls_back_to_words(...)",
+   "summary": "Below the crab's floor a mascot is a smudge, so say the phase instead.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_colour_option_overrides_the_provider",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 333,
+   "signature": "def test_the_colour_option_overrides_the_provider(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_context_bar_can_be_turned_off",
+   "kind": "test",
+   "file": "tests/test_crab.py",
+   "line": 340,
+   "signature": "def test_the_context_bar_can_be_turned_off(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_slot_count_comes_from_the_agent_tiles",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 50,
+   "signature": "def test_the_slot_count_comes_from_the_agent_tiles(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_store_takes_its_timings_from_the_config",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 56,
+   "signature": "def test_the_store_takes_its_timings_from_the_config(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_edited_layout_is_picked_up_without_a_restart",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 61,
+   "signature": "def test_an_edited_layout_is_picked_up_without_a_restart(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_save_in_the_same_timestamp_tick_is_still_noticed",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 71,
+   "signature": "def test_a_save_in_the_same_timestamp_tick_is_still_noticed(...)",
+   "summary": "The regression this pins: an edit landing inside the same filesystem",
+   "parent": ""
+  },
+  {
+   "name": "test_edited_timings_reach_the_store",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 87,
+   "signature": "def test_edited_timings_reach_the_store(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_invalid_config_is_ignored_and_the_last_good_one_kept",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 96,
+   "signature": "def test_an_invalid_config_is_ignored_and_the_last_good_one_kept(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_unchanged_file_is_not_reloaded",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 107,
+   "signature": "def test_an_unchanged_file_is_not_reloaded(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_reload_is_throttled",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 115,
+   "signature": "def test_the_reload_is_throttled(...)",
+   "summary": "Stat-per-frame at 2Hz is cheap, but there is no reason to do it twice.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_resized_display_forces_a_reconnect",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 124,
+   "signature": "def test_a_resized_display_forces_a_reconnect(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_layout_only_change_keeps_the_panel_open",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 137,
+   "signature": "def test_a_layout_only_change_keeps_the_panel_open(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_missing_config_file_does_not_trigger_a_reload",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 147,
+   "signature": "def test_a_missing_config_file_does_not_trigger_a_reload(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_editor_is_not_started_when_disabled",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 158,
+   "signature": "def test_the_editor_is_not_started_when_disabled(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_editor_starts_when_enabled",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 165,
+   "signature": "def test_the_editor_starts_when_enabled(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_port_already_in_use_does_not_stop_the_daemon",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 177,
+   "signature": "def test_a_port_already_in_use_does_not_stop_the_daemon(...)",
+   "summary": "The editor is a convenience; the panel is the job.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_tray_is_not_started_when_disabled",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 216,
+   "signature": "def test_the_tray_is_not_started_when_disabled(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_failing_tray_does_not_stop_the_daemon",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 222,
+   "signature": "def test_a_failing_tray_does_not_stop_the_daemon(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_quitting_from_the_tray_stops_the_daemon",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 235,
+   "signature": "def test_quitting_from_the_tray_stops_the_daemon(...)",
+   "summary": "The menu's Quit is wired to the same stop() that SIGTERM is.",
+   "parent": ""
+  },
+  {
+   "name": "test_an_edited_config_reaches_the_tray",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 243,
+   "signature": "def test_an_edited_config_reaches_the_tray(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_preview_frame_starts_empty",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 252,
+   "signature": "def test_the_preview_frame_starts_empty(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_editor_reads_the_daemons_live_config_and_frame",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 257,
+   "signature": "def test_the_editor_reads_the_daemons_live_config_and_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_default_config_gets_the_serial_panel",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 18,
+   "signature": "def test_the_default_config_gets_the_serial_panel(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_auto_is_also_the_serial_panel",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 24,
+   "signature": "def test_auto_is_also_the_serial_panel(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_simulate_overrides_the_configured_kind",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 28,
+   "signature": "def test_simulate_overrides_the_configured_kind(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_simulated_kind_needs_no_flag",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 32,
+   "signature": "def test_the_simulated_kind_needs_no_flag(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_serial_panel_refuses_a_size_it_cannot_drive",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 38,
+   "signature": "def test_the_serial_panel_refuses_a_size_it_cannot_drive(...)",
+   "summary": "Pointing a 1920x462 layout at the 3.5\" panel must fail readably.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_window_kind_is_an_explicit_stub",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 45,
+   "signature": "def test_the_window_kind_is_an_explicit_stub(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_unknown_kind_is_rejected",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 51,
+   "signature": "def test_an_unknown_kind_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_simulated_panel_writes_the_whole_frame_to_a_file",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 58,
+   "signature": "def test_the_simulated_panel_writes_the_whole_frame_to_a_file(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_simulated_panel_does_not_do_partial_writes",
+   "kind": "test",
+   "file": "tests/test_device.py",
+   "line": 69,
+   "signature": "def test_the_simulated_panel_does_not_do_partial_writes(...)",
+   "summary": "A crop saved on its own would be a file of just that crop.",
+   "parent": ""
+  },
+  {
+   "name": "test_first_frame_is_always_a_full_paint",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 53,
+   "signature": "def test_first_frame_is_always_a_full_paint(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_unchanged_frame_is_not_repainted",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 59,
+   "signature": "def test_unchanged_frame_is_not_repainted(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_small_change_is_sent_as_a_crop",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 66,
+   "signature": "def test_a_small_change_is_sent_as_a_crop(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_large_change_is_promoted_to_a_full_frame",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 75,
+   "signature": "def test_a_large_change_is_promoted_to_a_full_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_panel_without_partial_support_always_gets_the_whole_frame",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 82,
+   "signature": "def test_a_panel_without_partial_support_always_gets_the_whole_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_reopened_port_is_reported_so_the_daemon_reconnects",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 91,
+   "signature": "def test_a_reopened_port_is_reported_so_the_daemon_reconnects(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_reopened_port_keeps_the_diff_base_so_the_next_paint_is_full",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 99,
+   "signature": "def test_a_reopened_port_keeps_the_diff_base_so_the_next_paint_is_full(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_painting_before_connecting_is_an_error",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 117,
+   "signature": "def test_painting_before_connecting_is_an_error(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_healthy_panel_reports_connected_and_its_own_size",
+   "kind": "test",
+   "file": "tests/test_display.py",
+   "line": 123,
+   "signature": "def test_a_healthy_panel_reports_connected_and_its_own_size(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_layout_that_will_not_load_is_reported_not_raised",
+   "kind": "test",
+   "file": "tests/test_doctor.py",
+   "line": 45,
+   "signature": "def test_a_layout_that_will_not_load_is_reported_not_raised(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_layout_with_no_session_tile_is_still_flagged",
+   "kind": "test",
+   "file": "tests/test_doctor.py",
+   "line": 54,
+   "signature": "def test_a_layout_with_no_session_tile_is_still_flagged(...)",
+   "summary": "The pre-existing check must survive the new one being bolted alongside.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_good_layout_passes_and_describes_itself",
+   "kind": "test",
+   "file": "tests/test_doctor.py",
+   "line": 62,
+   "signature": "def test_a_good_layout_passes_and_describes_itself(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_every_installed_event_maps_to_a_phase",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 14,
+   "signature": "def test_every_installed_event_maps_to_a_phase(...)",
+   "summary": "An event we register but do not normalise would arrive and mean nothing.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_notification_hook_is_installed",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 21,
+   "signature": "def test_the_notification_hook_is_installed(...)",
+   "summary": "NOTICE is what the crab widget alarms on besides APPROVAL.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_approval_hook_is_still_installed",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 36,
+   "signature": "def test_the_approval_hook_is_still_installed(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_merging_preserves_someone_elses_hook",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 40,
+   "signature": "def test_merging_preserves_someone_elses_hook(...)",
+   "summary": "The installer merges rather than replaces, which is what makes it safe to",
+   "parent": ""
+  },
+  {
+   "name": "test_merging_twice_does_not_duplicate_our_hook",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 56,
+   "signature": "def test_merging_twice_does_not_duplicate_our_hook(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_unit_is_enabled_and_started",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 71,
+   "signature": "def test_the_unit_is_enabled_and_started(...)",
+   "summary": "Writing the unit and stopping there is a half-installed state: the panel",
+   "parent": ""
+  },
+  {
+   "name": "test_the_unit_is_disabled_before_its_file_is_removed",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 86,
+   "signature": "def test_the_unit_is_disabled_before_its_file_is_removed(...)",
+   "summary": "Deleting the unit first leaves a dangling default.target.wants symlink",
+   "parent": ""
+  },
+  {
+   "name": "test_a_missing_systemctl_is_not_fatal",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 100,
+   "signature": "def test_a_missing_systemctl_is_not_fatal(...)",
+   "summary": "No user manager exists in a container, a chroot or a package build. An",
+   "parent": ""
+  },
+  {
+   "name": "test_a_failing_systemctl_is_not_fatal",
+   "kind": "test",
+   "file": "tests/test_install.py",
+   "line": 109,
+   "signature": "def test_a_failing_systemctl_is_not_fatal(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_valid_layout_passes",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 46,
+   "signature": "def test_a_valid_layout_passes(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_empty_layout_is_rejected",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 50,
+   "signature": "def test_an_empty_layout_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_unknown_widget_is_rejected_and_lists_the_known_ones",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 55,
+   "signature": "def test_an_unknown_widget_is_rejected_and_lists_the_known_ones(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_non_positive_size_is_rejected",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 61,
+   "signature": "def test_a_non_positive_size_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_negative_origin_is_rejected",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 67,
+   "signature": "def test_a_negative_origin_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_tile_that_does_not_fit_is_rejected",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 80,
+   "signature": "def test_a_tile_that_does_not_fit_is_rejected(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_overlapping_tiles_are_rejected_naming_both",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 85,
+   "signature": "def test_overlapping_tiles_are_rejected_naming_both(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_shared_edge_is_not_an_overlap",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 91,
+   "signature": "def test_a_shared_edge_is_not_an_overlap(...)",
+   "summary": "Abutting tiles are an ordinary layout, not a mistake.",
+   "parent": ""
+  },
+  {
+   "name": "test_gaps_are_allowed",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 97,
+   "signature": "def test_gaps_are_allowed(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_agent_slots_counts_only_session_widgets",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 103,
+   "signature": "def test_agent_slots_counts_only_session_widgets(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_composed_frame_matches_the_display_size",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 115,
+   "signature": "def test_composed_frame_matches_the_display_size(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tiles_land_at_their_own_offsets",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 121,
+   "signature": "def test_tiles_land_at_their_own_offsets(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_background_colour_fills_the_frame",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 133,
+   "signature": "def test_the_background_colour_fills_the_frame(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_widget_returning_the_wrong_size_is_cropped_not_fatal",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 141,
+   "signature": "def test_a_widget_returning_the_wrong_size_is_cropped_not_fatal(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_failing_widget_yields_a_fault_tile_and_spares_its_neighbours",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 146,
+   "signature": "def test_a_failing_widget_yields_a_fault_tile_and_spares_its_neighbours(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_sessions_are_handed_to_session_widgets_in_tile_order",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 156,
+   "signature": "def test_sessions_are_handed_to_session_widgets_in_tile_order(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_widget_gets_none_when_there_are_fewer_sessions_than_slots",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 167,
+   "signature": "def test_a_session_widget_gets_none_when_there_are_fewer_sessions_than_slots(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_full_screen_rgba_tile_still_composites_over_the_background",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 184,
+   "signature": "def test_a_full_screen_rgba_tile_still_composites_over_the_background(...)",
+   "summary": "The fast path is only for an opaque full-screen tile.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_full_screen_opaque_tile_is_returned_directly",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 194,
+   "signature": "def test_a_full_screen_opaque_tile_is_returned_directly(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_composed_dashboard_is_pixel_identical",
+   "kind": "test",
+   "file": "tests/test_legacy_identical.py",
+   "line": 58,
+   "signature": "def test_composed_dashboard_is_pixel_identical(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_composed_idle_is_pixel_identical",
+   "kind": "test",
+   "file": "tests/test_legacy_identical.py",
+   "line": 64,
+   "signature": "def test_composed_idle_is_pixel_identical(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_full_screen_tile_is_handed_back_untouched",
+   "kind": "test",
+   "file": "tests/test_legacy_identical.py",
+   "line": 73,
+   "signature": "def test_full_screen_tile_is_handed_back_untouched(...)",
+   "summary": "Not merely equal \u2014 the same object, so no copy can perturb it.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_tile_option_can_override_the_idle_title",
+   "kind": "test",
+   "file": "tests/test_legacy_identical.py",
+   "line": 90,
+   "signature": "def test_a_tile_option_can_override_the_idle_title(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_claude_statusline_fields",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 11,
+   "signature": "def test_claude_statusline_fields(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_claude_remaining_percentage_is_converted_to_used",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 34,
+   "signature": "def test_claude_remaining_percentage_is_converted_to_used(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_codex_context_is_reported_as_used",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 47,
+   "signature": "def test_codex_context_is_reported_as_used(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tool_and_approval_events",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 77,
+   "signature": "def test_tool_and_approval_events(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_activity_replaces_the_tool_name_for_the_headline",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 101,
+   "signature": "def test_activity_replaces_the_tool_name_for_the_headline(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_activity_is_cleared_when_an_event_carries_no_tool",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 116,
+   "signature": "def test_activity_is_cleared_when_an_event_carries_no_tool(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_statusline_keeps_the_activity_from_the_last_hook",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 149,
+   "signature": "def test_statusline_keeps_the_activity_from_the_last_hook(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_session_end_is_not_active",
+   "kind": "test",
+   "file": "tests/test_normalize.py",
+   "line": 169,
+   "signature": "def test_session_end_is_not_active(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_landscape_frames_have_expected_size",
+   "kind": "test",
+   "file": "tests/test_render.py",
+   "line": 10,
+   "signature": "def test_landscape_frames_have_expected_size(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_merges_sparse_updates",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 14,
+   "signature": "def test_merges_sparse_updates(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_approval_has_priority_over_more_recent_work",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 24,
+   "signature": "def test_approval_has_priority_over_more_recent_work(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_stale_sessions_go_idle",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 31,
+   "signature": "def test_stale_sessions_go_idle(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_statusline_refresh_preserves_phase",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 37,
+   "signature": "def test_statusline_refresh_preserves_phase(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_waiting_on_a_long_tool_call_stays_visible",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 45,
+   "signature": "def test_a_session_waiting_on_a_long_tool_call_stays_visible(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_idle_session_still_expires_on_the_short_timeout",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 52,
+   "signature": "def test_an_idle_session_still_expires_on_the_short_timeout(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_chatty_session_cannot_starve_a_quiet_one",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 58,
+   "signature": "def test_a_chatty_session_cannot_starve_a_quiet_one(...)",
+   "summary": "The failure this reproduces: one session emitting every second took every",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_with_nothing_new_does_not_take_a_turn",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 76,
+   "signature": "def test_a_session_with_nothing_new_does_not_take_a_turn(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_approval_preempts_the_dwell",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 88,
+   "signature": "def test_approval_preempts_the_dwell(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_active_is_the_one_slot_case_of_assign",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 103,
+   "signature": "def test_active_is_the_one_slot_case_of_assign(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_no_live_sessions_gives_every_slot_nothing",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 109,
+   "signature": "def test_no_live_sessions_gives_every_slot_nothing(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_fewer_live_sessions_than_slots_leaves_the_rest_empty",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 117,
+   "signature": "def test_fewer_live_sessions_than_slots_leaves_the_rest_empty(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_each_session_gets_its_own_slot_with_no_duplicates",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 123,
+   "signature": "def test_each_session_gets_its_own_slot_with_no_duplicates(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_more_sessions_than_slots_shows_only_as_many_as_there_are_tiles",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 132,
+   "signature": "def test_more_sessions_than_slots_shows_only_as_many_as_there_are_tiles(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_sessions_do_not_hop_between_slots_while_nothing_changes",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 141,
+   "signature": "def test_sessions_do_not_hop_between_slots_while_nothing_changes(...)",
+   "summary": "Two sessions, two tiles: nothing should ever move.",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_keeps_its_own_slot_when_it_alone_keeps_working",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 152,
+   "signature": "def test_a_session_keeps_its_own_slot_when_it_alone_keeps_working(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_surplus_rotates_through_the_tiles",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 163,
+   "signature": "def test_the_surplus_rotates_through_the_tiles(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_fresh_session_cannot_displace_a_tile_inside_the_dwell",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 187,
+   "signature": "def test_a_fresh_session_cannot_displace_a_tile_inside_the_dwell(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_approval_displaces_the_longest_held_tile_not_always_the_first",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 195,
+   "signature": "def test_an_approval_displaces_the_longest_held_tile_not_always_the_first(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_approval_takes_an_empty_tile_before_evicting_anyone",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 208,
+   "signature": "def test_an_approval_takes_an_empty_tile_before_evicting_anyone(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_two_approvals_can_hold_both_tiles",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 216,
+   "signature": "def test_two_approvals_can_hold_both_tiles(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_slot_count_can_change_between_calls",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 223,
+   "signature": "def test_the_slot_count_can_change_between_calls(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_that_ends_frees_its_tile_and_leaves_the_other_alone",
+   "kind": "test",
+   "file": "tests/test_state.py",
+   "line": 233,
+   "signature": "def test_a_session_that_ends_frees_its_tile_and_leaves_the_other_alone(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_missing_daemon_is_nonblocking",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 17,
+   "signature": "def test_missing_daemon_is_nonblocking(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tcp_transport_round_trip",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 30,
+   "signature": "def test_tcp_transport_round_trip(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_missing_tcp_daemon_is_nonblocking",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 51,
+   "signature": "def test_missing_tcp_daemon_is_nonblocking(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_statusline_proxy_preserves_output",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 56,
+   "signature": "def test_statusline_proxy_preserves_output(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_poll_timeout_follows_the_frame_rate",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 72,
+   "signature": "def test_the_poll_timeout_follows_the_frame_rate(...)",
+   "summary": "The receive blocks for this long before the loop goes round again, so a",
+   "parent": ""
+  },
+  {
+   "name": "test_a_hook_survives_a_layout_it_will_never_draw",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 111,
+   "signature": "def test_a_hook_survives_a_layout_it_will_never_draw(...)",
+   "summary": "The regression this whole leniency exists for.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_daemon_still_refuses_a_layout_it_cannot_draw",
+   "kind": "test",
+   "file": "tests/test_transport.py",
+   "line": 132,
+   "signature": "def test_the_daemon_still_refuses_a_layout_it_cannot_draw(...)",
+   "summary": "The other half of the bargain: `run` draws, so it must not start on a",
+   "parent": ""
+  },
+  {
+   "name": "test_menu_offers_the_editor_and_the_way_out",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 17,
+   "signature": "def test_menu_offers_the_editor_and_the_way_out(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_menu_hides_the_editor_when_it_is_not_running",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 24,
+   "signature": "def test_menu_hides_the_editor_when_it_is_not_running(...)",
+   "summary": "No point offering a link to a server the daemon never started.",
+   "parent": ""
+  },
+  {
+   "name": "test_menu_leads_with_a_disabled_state_row",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 32,
+   "signature": "def test_menu_leads_with_a_disabled_state_row(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tooltip_names_the_device_when_attached",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 39,
+   "signature": "def test_tooltip_names_the_device_when_attached(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tooltip_says_so_when_there_is_no_panel",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 44,
+   "signature": "def test_tooltip_says_so_when_there_is_no_panel(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_tooltip_fits_the_win32_field",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 50,
+   "signature": "def test_tooltip_fits_the_win32_field(...)",
+   "summary": "szTip is 128 wide characters including the terminator.",
+   "parent": ""
+  },
+  {
+   "name": "test_icon_renders_with_transparency",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 56,
+   "signature": "def test_icon_renders_with_transparency(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_two_states_do_not_look_alike",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 64,
+   "signature": "def test_the_two_states_do_not_look_alike(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_icon_file_carries_every_size",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 70,
+   "signature": "def test_icon_file_carries_every_size(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_icon_states_land_in_separate_files",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 79,
+   "signature": "def test_icon_states_land_in_separate_files(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_no_tray_where_there_is_no_tray",
+   "kind": "test",
+   "file": "tests/test_tray.py",
+   "line": 84,
+   "signature": "def test_no_tray_where_there_is_no_tray(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_registry_exposes_the_expected_widgets",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 52,
+   "signature": "def test_the_registry_exposes_the_expected_widgets(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_clock_fills_exactly_its_tile",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 62,
+   "signature": "def test_the_clock_fills_exactly_its_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_clock_renders_every_option_combination",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 80,
+   "signature": "def test_the_clock_renders_every_option_combination(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_clock_shows_a_different_minute_after_a_minute",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 85,
+   "signature": "def test_the_clock_shows_a_different_minute_after_a_minute(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_clock_never_paints_over_the_edge_of_its_tile",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 95,
+   "signature": "def test_the_clock_never_paints_over_the_edge_of_its_tile(...)",
+   "summary": "The seconds token used to be sized independently of the time, so a big",
+   "parent": ""
+  },
+  {
+   "name": "test_a_transparent_tile_leaves_the_backdrop_unpainted",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 108,
+   "signature": "def test_a_transparent_tile_leaves_the_backdrop_unpainted(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_opaque_tile_paints_its_card",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 113,
+   "signature": "def test_an_opaque_tile_paints_its_card(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_opacity_is_applied_to_the_card",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 118,
+   "signature": "def test_opacity_is_applied_to_the_card(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_panel_fill_resolves_the_tile_backdrop",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 136,
+   "signature": "def test_panel_fill_resolves_the_tile_backdrop(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_agent_card_fills_exactly_its_tile",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 143,
+   "signature": "def test_the_agent_card_fills_exactly_its_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_empty_slot_fills_exactly_its_tile",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 150,
+   "signature": "def test_an_empty_slot_fills_exactly_its_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_session_with_nothing_filled_in_still_renders",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 155,
+   "signature": "def test_a_session_with_nothing_filled_in_still_renders(...)",
+   "summary": "Every optional field is empty or None the moment a session starts.",
+   "parent": ""
+  },
+  {
+   "name": "test_every_phase_renders_at_a_wide_tile",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 173,
+   "signature": "def test_every_phase_renders_at_a_wide_tile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_each_provider_gets_its_own_accent",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 178,
+   "signature": "def test_each_provider_gets_its_own_accent(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_context_bar_copes_with_every_percentage",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 185,
+   "signature": "def test_the_context_bar_copes_with_every_percentage(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_very_long_activity_line_still_fits",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 190,
+   "signature": "def test_a_very_long_activity_line_still_fits(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_empty_slot_says_which_slot_it_is",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 198,
+   "signature": "def test_the_empty_slot_says_which_slot_it_is(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_disconnected_panel_is_reported_on_an_empty_slot",
+   "kind": "test",
+   "file": "tests/test_widgets.py",
+   "line": 204,
+   "signature": "def test_a_disconnected_panel_is_reported_on_an_empty_slot(...)",
+   "summary": "",
+   "parent": ""
+  }
+ ]
+}

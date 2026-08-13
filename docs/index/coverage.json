@@ -1,0 +1,126 @@
+{
+ "generated": "2026-08-13T21:04:52Z",
+ "by_source": {
+  "src/usb_lcd_dashboard/admin.py": [
+   "docs/admin/settings-editor.md"
+  ],
+  "src/usb_lcd_dashboard/admin_page.py": [
+   "docs/admin/settings-editor.md"
+  ],
+  "src/usb_lcd_dashboard/tray.py": [
+   "docs/admin/tray.md"
+  ],
+  "src/usb_lcd_dashboard/__init__.py": [
+   "docs/architecture/overview.md"
+  ],
+  "src/usb_lcd_dashboard/__main__.py": [
+   "docs/architecture/overview.md"
+  ],
+  "src/usb_lcd_dashboard/cli.py": [
+   "docs/integration/cli.md"
+  ],
+  "src/usb_lcd_dashboard/doctor.py": [
+   "docs/integration/cli.md"
+  ],
+  "src/usb_lcd_dashboard/install.py": [
+   "docs/integration/install.md"
+  ],
+  "packaging/linux/build-deb.sh": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/build-deb-inner.sh": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/control": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/postinst": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/postrm": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/copyright": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/changelog": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/smoke-test.sh": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/smoke-test-inner.sh": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/linux/smoke-test-user.sh": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/99-turing-lcd.rules": [
+   "docs/packaging/linux.md"
+  ],
+  "packaging/windows/build-installer.sh": [
+   "docs/packaging/windows.md"
+  ],
+  "packaging/windows/installer.nsi": [
+   "docs/packaging/windows.md"
+  ],
+  "packaging/windows/config.example.toml": [
+   "docs/packaging/windows.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/crab.py": [
+   "docs/rendering/crab.md"
+  ],
+  "src/usb_lcd_dashboard/layout.py": [
+   "docs/rendering/layout.md"
+  ],
+  "src/usb_lcd_dashboard/background.py": [
+   "docs/rendering/layout.md"
+  ],
+  "src/usb_lcd_dashboard/render.py": [
+   "docs/rendering/render.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/__init__.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/base.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/agent.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/clock.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/legacy.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/config.py": [
+   "docs/runtime/config.md"
+  ],
+  "src/usb_lcd_dashboard/daemon.py": [
+   "docs/runtime/daemon.md"
+  ],
+  "src/usb_lcd_dashboard/device.py": [
+   "docs/runtime/device.md"
+  ],
+  "src/usb_lcd_dashboard/display.py": [
+   "docs/runtime/display.md"
+  ],
+  "src/usb_lcd_dashboard/transport.py": [
+   "docs/runtime/transport.md"
+  ],
+  "src/usb_lcd_dashboard/model.py": [
+   "docs/sessions/model.md"
+  ],
+  "src/usb_lcd_dashboard/normalize.py": [
+   "docs/sessions/normalize.md"
+  ],
+  "src/usb_lcd_dashboard/activity.py": [
+   "docs/sessions/normalize.md"
+  ],
+  "tests": [
+   "docs/testing/README.md"
+  ]
+ },
+ "uncovered_sources": []
+}

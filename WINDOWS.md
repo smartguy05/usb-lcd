@@ -1,9 +1,18 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.4.0.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.6.1.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
+
+Built 2026-08-13 with tile support, the tray icon and the crab widget:
+
+```text
+dist/USB-LCD-Dashboard-Setup-0.6.1.exe
+sha256 78cf9bfd063a469b346bc6e935dd0ed198d3e9b3873e40f4f1384047679410be
+```
+
+`dist/` also still holds the 0.4.0 installer, which predates both features.
 
 ## Install
 
@@ -19,6 +28,21 @@ The installer adds global Claude Code and Codex hooks without replacing other
 configured hooks. If either CLI was already open, start a new session. Codex
 requires newly installed command hooks to be reviewed once: run `/hooks` and
 trust the USB LCD Dashboard definitions.
+
+## The tray icon
+
+The dashboard shows an icon in the notification area whenever it is running:
+green with the LCD attached, grey while it is still looking for it, with the
+resolved COM port in the hover text. Left-click opens the settings editor;
+right-click offers the editor, the log folder, and **Quit**, which stops the
+background process the same way the uninstaller does.
+
+Windows 11 puts a newly registered icon behind the chevron (`^`) at the left of
+the notification area. Drag it out onto the taskbar to keep it in view.
+
+To run without one, set `enabled = false` under `[tray]` in `config.toml`. Note
+that with no icon and no console window there is then nothing to stop the
+dashboard with except `python.exe -m usb_lcd_dashboard shutdown`.
 
 ## Diagnostics
 
@@ -74,4 +98,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.4.0.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.6.1.exe`.

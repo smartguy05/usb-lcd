@@ -1,0 +1,11 @@
+usb-lcd-dashboard (0.6.1) noble; urgency=medium
+
+  * First Ubuntu package. Ships the dashboard, a vendored smartscreen-driver,
+    and the udev rule that creates /dev/turing-lcd.
+  * Depends on the archive's python3-pil, python3-serial and python3-numpy
+    rather than bundling a Python runtime as the Windows installer does.
+  * usb-lcd-dashboard install now enables and starts the systemd user service
+    instead of only writing the unit file, and uninstall stops it before
+    removing the unit.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Thu, 13 Aug 2026 12:00:00 +0000

@@ -1,0 +1,33 @@
+#!/bin/sh
+# The per-user hooks and systemd service are deliberately left alone: this runs
+# as root and cannot know which users have them, and silently reaching into
+# every home directory to edit ~/.claude/settings.json would be worse than
+# leaving a hook that harmlessly fails to reach a daemon. Users remove their own
+# with "usb-lcd-dashboard uninstall", which is documented in README.Debian.
+set -e
+
+case "$1" in
+    remove|purge)
+        if [ -d /run/udev ] && command -v udevadm >/dev/null 2>&1; then
+            udevadm control --reload-rules >/dev/null 2>&1 || true
+        fi
+        if [ "$1" = "remove" ]; then
+            cat <<'EOF'
+
+The system files are gone. Per-user hooks and the systemd user service are
+not touched by package removal — each user removes their own with:
+
+    systemctl --user disable --now usb-lcd-dashboard
+    usb-lcd-dashboard uninstall
+
+(run that before removing the package, or restore it temporarily). Your
+config.toml and its backups are retained either way.
+
+EOF
+        fi
+        ;;
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+esac
+
+exit 0

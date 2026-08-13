@@ -13,5 +13,9 @@ build/
 .build/
 packaging/windows/payload/
 
+# The frame the Linux smoke test renders as proof it worked. Regenerated on
+# every run; the installers in dist/ are tracked on purpose, this is not.
+dist/linux-screencap.png
+
 # Local config
 config.toml
