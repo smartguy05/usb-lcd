@@ -1,15 +1,16 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.6.1.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.7.0.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
 
-Built 2026-08-13 with tile support, the tray icon and the crab widget:
+Built 2026-08-17 with tile support, the tray icon, the crab, direct USB, and the
+Teams unread-messaging widget:
 
 ```text
-dist/USB-LCD-Dashboard-Setup-0.6.1.exe
-sha256 78cf9bfd063a469b346bc6e935dd0ed198d3e9b3873e40f4f1384047679410be
+dist/USB-LCD-Dashboard-Setup-0.7.0.exe
+sha256 dacb458723b746cf09ba8ac1e1163b4493f43210f2221997799af90bc4277994
 ```
 
 `dist/` also still holds the 0.4.0 installer, which predates both features.
@@ -23,6 +24,12 @@ sha256 78cf9bfd063a469b346bc6e935dd0ed198d3e9b3873e40f4f1384047679410be
    `USB Serial Device (COMx)` using its built-in `usbser.sys` driver.
 4. Within a few seconds the LCD should replace its factory screen with the idle
    dashboard. The dashboard starts automatically at each user login.
+
+For the Teams messages widget, set `USB_LCD_TEAMS_CLIENT_ID` and
+`USB_LCD_TEAMS_TENANT_ID` as Windows user environment variables, restart the
+dashboard, then use **Connections → Connect** in the settings editor. The Entra
+application must be a public client with delegated `Chat.Read` and `User.Read`;
+no client secret is used.
 
 The installer adds global Claude Code and Codex hooks without replacing other
 configured hooks. If either CLI was already open, start a new session. Codex
@@ -98,4 +105,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.6.1.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.7.0.exe`.

@@ -29,7 +29,7 @@ ADMIN_HOST = "127.0.0.1"
 # part that differs: "window" is a display the OS enumerates as a monitor, and
 # whether the ultra-wide panel is that or another serial protocol is unknown
 # until the hardware is in hand.
-DISPLAY_KINDS = ("turing_rev_a", "window", "simulated", "auto")
+DISPLAY_KINDS = ("turing_rev_a", "turing_usb", "window", "simulated", "auto")
 
 # The daemon and the hooks both run under console-less pythonw.exe on Windows,
 # so any child process would otherwise allocate a console window of its own.

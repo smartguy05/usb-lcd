@@ -6,18 +6,17 @@ Architecture: all
 Maintainer: USB LCD Dashboard <noreply@users.noreply.github.com>
 Installed-Size: @INSTALLED_SIZE@
 Depends: python3 (>= 3.12), python3-pil (>= 10.1), python3-serial (>= 3.5),
- python3-numpy, fonts-dejavu-core
+ python3-numpy, fonts-dejavu-core, python3-msal, python3-msal-extensions
 Recommends: systemd, git, fonts-ubuntu
 Homepage: https://github.com/smartguy05/usb-lcd
 Description: Live Claude Code and Codex dashboard for a USB LCD panel
  Drives a Turing/UsbMonitor 3.5-inch USB LCD as a status display for Claude
  Code and Codex sessions, showing the provider, model, project, elapsed time,
- permission requests and context used. It never displays prompts, responses or
- transcript text — only lifecycle metadata.
+ permission requests and context used. An optional Teams widget displays the
+ newest unread chat preview after delegated sign-in.
  .
  The panel is divided into tiles, each holding a widget: a clock, an agent
- card, or an animated crab that changes expression with what the agent is
- doing and waves both claws when it needs your attention.
+ card, an animated crab, or the latest unread Microsoft Teams chat.
  .
  Installing this package puts the program and its udev rule in place. Wiring it
  into your own Claude and Codex sessions is a per-user step: run

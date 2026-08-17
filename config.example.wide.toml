@@ -1,4 +1,4 @@
-# The 9.2" 1920x462 ultra-wide panel: three agent tiles and a clock.
+# The 9.2" 1920x462 ultra-wide panel: clock, agent, Teams messages and crab.
 #
 # kind = "window" is the path for a panel the OS enumerates as a monitor, and it
 # is NOT IMPLEMENTED yet — the panel's transport cannot be settled from its
@@ -65,11 +65,13 @@ w = 486
 h = 438
 
 [[tile]]
-widget = "agent"
+widget = "messages"
 x = 926
 y = 12
 w = 486
 h = 438
+[tile.options]
+title = "TEAMS"
 
 [[tile]]
 widget = "crab"

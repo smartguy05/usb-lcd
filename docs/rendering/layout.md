@@ -36,9 +36,11 @@ different anyway — each machine keeps its own config.
 | `slot` | `-1` | 0-based index for session-wanting tiles. |
 | `connected` | `True` | Whether the panel is attached. |
 | `idle_title` | `""` | Dashboard-level fallback title. |
+| `messages` | `None` | Immutable integration snapshot for message-wanting widgets. |
 
-It is **frozen**, and there is no per-widget state anywhere. That is what forces
-animation to be a pure function of `now` — see
+It is **frozen**, and there is no per-widget state anywhere. Slow integration
+work publishes immutable snapshots before composition; rendering never performs
+network I/O. Animation remains a pure function of `now` — see
 [crab.md](crab.md#animation-is-a-pure-function-of-ctxnow).
 
 ## Validation

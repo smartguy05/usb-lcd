@@ -159,10 +159,57 @@ def test_the_widgets_endpoint_describes_the_registry(server):
     base, _, _ = server
     _, body, _ = get(base, "/api/widgets")
     widgets = {w["name"]: w for w in json.loads(body)["widgets"]}
-    assert set(widgets) == {"agent", "clock", "crab", "legacy"}
+    assert set(widgets) == {"agent", "clock", "crab", "legacy", "messages"}
     assert widgets["agent"]["wants_session"] is True
     assert widgets["crab"]["wants_session"] is True
     assert any(o["name"] == "hour12" for o in widgets["clock"]["options"])
+    assert widgets["messages"]["wants_messages"] is True
+
+
+def test_the_teams_status_endpoint_contains_no_token(server):
+    base, _, _ = server
+    status, body, _ = get(base, "/api/integrations/teams")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["status"] == "unconfigured"
+    assert "token" not in body.decode().lower()
+
+
+def test_teams_connect_and_disconnect_actions_are_forwarded(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(WIDE, encoding="utf-8")
+    actions = []
+    integration = {"configured": True, "status": "disconnected"}
+    state = AdminState(
+        path,
+        lambda: load_config(path),
+        lambda: None,
+        get_teams=lambda: integration,
+        connect_teams=lambda: actions.append("connect") or {**integration, "status": "connecting"},
+        disconnect_teams=lambda: actions.append("disconnect"),
+    )
+    srv = admin.start(state, 0)
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        assert post(base, "/api/integrations/teams/connect", {})[0] == 200
+        assert post(base, "/api/integrations/teams/disconnect", {})[0] == 200
+    finally:
+        srv.shutdown()
+        srv.server_close()
+    assert actions == ["connect", "disconnect"]
+
+
+def test_a_cross_site_form_cannot_trigger_a_teams_action(server):
+    base, _, _ = server
+    request = urllib.request.Request(
+        base + "/api/integrations/teams/connect",
+        data=b"",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(request, timeout=5)
+    assert exc.value.code == 415
 
 
 def test_the_preview_says_so_when_no_frame_exists_yet(server):

@@ -7,8 +7,10 @@ from usb_lcd_dashboard.config import Config
 from usb_lcd_dashboard.device import (
     SerialPanel,
     SimulatedPanel,
+    TuringUsbPanel,
     make_device,
 )
+from usb_lcd_dashboard.turing_usb import _command
 
 
 LEGACY = Config()
@@ -33,6 +35,19 @@ def test_the_simulated_kind_needs_no_flag():
     panel = make_device(WIDE)
     assert isinstance(panel, SimulatedPanel)
     assert panel.size == (1920, 462)
+
+
+def test_the_turing_usb_kind_gets_the_native_usb_panel():
+    config = replace(WIDE, display_kind="turing_usb")
+    panel = make_device(config)
+    assert isinstance(panel, TuringUsbPanel)
+    assert panel.size == (1920, 462)
+
+
+def test_turing_usb_commands_are_fixed_512_byte_packets():
+    packet = _command(10)
+    assert len(packet) == 512
+    assert packet[-2:] == b"\xa1\x1a"
 
 
 def test_the_serial_panel_refuses_a_size_it_cannot_drive():

@@ -16,6 +16,16 @@ PYTHON_SHA256="4acbed6dd1c744b0376e3b1cf57ce906f9dc9e95e68824584c8099a63025a3c3"
 PILLOW_VERSION="12.3.0"
 PY_SERIAL_VERSION="3.5"
 NUMPY_VERSION="2.5.1"
+PYUSB_VERSION="1.3.1"
+PYCRYPTODOME_VERSION="3.23.0"
+LIBUSB_PACKAGE_VERSION="1.0.30.0"
+IMPORTLIB_RESOURCES_VERSION="7.1.0"
+MSAL_VERSION="1.37.0"
+MSAL_EXTENSIONS_VERSION="1.3.1"
+NSIS_VERSION="3.12"
+NSIS_ARCHIVE="nsis-${NSIS_VERSION}.zip"
+NSIS_URL="https://prdownloads.sourceforge.net/nsis/${NSIS_ARCHIVE}"
+NSIS_SHA256="56581f90db321581c5381193d796fffcf2d24b2f8fed2160a6c6a3baa67f2c4f"
 SMARTSCREEN_COMMIT="918342ecbf33d210d41867f083142e3b5cbffcca"
 
 if [[ -x "$PROJECT_DIR/.venv/bin/python" ]]; then
@@ -85,7 +95,13 @@ printf '%s  %s\n' "$PYTHON_SHA256" "$CACHE_DIR/$PYTHON_ARCHIVE" | sha256sum --ch
     --only-binary=:all: \
     "Pillow==$PILLOW_VERSION" \
     "pyserial==$PY_SERIAL_VERSION" \
-    "numpy==$NUMPY_VERSION"
+    "numpy==$NUMPY_VERSION" \
+    "pyusb==$PYUSB_VERSION" \
+    "pycryptodome==$PYCRYPTODOME_VERSION" \
+    "libusb-package==$LIBUSB_PACKAGE_VERSION" \
+    "importlib-resources==$IMPORTLIB_RESOURCES_VERSION" \
+    "msal==$MSAL_VERSION" \
+    "msal-extensions==$MSAL_EXTENSIONS_VERSION"
 "$HOST_PYTHON" -m pip wheel \
     --no-deps \
     --wheel-dir "$CACHE_DIR" \
@@ -105,13 +121,29 @@ PTH_FILE="$PAYLOAD_DIR/python312._pth"
 sed -i '/^\.$/a Lib/site-packages' "$PTH_FILE"
 sed -i 's/^#import site/import site/' "$PTH_FILE"
 
-container_run \
-    --env HOST_UID="$HOST_UID" \
-    --env HOST_GID="$HOST_GID" \
-    --env APP_VERSION="$APP_VERSION" \
-    --workdir /work \
-    ubuntu:24.04 \
-    bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis -DAPP_VERSION="$APP_VERSION" packaging/windows/installer.nsi && { chown "$HOST_UID:$HOST_GID" "dist/USB-LCD-Dashboard-Setup-$APP_VERSION.exe" || true; }'
+case "$(uname -s)" in
+    MINGW*|MSYS*)
+        curl --fail --location --retry 3 --output "$CACHE_DIR/$NSIS_ARCHIVE" "$NSIS_URL"
+        printf '%s  %s\n' "$NSIS_SHA256" "$CACHE_DIR/$NSIS_ARCHIVE" | sha256sum --check --status
+        "$HOST_PYTHON" -m zipfile -e "$CACHE_DIR/$NSIS_ARCHIVE" "$BUILD_DIR/nsis"
+        NSIS_EXE="$BUILD_DIR/nsis/nsis-$NSIS_VERSION/makensis.exe"
+        OUTPUT_FILE="$(cygpath -w "$DIST_DIR/USB-LCD-Dashboard-Setup-$APP_VERSION.exe")"
+        (
+            cd "$PROJECT_DIR/packaging/windows"
+            MSYS2_ARG_CONV_EXCL='*' "$NSIS_EXE" \
+                "-DAPP_VERSION=$APP_VERSION" "-DOUTPUT_FILE=$OUTPUT_FILE" installer.nsi
+        )
+        ;;
+    *)
+        container_run \
+            --env HOST_UID="$HOST_UID" \
+            --env HOST_GID="$HOST_GID" \
+            --env APP_VERSION="$APP_VERSION" \
+            --workdir /work \
+            ubuntu:24.04 \
+            bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis -DAPP_VERSION="$APP_VERSION" packaging/windows/installer.nsi && { chown "$HOST_UID:$HOST_GID" "dist/USB-LCD-Dashboard-Setup-$APP_VERSION.exe" || true; }'
+        ;;
+esac
 
 INSTALLER="$DIST_DIR/USB-LCD-Dashboard-Setup-$APP_VERSION.exe"
 test -s "$INSTALLER"

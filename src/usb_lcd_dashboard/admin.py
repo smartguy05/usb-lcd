@@ -199,10 +199,29 @@ class AdminState:
         config_path: Path,
         get_config: Callable[[], Config],
         get_preview: Callable[[], Image.Image | None],
+        get_teams: Callable[[], dict[str, Any]] | None = None,
+        connect_teams: Callable[[], dict[str, Any]] | None = None,
+        disconnect_teams: Callable[[], None] | None = None,
     ):
         self.config_path = config_path
         self.get_config = get_config
         self.get_preview = get_preview
+        self.get_teams = get_teams or (
+            lambda: {
+                "configured": False,
+                "status": "unconfigured",
+                "account": "",
+                "updated_at": None,
+                "unread_conversations": 0,
+                "stale": False,
+                "error": "",
+                "verification_uri": None,
+                "user_code": None,
+                "expires_at": None,
+            }
+        )
+        self.connect_teams = connect_teams
+        self.disconnect_teams = disconnect_teams
 
     def save(self, payload: dict[str, Any]) -> Config:
         """Validate through the loader, then replace config.toml atomically."""
@@ -252,6 +271,8 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
                 self._json(200, config_to_json(state.get_config()))
             elif route == "/api/widgets":
                 self._json(200, {"widgets": describe()})
+            elif route == "/api/integrations/teams":
+                self._json(200, state.get_teams())
             elif route == "/api/preview.png":
                 frame = state.get_preview()
                 if frame is None:
@@ -266,7 +287,36 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
         def do_POST(self):  # noqa: N802 - base class name
             if not self._guard():
                 return
-            if self.path.split("?", 1)[0] != "/api/config":
+            route = self.path.split("?", 1)[0]
+            if route in {
+                "/api/integrations/teams/connect",
+                "/api/integrations/teams/disconnect",
+            }:
+                if not (self.headers.get("Content-Type") or "").lower().startswith(
+                    "application/json"
+                ):
+                    self._json(415, {"error": "integration actions require JSON"})
+                    return
+                action = (
+                    state.connect_teams
+                    if route.endswith("/connect")
+                    else state.disconnect_teams
+                )
+                if action is None:
+                    self._json(503, {"error": "Teams integration is unavailable"})
+                    return
+                try:
+                    result = action()
+                except ValueError as exc:
+                    self._json(400, {"error": str(exc)})
+                    return
+                except Exception as exc:
+                    LOG.exception("Teams integration action failed")
+                    self._json(502, {"error": str(exc)})
+                    return
+                self._json(200, result if isinstance(result, dict) else state.get_teams())
+                return
+            if route != "/api/config":
                 self._json(404, {"error": "no such route"})
                 return
             try:

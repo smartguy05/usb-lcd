@@ -25,6 +25,7 @@ from .agent import render_agent
 from .clock import render_clock
 from .crab import render_crab
 from .legacy import render_legacy
+from .messages import render_messages
 
 Renderer = Callable[[TileContext], Image.Image]
 
@@ -53,6 +54,7 @@ class WidgetSpec:
     # The only cross-tile resource in play. Everything else a widget needs it
     # fetches itself from its own options, so this stays a bool, not a DSL.
     wants_session: bool = False
+    wants_messages: bool = False
     options: dict[str, Option] = field(default_factory=dict)
     help: str = ""
 
@@ -99,6 +101,15 @@ WIDGETS: dict[str, WidgetSpec] = {
         help="The 3.5\" panel's original full-screen card. Meant to be the only "
         "tile, covering the whole display.",
     ),
+    "messages": WidgetSpec(
+        render_messages,
+        wants_messages=True,
+        options={
+            "title": Option("text", "Teams", "Heading shown above the latest unread chat"),
+            **COMMON_OPTIONS,
+        },
+        help="The newest unread Microsoft Teams chat and the number of unread chats.",
+    ),
 }
 
 
@@ -108,6 +119,7 @@ def describe() -> list[dict[str, Any]]:
         {
             "name": name,
             "wants_session": spec.wants_session,
+            "wants_messages": spec.wants_messages,
             "help": spec.help,
             "options": [
                 {

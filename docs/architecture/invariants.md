@@ -70,6 +70,9 @@ must derive from `ctx.now`, never a counter or a wall-clock read. That is what
 makes motion survive a session moving between tiles, and what makes any frame
 reproducible in a test by naming its timestamp.
 
+External integrations poll on their own worker and publish immutable snapshots
+into `TileContext`; a renderer never waits for authentication or network I/O.
+
 ## Session slots come from the layout
 
 `agent_slots` counts tiles whose widget declares `wants_session`. A standalone

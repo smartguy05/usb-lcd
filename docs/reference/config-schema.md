@@ -43,7 +43,7 @@ port = 45723               # must differ from ipc.port
 enabled = true
 
 [[tile]]                   # repeat per tile; omit entirely for the legacy layout
-widget = "clock"           # clock | agent | crab | legacy
+widget = "clock"           # clock | agent | crab | messages | legacy
 x = 12
 y = 12
 w = 404
@@ -67,6 +67,7 @@ Every widget built on `new_tile` honours:
 | `clock` | `title`, `hour12`, `seconds`, `show_date` |
 | `crab` | `color`, `animate`, `show_project`, `show_activity`, `show_context`, `alarm` |
 | `legacy` | `title` only — it paints its own opaque background |
+| `messages` | `title` plus the common options |
 
 The authoritative list is the registry itself; `GET /api/widgets` on the editor
 returns it as JSON. See [../rendering/widgets.md](../rendering/widgets.md).

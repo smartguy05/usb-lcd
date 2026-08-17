@@ -1,6 +1,6 @@
 # Ubuntu package
 
-`usb-lcd-dashboard_0.6.1_all.deb` installs the dashboard on Ubuntu 24.04 LTS
+`usb-lcd-dashboard_0.7.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
 (noble) and later.
 
 Unlike the Windows installer it does **not** bundle a Python runtime. Ubuntu
@@ -15,7 +15,7 @@ The package is architecture-independent: nothing in it is compiled.
 ## Install
 
 ```bash
-sudo apt install ./usb-lcd-dashboard_0.6.1_all.deb
+sudo apt install ./usb-lcd-dashboard_0.7.0_all.deb
 ```
 
 That is the system-wide half: the program, and the udev rule that creates
@@ -71,6 +71,13 @@ systemctl --user status usb-lcd-dashboard
 systemctl --user restart usb-lcd-dashboard
 journalctl --user -u usb-lcd-dashboard -f
 ```
+
+For the Teams messages widget, create
+`~/.config/usb-lcd-dashboard/teams.env` with `USB_LCD_TEAMS_CLIENT_ID` and
+`USB_LCD_TEAMS_TENANT_ID`, one assignment per line. Restart the user service,
+then connect from the settings editor. The Entra application needs delegated
+`Chat.Read` and `User.Read` plus public-client/device-code authentication; do
+not put a client secret in the environment file.
 
 There is no log file on Linux and no tray icon: the daemon logs to the journal,
 and `systemctl --user` is the stop button.

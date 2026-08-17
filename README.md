@@ -9,7 +9,8 @@ one config file per machine:
 ```
 
 The 3.5" panel shows one session on one card. The ultra-wide is divided into
-**tiles**, each holding a widget — a clock, an agent card, or an animated crab.
+**tiles**, each holding a widget — a clock, an agent card, an animated crab, or
+the latest unread Microsoft Teams chat.
 
 **To install it, jump to [Installing](#installing)** — there is a prebuilt
 package for [Windows 11](#windows-11) and for [Ubuntu](#ubuntu).
@@ -33,7 +34,7 @@ its own `config.toml`.
 
 ```toml
 [[tile]]
-widget = "clock"          # clock | agent | crab | legacy
+widget = "clock"          # clock | agent | crab | messages | legacy
 x = 12
 y = 12
 w = 404
@@ -72,6 +73,42 @@ machines can name a wallpaper that only exists on one.
 
 See [config.example.wide.toml](config.example.wide.toml) for the full ultra-wide
 layout.
+
+## Microsoft Teams messages
+
+The `messages` widget shows the newest unread Teams chat with its conversation,
+sender, plain-text preview and age. Its count is unread conversations, not
+individual messages, and the dashboard never marks a chat read.
+
+Create a Microsoft Entra public-client application with device-code access and
+delegated `Chat.Read` and `User.Read`. Supply its identity to the daemon:
+
+```text
+USB_LCD_TEAMS_CLIENT_ID=<application-client-id>
+USB_LCD_TEAMS_TENANT_ID=<tenant-id>
+```
+
+On Windows, set user environment variables and restart the dashboard. On Linux,
+put those assignments in `~/.config/usb-lcd-dashboard/teams.env` and restart the
+systemd user service. Do not configure a client secret.
+
+Open the settings editor, find **Connections**, choose **Connect**, and follow
+the Microsoft device-login link and code. The cache uses OS-backed encryption
+where available, with a protected per-user file fallback and warning.
+
+```toml
+[[tile]]
+widget = "messages"
+x = 926
+y = 12
+w = 486
+h = 438
+[tile.options]
+title = "TEAMS"
+```
+
+V1 covers direct, group, meeting and federated chats. Teams channels, Slack and
+Discord remain future provider extensions.
 
 ## The crab
 
@@ -272,7 +309,7 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.6.1.exe` | `usb-lcd-dashboard_0.6.1_all.deb` |
+| Package | `USB-LCD-Dashboard-Setup-0.7.0.exe` | `usb-lcd-dashboard_0.7.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
 | Size | ~20 MB | ~67 KB plus dependencies |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
@@ -288,10 +325,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.6.1.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.7.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.6.1.exe
+.\dist\USB-LCD-Dashboard-Setup-0.7.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -321,7 +358,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.6.1_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.7.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and

@@ -8,6 +8,7 @@ from usb_lcd_dashboard.background import Background
 from usb_lcd_dashboard.layout import Tile, agent_slots, compose, validate
 from usb_lcd_dashboard.model import SessionState
 from usb_lcd_dashboard.widgets import WidgetSpec
+from usb_lcd_dashboard.messaging import MessageSnapshot
 
 
 NOW = datetime(2026, 8, 6, 14, 37, tzinfo=timezone.utc)
@@ -107,6 +108,22 @@ def test_agent_slots_counts_only_session_widgets():
         Tile("needy", 20, 0, 10, 10),
     ]
     assert agent_slots(tiles) == 2
+
+
+def test_only_message_wanting_widgets_receive_the_shared_snapshot():
+    seen = []
+
+    def watcher(ctx):
+        seen.append(ctx.messages)
+        return Image.new("RGBA", ctx.size, "red")
+
+    widgets.WIDGETS["inbox"] = WidgetSpec(watcher, wants_messages=True)
+    snapshot = MessageSnapshot(status="connected", unread_conversations=2)
+    try:
+        compose([Tile("inbox", 0, 0, 20, 10)], (20, 10), now=NOW, messages=snapshot)
+    finally:
+        del widgets.WIDGETS["inbox"]
+    assert seen == [snapshot]
     assert agent_slots([Tile("red", 0, 0, 10, 10)]) == 0
 
 

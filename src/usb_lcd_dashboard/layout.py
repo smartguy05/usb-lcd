@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw
 
 from .background import Background, background_layer
 from .model import SessionState
+from .messaging import MessageSnapshot
 from .render import ERROR, MUTED, PANEL, _fit
 
 LOG = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class TileContext:
     slot: int = -1
     connected: bool = True
     idle_title: str = ""
+    messages: MessageSnapshot | None = None
 
 
 def _overlap(a: Tile, b: Tile) -> bool:
@@ -133,6 +135,7 @@ def compose(
     background: Background | None = None,
     connected: bool = True,
     idle_title: str = "",
+    messages: MessageSnapshot | None = None,
 ) -> Image.Image:
     """Render every tile and composite them into one frame.
 
@@ -163,6 +166,7 @@ def compose(
             slot=slot if spec.wants_session else -1,
             connected=connected,
             idle_title=idle_title,
+            messages=messages if spec.wants_messages else None,
         )
         try:
             drawn = spec.render(context)

@@ -1,3 +1,11 @@
+usb-lcd-dashboard (0.7.0) noble; urgency=medium
+
+  * Add the Microsoft Teams unread-messaging widget, delegated device login,
+    secure token persistence, and settings-editor connection controls.
+  * Add the direct USB bulk transport alongside the original serial driver.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 12:00:00 +0000
+
 usb-lcd-dashboard (0.6.1) noble; urgency=medium
 
   * First Ubuntu package. Ships the dashboard, a vendored smartscreen-driver,

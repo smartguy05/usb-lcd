@@ -5,10 +5,12 @@ from PIL import ImageChops
 
 from usb_lcd_dashboard.layout import TileContext
 from usb_lcd_dashboard.model import SessionState
+from usb_lcd_dashboard.messaging import MessageItem, MessageSnapshot
 from usb_lcd_dashboard.widgets import WIDGETS
 from usb_lcd_dashboard.widgets.agent import render_agent
 from usb_lcd_dashboard.widgets.base import panel_fill
 from usb_lcd_dashboard.widgets.clock import render_clock
+from usb_lcd_dashboard.widgets.messages import render_messages
 
 
 NOW = datetime(2026, 8, 6, 14, 37, 5, tzinfo=timezone.utc)
@@ -50,10 +52,40 @@ def full_session(**kwargs):
 # ------------------------------------------------------------------- registry
 
 def test_the_registry_exposes_the_expected_widgets():
-    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy"}
+    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy", "messages"}
     assert WIDGETS["agent"].wants_session is True
     assert WIDGETS["crab"].wants_session is True
     assert WIDGETS["clock"].wants_session is False
+    assert WIDGETS["messages"].wants_messages is True
+
+
+# ------------------------------------------------------------------- messages
+
+@pytest.mark.parametrize("size", SIZES)
+@pytest.mark.parametrize("status", ["unconfigured", "disconnected", "connecting", "error"])
+def test_every_empty_messages_state_fills_its_tile(size, status):
+    image = render_messages(context(size, messages=MessageSnapshot(status=status)))
+    assert image.size == size
+    assert image.mode == "RGBA"
+
+
+@pytest.mark.parametrize("size", SIZES)
+def test_the_latest_message_renders_at_every_size(size):
+    snapshot = MessageSnapshot(
+        status="connected",
+        latest=MessageItem(
+            provider="teams",
+            conversation="Project launch",
+            sender="Alex",
+            preview="Can you review this pull request before the meeting?",
+            created_at=NOW - timedelta(minutes=2),
+        ),
+        unread_conversations=3,
+        updated_at=NOW,
+    )
+    image = render_messages(context(size, messages=snapshot))
+    assert image.size == size
+
 
 
 # ---------------------------------------------------------------------- clock

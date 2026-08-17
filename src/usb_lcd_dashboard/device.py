@@ -1,10 +1,8 @@
 """Panel transports.
 
 Display owns the dirty-rect diffing that decides *what* to send; a PanelDevice
-owns *how* it goes out. The 3.5" Turing panel is a serial smart screen driven by
-a vendor byte protocol. The 9.2" ultra-wide is not yet known to be either that or
-a monitor the OS enumerates, so WindowPanel is a deliberately loud stub rather
-than a guess.
+owns *how* it goes out. Older Turing panels use a serial protocol. Current TURZX
+panels use native USB and accept encrypted commands plus PNG/JPEG frames.
 """
 
 from __future__ import annotations
@@ -140,6 +138,63 @@ class SimulatedPanel:
         return None
 
 
+class TuringUsbPanel:
+    """TURZX native-USB panels, including the 1CBE:0092 9.2-inch model."""
+
+    def __init__(self, config: Config):
+        self.config = config
+        self.size = config.size
+        self.device = "AUTO"
+        self.usb = None
+        self.product_id = None
+
+    def open(self) -> None:
+        import usb.util
+
+        from .turing_usb import PRODUCT_SIZES, find_device, send_command
+
+        usb_device, product_id = find_device()
+        native_size = PRODUCT_SIZES[product_id]
+        if self.config.size != native_size:
+            usb.util.dispose_resources(usb_device)
+            raise ValueError(
+                f"TURZX USB {product_id:04x} is {native_size[0]}x{native_size[1]}, "
+                f"but the config asks for {self.config.width}x{self.config.height}"
+            )
+        send_command(usb_device, 10)  # synchronize
+        send_command(usb_device, 14, bytes((round(self.config.brightness / 100 * 102),)))
+        self.usb = usb_device
+        self.product_id = product_id
+        self.device = f"USB {0x1CBE:04X}:{product_id:04X}"
+
+    def close(self) -> None:
+        if self.usb is not None:
+            import usb.util
+
+            usb.util.dispose_resources(self.usb)
+            self.usb = None
+
+    def write(self, image: Image.Image, pos: tuple[int, int] = (0, 0)) -> None:
+        if self.usb is None:
+            raise ConnectionError("display is not connected")
+        if pos != (0, 0) or image.size != self.size:
+            raise ValueError("TURZX USB panels require full-frame writes")
+        from .turing_usb import send_image
+
+        # The USB protocol always consumes the panel's native portrait buffer.
+        if self.config.orientation == "landscape":
+            image = image.transpose(Image.Transpose.ROTATE_270)
+        else:
+            image = image.transpose(Image.Transpose.ROTATE_180)
+        send_image(self.usb, image)
+
+    def supports_partial(self) -> bool:
+        return False
+
+    def health_check(self) -> None:
+        return None
+
+
 class WindowPanel:
     """A panel the OS enumerates as a monitor. Not implemented yet.
 
@@ -163,6 +218,8 @@ def make_device(config: Config, simulate: bool = False) -> PanelDevice:
         return SimulatedPanel(config)
     if config.display_kind in ("turing_rev_a", "auto"):
         return SerialPanel(config)
+    if config.display_kind == "turing_usb":
+        return TuringUsbPanel(config)
     if config.display_kind == "window":
         return WindowPanel(config)
     raise ValueError(f"unknown display.kind: {config.display_kind!r}")

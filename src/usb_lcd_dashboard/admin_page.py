@@ -82,6 +82,8 @@ PAGE = r"""<!doctype html>
   .ro { font-size: 12px; color: var(--muted); }
   .ro code { color: var(--text); }
   .empty { color: var(--muted); font-size: 13px; }
+  .connection { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .code { font: 600 18px/1.4 ui-monospace, monospace; letter-spacing: .08em; }
 </style>
 </head>
 <body>
@@ -141,6 +143,11 @@ PAGE = r"""<!doctype html>
     </section>
 
     <section>
+      <h2>Connections</h2>
+      <div id="teamsConnection"><p class="empty">Loading Teams status…</p></div>
+    </section>
+
+    <section>
       <h2>Not editable here</h2>
       <div class="ro" id="roInfo"></div>
     </section>
@@ -151,6 +158,7 @@ PAGE = r"""<!doctype html>
 "use strict";
 const $ = (id) => document.getElementById(id);
 let cfg = null, widgets = [], sel = -1, dirty = false;
+let teams = null;
 
 const STAGE_MAX = 1000;
 const scale = () => Math.min(1, STAGE_MAX / Math.max(1, cfg.display.width));
@@ -161,6 +169,73 @@ function setStatus(text, cls) {
   const el = $("status");
   el.textContent = text;
   el.className = cls || "";
+}
+
+async function teamsAction(action) {
+  setStatus(action === "connect" ? "Starting Teams sign-in…" : "Disconnecting Teams…", "busy");
+  const response = await fetch("api/integrations/teams/" + action, {
+    method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Teams action failed");
+  teams = body;
+  drawTeams();
+  setStatus("", "");
+}
+
+function drawTeams() {
+  const host = $("teamsConnection");
+  if (!host || !teams) return;
+  host.innerHTML = "";
+  const line = document.createElement("div");
+  const status = teams.status || "unknown";
+  line.textContent = "Microsoft Teams · " + status + (teams.account ? " · " + teams.account : "");
+  host.appendChild(line);
+  if (!teams.configured) {
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.textContent = "Set USB_LCD_TEAMS_CLIENT_ID and USB_LCD_TEAMS_TENANT_ID, then restart the dashboard.";
+    host.appendChild(hint);
+    return;
+  }
+  if (teams.user_code) {
+    const instruction = document.createElement("div");
+    instruction.className = "hint";
+    instruction.textContent = "Open the Microsoft sign-in page and enter:";
+    const code = document.createElement("div");
+    code.className = "code"; code.textContent = teams.user_code;
+    const link = document.createElement("a");
+    link.href = teams.verification_uri; link.target = "_blank"; link.rel = "noopener";
+    link.textContent = teams.verification_uri || "Open Microsoft sign-in";
+    host.append(instruction, code, link);
+  }
+  if (teams.error) {
+    const error = document.createElement("div");
+    error.className = "hint"; error.style.color = "var(--err)"; error.textContent = teams.error;
+    host.appendChild(error);
+  }
+  const actions = document.createElement("div"); actions.className = "connection";
+  if (status !== "connecting") {
+    const connect = document.createElement("button");
+    connect.textContent = status === "connected" ? "Reconnect" : "Connect";
+    connect.addEventListener("click", () => teamsAction("connect").catch((e) => setStatus(String(e), "err")));
+    actions.appendChild(connect);
+  }
+  if (status === "connected" || teams.account) {
+    const disconnect = document.createElement("button"); disconnect.className = "danger";
+    disconnect.textContent = "Disconnect";
+    disconnect.addEventListener("click", () => teamsAction("disconnect").catch((e) => setStatus(String(e), "err")));
+    actions.appendChild(disconnect);
+  }
+  host.appendChild(actions);
+}
+
+async function refreshTeams() {
+  try {
+    const response = await fetch("api/integrations/teams");
+    teams = await response.json();
+    drawTeams();
+  } catch (_) { /* The panel editor remains useful if an integration check fails. */ }
 }
 
 function markDirty() {
@@ -395,7 +470,7 @@ function drawSideForms() {
   const d = $("displayForm");
   d.innerHTML = "";
   choice(d, "Kind", cfg.display.kind,
-    ["turing_rev_a", "auto", "simulated", "window"], (v) => { cfg.display.kind = v; });
+    ["turing_rev_a", "turing_usb", "auto", "simulated", "window"], (v) => { cfg.display.kind = v; });
   field(d, "Device", cfg.display.device, "text", (v) => { cfg.display.device = v; },
     'Serial port, or AUTO');
   const size = document.createElement("div");
@@ -549,6 +624,8 @@ window.addEventListener("beforeunload", (e) => {
 
 load().then(refreshPreview).catch((err) => setStatus(String(err), "err"));
 setInterval(refreshPreview, 2000);
+refreshTeams();
+setInterval(refreshTeams, 2000);
 </script>
 </body>
 </html>

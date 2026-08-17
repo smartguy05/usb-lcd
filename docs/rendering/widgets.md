@@ -16,11 +16,11 @@ shape `render_dashboard` always had — they were full-screen widgets all along.
 | `crab` | yes | The animated mascot. See [crab.md](crab.md). |
 | `clock` | no | Time and date. |
 | `legacy` | yes | The 480×320 original; meant to be the only tile. |
+| `messages` | no | Latest unread Teams chat from the daemon's cached snapshot. |
 
-`WidgetSpec` (`:50`): `render`, `wants_session`, `options`, `help`.
-`wants_session` is *"the only cross-tile resource in play. Everything else a
-widget needs it fetches itself from its own options, so this stays a bool, not a
-DSL."*
+`WidgetSpec` (`:50`): `render`, `wants_session`, `wants_messages`, `options`,
+`help`. The first flag assigns an agent session; the second supplies the shared,
+immutable messaging snapshot. Network work remains outside rendering.
 
 `Option(type, default, help)` (`:35`) with `type` in
 `("bool", "text", "number", "color")`. `describe()` (`:105`) serialises the

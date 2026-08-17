@@ -79,6 +79,12 @@ def _command_prefix(explicit: str | None = None) -> str:
     )
     script = Path(sys.executable).with_name(executable_name)
     if script.exists():
+        if os.name == "nt":
+            # Claude Code launches hooks through Bash even on Windows.  An
+            # unquoted ``C:\\...`` command is parsed as escapes and collapses
+            # into ``C:Users...``.  Git Bash accepts a quoted C:/ path and
+            # Windows also accepts forward slashes.
+            return f'"{script.as_posix()}"'
         return _quote_command([str(script)])
     return _quote_command([_hook_interpreter(), "-m", "usb_lcd_dashboard"])
 
@@ -221,6 +227,7 @@ def install(executable: str | None = None) -> None:
             "After=graphical-session.target\n\n"
             "[Service]\n"
             "Type=simple\n"
+            f"EnvironmentFile=-{state_dir}/teams.env\n"
             f"ExecStart={command_prefix} run\n"
             "Restart=on-failure\n"
             "RestartSec=3\n"

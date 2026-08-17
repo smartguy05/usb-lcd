@@ -5,15 +5,20 @@ Unicode True
 !define APP_NAME "USB LCD Dashboard"
 ; build-installer.sh passes -DAPP_VERSION from pyproject.toml, the single source.
 !ifndef APP_VERSION
-    !define APP_VERSION "0.6.1"
+    !define APP_VERSION "0.7.0"
 !endif
 !define APP_PUBLISHER "USB LCD Dashboard"
 !define APP_KEY "Software\USB LCD Dashboard"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\USB LCD Dashboard"
-!define PAYLOAD "payload"
+!ifndef PAYLOAD
+    !define PAYLOAD "payload"
+!endif
+!ifndef OUTPUT_FILE
+    !define OUTPUT_FILE "/work/dist/USB-LCD-Dashboard-Setup-${APP_VERSION}.exe"
+!endif
 
 Name "${APP_NAME}"
-OutFile "/work/dist/USB-LCD-Dashboard-Setup-${APP_VERSION}.exe"
+OutFile "${OUTPUT_FILE}"
 InstallDir "$LOCALAPPDATA\Programs\USB LCD Dashboard"
 InstallDirRegKey HKCU "${APP_KEY}" "InstallDir"
 RequestExecutionLevel user
@@ -57,7 +62,7 @@ Section "Install" SEC_MAIN
     runtime_stopped:
 
     SetOutPath "$INSTDIR"
-    File /r "${PAYLOAD}/*.*"
+    File /r "${PAYLOAD}\*.*"
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 
     ExecWait '"$INSTDIR\python.exe" -m usb_lcd_dashboard install' $0
