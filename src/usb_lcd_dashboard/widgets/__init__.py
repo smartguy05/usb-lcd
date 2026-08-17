@@ -26,6 +26,8 @@ from .clock import render_clock
 from .crab import render_crab
 from .legacy import render_legacy
 from .messages import render_messages
+from .notifications import render_notifications
+from .todos import render_todos
 
 Renderer = Callable[[TileContext], Image.Image]
 
@@ -55,6 +57,8 @@ class WidgetSpec:
     # fetches itself from its own options, so this stays a bool, not a DSL.
     wants_session: bool = False
     wants_messages: bool = False
+    wants_notifications: bool = False
+    wants_todos: bool = False
     options: dict[str, Option] = field(default_factory=dict)
     help: str = ""
 
@@ -105,10 +109,30 @@ WIDGETS: dict[str, WidgetSpec] = {
         render_messages,
         wants_messages=True,
         options={
-            "title": Option("text", "Teams", "Heading shown above the latest unread chat"),
+            "title": Option("text", "Discord", "Heading above the newest message"),
             **COMMON_OPTIONS,
         },
-        help="The newest unread Microsoft Teams chat and the number of unread chats.",
+        help="Newest human message from selected Discord channels and the local new-message count.",
+    ),
+    "notifications": WidgetSpec(
+        render_notifications,
+        wants_notifications=True,
+        options={
+            "title": Option("text", "Notifications", "Heading above the notification"),
+            "rotation_seconds": Option("number", 8, "Seconds before showing the next notification"),
+            **COMMON_OPTIONS,
+        },
+        help="Filtered Windows notifications, rotating newest first.",
+    ),
+    "todos": WidgetSpec(
+        render_todos,
+        wants_todos=True,
+        options={
+            "title": Option("text", "Todos", "Heading above the human action list"),
+            "rotation_seconds": Option("number", 8, "Seconds before showing the next page"),
+            **COMMON_OPTIONS,
+        },
+        help="Your persistent human action list, shared with the settings editor, Claude Code, and Codex.",
     ),
 }
 
@@ -120,6 +144,8 @@ def describe() -> list[dict[str, Any]]:
             "name": name,
             "wants_session": spec.wants_session,
             "wants_messages": spec.wants_messages,
+            "wants_notifications": spec.wants_notifications,
+            "wants_todos": spec.wants_todos,
             "help": spec.help,
             "options": [
                 {

@@ -20,8 +20,7 @@ PYUSB_VERSION="1.3.1"
 PYCRYPTODOME_VERSION="3.23.0"
 LIBUSB_PACKAGE_VERSION="1.0.30.0"
 IMPORTLIB_RESOURCES_VERSION="7.1.0"
-MSAL_VERSION="1.37.0"
-MSAL_EXTENSIONS_VERSION="1.3.1"
+PYWINRT_VERSION="3.2.1"
 NSIS_VERSION="3.12"
 NSIS_ARCHIVE="nsis-${NSIS_VERSION}.zip"
 NSIS_URL="https://prdownloads.sourceforge.net/nsis/${NSIS_ARCHIVE}"
@@ -100,8 +99,12 @@ printf '%s  %s\n' "$PYTHON_SHA256" "$CACHE_DIR/$PYTHON_ARCHIVE" | sha256sum --ch
     "pycryptodome==$PYCRYPTODOME_VERSION" \
     "libusb-package==$LIBUSB_PACKAGE_VERSION" \
     "importlib-resources==$IMPORTLIB_RESOURCES_VERSION" \
-    "msal==$MSAL_VERSION" \
-    "msal-extensions==$MSAL_EXTENSIONS_VERSION"
+    "winrt-Windows.UI.Notifications==$PYWINRT_VERSION" \
+    "winrt-Windows.UI.Notifications.Management==$PYWINRT_VERSION" \
+    "winrt-Windows.Foundation==$PYWINRT_VERSION" \
+    "winrt-Windows.Foundation.Collections==$PYWINRT_VERSION" \
+    "winrt-Windows.ApplicationModel==$PYWINRT_VERSION" \
+    "winrt-Windows.Data.Xml.Dom==$PYWINRT_VERSION"
 "$HOST_PYTHON" -m pip wheel \
     --no-deps \
     --wheel-dir "$CACHE_DIR" \
@@ -116,6 +119,8 @@ find "$SITE_DIR" -type d -name __pycache__ -prune -exec rm -rf {} +
 find "$SITE_DIR" -type f -name '*.pyc' -delete
 cp "$PROJECT_DIR/LICENSE" "$PAYLOAD_DIR/LICENSE-USB-LCD-Dashboard.txt"
 cp "$PROJECT_DIR/WINDOWS.md" "$PAYLOAD_DIR/README-Windows.txt"
+cp "$PROJECT_DIR/packaging/windows/register-identity.ps1" "$PAYLOAD_DIR/"
+cp "$PROJECT_DIR/packaging/windows/unregister-identity.ps1" "$PAYLOAD_DIR/"
 
 PTH_FILE="$PAYLOAD_DIR/python312._pth"
 sed -i '/^\.$/a Lib/site-packages' "$PTH_FILE"
@@ -123,6 +128,10 @@ sed -i 's/^#import site/import site/' "$PTH_FILE"
 
 case "$(uname -s)" in
     MINGW*|MSYS*)
+        powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass \
+            -File "$(cygpath -w "$PROJECT_DIR/packaging/windows/build-identity.ps1")" \
+            -PayloadDir "$(cygpath -w "$PAYLOAD_DIR")" \
+            -Version "$APP_VERSION"
         curl --fail --location --retry 3 --output "$CACHE_DIR/$NSIS_ARCHIVE" "$NSIS_URL"
         printf '%s  %s\n' "$NSIS_SHA256" "$CACHE_DIR/$NSIS_ARCHIVE" | sha256sum --check --status
         "$HOST_PYTHON" -m zipfile -e "$CACHE_DIR/$NSIS_ARCHIVE" "$BUILD_DIR/nsis"
@@ -135,13 +144,9 @@ case "$(uname -s)" in
         )
         ;;
     *)
-        container_run \
-            --env HOST_UID="$HOST_UID" \
-            --env HOST_GID="$HOST_GID" \
-            --env APP_VERSION="$APP_VERSION" \
-            --workdir /work \
-            ubuntu:24.04 \
-            bash -lc 'apt-get update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get install -y nsis >/dev/null && makensis -DAPP_VERSION="$APP_VERSION" packaging/windows/installer.nsi && { chown "$HOST_UID:$HOST_GID" "dist/USB-LCD-Dashboard-Setup-$APP_VERSION.exe" || true; }'
+        echo "The notification-enabled Windows installer must be built on Windows so mt.exe can attach package identity to pythonw.exe." >&2
+        echo "Run this script from Git Bash with the Windows 10/11 SDK installed." >&2
+        exit 1
         ;;
 esac
 

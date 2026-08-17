@@ -9,7 +9,7 @@ from ..messaging import MessageSnapshot
 from ..render import ERROR, MUTED, TEXT, WARNING, _fit, _font, _wrap
 from .base import new_tile
 
-TEAMS = "#7b83eb"
+DISCORD = "#5865f2"
 
 
 def _age(ctx: TileContext, snapshot: MessageSnapshot) -> str:
@@ -39,22 +39,22 @@ def render_messages(ctx: TileContext) -> Image.Image:
     width, height = ctx.size
     image, draw = new_tile(ctx.size, ctx.options)
     snapshot = ctx.messages or MessageSnapshot()
-    title = str(ctx.options.get("title") or "Teams")
+    title = str(ctx.options.get("title") or "Discord")
 
     if snapshot.status == "unconfigured":
-        _empty(draw, ctx.size, title, "SET UP TEAMS INTEGRATION", WARNING)
+        _empty(draw, ctx.size, title, "SET UP DISCORD INTEGRATION", WARNING)
         return image
     if snapshot.status == "connecting":
-        _empty(draw, ctx.size, title, "WAITING FOR SIGN-IN", TEAMS)
+        _empty(draw, ctx.size, title, "CONNECTING", DISCORD)
         return image
     if snapshot.status == "disconnected":
         _empty(draw, ctx.size, title, "CONNECT IN SETTINGS", MUTED)
         return image
     if snapshot.latest is None:
         if snapshot.status == "error":
-            _empty(draw, ctx.size, title, "TEAMS UNAVAILABLE", ERROR)
+            _empty(draw, ctx.size, title, "DISCORD UNAVAILABLE", ERROR)
         else:
-            _empty(draw, ctx.size, title, "NO UNREAD CHATS", TEAMS)
+            _empty(draw, ctx.size, title, "NO NEW MESSAGES", DISCORD)
         return image
 
     item = snapshot.latest
@@ -64,15 +64,15 @@ def render_messages(ctx: TileContext) -> Image.Image:
     normal = max(9, round(height * 0.095))
 
     heading, heading_font = _fit(draw, title, inner * 0.65, small, True)
-    draw.text((pad, pad), heading, font=heading_font, fill=TEAMS)
-    count = f"{snapshot.unread_conversations} unread"
+    draw.text((pad, pad), heading, font=heading_font, fill=DISCORD)
+    count = "99+ new" if snapshot.unread_conversations >= 100 else f"{snapshot.unread_conversations} new"
     count, count_font = _fit(draw, count, inner * 0.4, small, True)
     draw.text((width - pad, pad), count, font=count_font, fill=WARNING, anchor="ra")
 
     conversation, conversation_font = _fit(draw, item.conversation, inner, normal, True)
     draw.text((pad, height * 0.25), conversation, font=conversation_font, fill=TEXT)
     sender, sender_font = _fit(draw, item.sender, inner, small, True)
-    draw.text((pad, height * 0.40), sender, font=sender_font, fill=TEAMS)
+    draw.text((pad, height * 0.40), sender, font=sender_font, fill=DISCORD)
 
     preview_font = _font(max(8, round(height * 0.085)))
     lines = _wrap(draw, item.preview, inner, preview_font)
@@ -90,4 +90,3 @@ def render_messages(ctx: TileContext) -> Image.Image:
     footer, footer_font = _fit(draw, footer, inner, small)
     draw.text((width - pad, height - pad), footer, font=footer_font, fill=MUTED, anchor="rd")
     return image
-

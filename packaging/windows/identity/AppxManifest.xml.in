@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+         xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap uap3 uap10 rescap">
+  <Identity Name="USBLCDDashboard.Personal" Publisher="CN=USB LCD Dashboard Personal"
+            Version="@VERSION@" ProcessorArchitecture="x64" />
+  <Properties>
+    <DisplayName>USB LCD Dashboard</DisplayName>
+    <PublisherDisplayName>USB LCD Dashboard</PublisherDisplayName>
+    <Logo>screencap.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0"
+                        MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Resources><Resource Language="en-us" /></Resources>
+  <Applications>
+    <Application Id="Dashboard" Executable="pythonw.exe"
+                 uap10:RuntimeBehavior="win32App" uap10:TrustLevel="mediumIL">
+      <uap:VisualElements DisplayName="USB LCD Dashboard"
+          Description="USB LCD Dashboard" BackgroundColor="transparent"
+          Square150x150Logo="screencap.png" Square44x44Logo="screencap.png" />
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <uap3:Capability Name="userNotificationListener" />
+  </Capabilities>
+</Package>

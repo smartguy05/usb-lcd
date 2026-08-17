@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-13T21:04:52Z",
+ "generated": "2026-08-17T20:21:32Z",
  "documents": [
   {
    "path": "docs/admin/README.md",
@@ -36,7 +36,7 @@
     "admin.py:314",
     "admin.py:41"
    ],
-   "words": 639
+   "words": 722
   },
   {
    "path": "docs/admin/tray.md",
@@ -98,7 +98,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 702
+   "words": 724
   },
   {
    "path": "docs/architecture/overview.md",
@@ -147,7 +147,7 @@
     "cli.py:26",
     "cli.py:53"
    ],
-   "words": 519
+   "words": 577
   },
   {
    "path": "docs/integration/install.md",
@@ -172,7 +172,20 @@
     "install.py:74",
     "install.py:98"
    ],
-   "words": 684
+   "words": 732
+  },
+  {
+   "path": "docs/integration/messaging.md",
+   "title": "Messaging and notification sources",
+   "headings": [],
+   "covers": [
+    "src/usb_lcd_dashboard/discord.py",
+    "src/usb_lcd_dashboard/messaging.py",
+    "src/usb_lcd_dashboard/notifications.py",
+    "src/usb_lcd_dashboard/teams.py"
+   ],
+   "citations": [],
+   "words": 160
   },
   {
    "path": "docs/integration/README.md",
@@ -184,7 +197,18 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 196
+   "words": 218
+  },
+  {
+   "path": "docs/integration/todos.md",
+   "title": "Human todos",
+   "headings": [],
+   "covers": [
+    "src/usb_lcd_dashboard/todos.py",
+    "src/usb_lcd_dashboard/mcp.py"
+   ],
+   "citations": [],
+   "words": 147
   },
   {
    "path": "docs/packaging/linux.md",
@@ -245,7 +269,7 @@
     "packaging/windows/config.example.toml"
    ],
    "citations": [],
-   "words": 510
+   "words": 574
   },
   {
    "path": "docs/README.md",
@@ -289,7 +313,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 455
+   "words": 560
   },
   {
    "path": "docs/reference/phases.md",
@@ -376,7 +400,7 @@
     "layout.py:68",
     "layout.py:98"
    ],
-   "words": 745
+   "words": 765
   },
   {
    "path": "docs/rendering/README.md",
@@ -421,6 +445,7 @@
     "agent.py",
     "clock.py",
     "legacy.py",
+    "todos.py",
     "Tests",
     "See also"
    ],
@@ -429,7 +454,10 @@
     "src/usb_lcd_dashboard/widgets/base.py",
     "src/usb_lcd_dashboard/widgets/agent.py",
     "src/usb_lcd_dashboard/widgets/clock.py",
-    "src/usb_lcd_dashboard/widgets/legacy.py"
+    "src/usb_lcd_dashboard/widgets/legacy.py",
+    "src/usb_lcd_dashboard/widgets/messages.py",
+    "src/usb_lcd_dashboard/widgets/notifications.py",
+    "src/usb_lcd_dashboard/widgets/todos.py"
    ],
    "citations": [
     "agent.py:67",
@@ -440,7 +468,7 @@
     "legacy.py:18",
     "widgets/__init__.py:60"
    ],
-   "words": 707
+   "words": 791
   },
   {
    "path": "docs/runtime/config.md",
@@ -506,7 +534,8 @@
     "See also"
    ],
    "covers": [
-    "src/usb_lcd_dashboard/device.py"
+    "src/usb_lcd_dashboard/device.py",
+    "src/usb_lcd_dashboard/turing_usb.py"
    ],
    "citations": [
     "device.py:113",
@@ -517,7 +546,7 @@
     "device.py:42",
     "device.py:98"
    ],
-   "words": 564
+   "words": 565
   },
   {
    "path": "docs/runtime/display.md",

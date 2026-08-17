@@ -1,6 +1,6 @@
 # The widget registry
 
-> **Covers:** `src/usb_lcd_dashboard/widgets/__init__.py`, `src/usb_lcd_dashboard/widgets/base.py`, `src/usb_lcd_dashboard/widgets/agent.py`, `src/usb_lcd_dashboard/widgets/clock.py`, `src/usb_lcd_dashboard/widgets/legacy.py`
+> **Covers:** `src/usb_lcd_dashboard/widgets/__init__.py`, `src/usb_lcd_dashboard/widgets/base.py`, `src/usb_lcd_dashboard/widgets/agent.py`, `src/usb_lcd_dashboard/widgets/clock.py`, `src/usb_lcd_dashboard/widgets/legacy.py`, `src/usb_lcd_dashboard/widgets/messages.py`, `src/usb_lcd_dashboard/widgets/notifications.py`, `src/usb_lcd_dashboard/widgets/todos.py`
 
 A widget is a plain function: `TileContext -> Image` of the tile's exact size,
 in **RGBA** so a tile can be translucent over a wallpaper. That is the same
@@ -16,11 +16,15 @@ shape `render_dashboard` always had — they were full-screen widgets all along.
 | `crab` | yes | The animated mascot. See [crab.md](crab.md). |
 | `clock` | no | Time and date. |
 | `legacy` | yes | The 480×320 original; meant to be the only tile. |
-| `messages` | no | Latest unread Teams chat from the daemon's cached snapshot. |
+| `messages` | no | Latest human Discord message and local new-message count. |
+| `notifications` | no | Filtered active Windows notifications, rotating newest-first. |
+| `todos` | no | Prioritized pages from the persistent human action list. |
 
-`WidgetSpec` (`:50`): `render`, `wants_session`, `wants_messages`, `options`,
-`help`. The first flag assigns an agent session; the second supplies the shared,
-immutable messaging snapshot. Network work remains outside rendering.
+`WidgetSpec` (`:50`): `render`, `wants_session`, `wants_messages`,
+`wants_notifications`, `wants_todos`, `options`,
+`help`. The first flag assigns an agent session; the second is reserved for a
+future provider-neutral messaging snapshot. Network work remains outside
+rendering.
 
 `Option(type, default, help)` (`:35`) with `type` in
 `("bool", "text", "number", "color")`. `describe()` (`:105`) serialises the
@@ -99,6 +103,13 @@ three conditions for the fast path in
 
 Its only option is `title`, overriding `dashboard.idle_title`. It omits
 `COMMON_OPTIONS` because it paints its own opaque background.
+
+## todos.py
+
+`render_todos(ctx)` renders only the immutable snapshot supplied by the daemon.
+Overdue, today, and seven-day deadlines lead; remaining items follow priority,
+with manual position breaking equal tiers. Capacity derives from tile height and
+pages change from `ctx.now` at `rotation_seconds`, so rendering is reproducible.
 
 ## Tests
 

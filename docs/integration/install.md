@@ -2,7 +2,7 @@
 
 > **Covers:** `src/usb_lcd_dashboard/install.py`
 
-Merges hooks into the user's CLI settings, preserves an existing status line,
+Merges hooks and human-todo MCP tools into the user's CLI settings, preserves an existing status line,
 seeds a config, and on Linux writes and starts a systemd user unit. Everything
 it does is recorded in `install-state.json` so `uninstall` can undo it.
 
@@ -48,7 +48,7 @@ rather than a symlink somewhere else.
 
 1. Create the state directory; load `install-state.json` if it exists, so a
    re-run is idempotent.
-2. **Back up** `~/.claude/settings.json` and `~/.codex/hooks.json` — once ever,
+2. **Back up** the hook files plus `~/.claude.json` and `~/.codex/config.toml` — once ever,
    guarded by a key in the state file, so re-running never overwrites the
    original backup with an already-modified file.
 3. **Preserve the status line.** The existing `statusLine` command is captured
@@ -60,11 +60,14 @@ rather than a symlink somewhere else.
    `usb-lcd-dashboard` or `usb_lcd_dashboard` — that substring is how it
    identifies its own entries — then appends a fresh one with `timeout: 2`.
    Other tools' hooks are left alone. Written atomically.
-5. **Seed the config** only if none exists, with the platform's device and IPC
+5. **Merge todo MCP tools.** Add a user-scoped stdio server to Claude Code and
+   Codex without rewriting unrelated settings; record a displaced same-name
+   entry so uninstall can restore it.
+6. **Seed the config** only if none exists, with the platform's device and IPC
    mode.
-6. **On POSIX**, write `~/.config/systemd/user/usb-lcd-dashboard.service`, then
+7. **On POSIX**, write `~/.config/systemd/user/usb-lcd-dashboard.service`, then
    `daemon-reload` and `enable --now`.
-7. Write `install-state.json` and print what happened.
+8. Write `install-state.json` and print what happened.
 
 ### The unit
 
@@ -105,7 +108,9 @@ captured `statusLine` (popping the key entirely if there was none), and on POSIX
 `default.target.wants` symlink and the daemon still running with the panel held
 open.
 
-It deliberately **keeps** `config.toml`, the backups, and `install-state.json`.
+It also removes the installed MCP entries and restores displaced entries. It
+deliberately **keeps** `config.toml`, `todos.sqlite3`, backups, and
+`install-state.json`.
 
 ## Re-run after upgrading
 

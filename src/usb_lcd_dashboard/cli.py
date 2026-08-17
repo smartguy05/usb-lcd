@@ -38,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("install")
     sub.add_parser("uninstall")
     sub.add_parser("shutdown")
+    sub.add_parser("mcp")
     args = parser.parse_args(argv)
 
     log_options = {}
@@ -50,6 +51,12 @@ def main(argv: list[str] | None = None) -> int:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         **log_options,
     )
+    # The todo MCP server is a standalone local tool. A broken display or IPC
+    # setting must not prevent the user or an agent from managing the list.
+    if args.command == "mcp":
+        from .mcp import serve
+
+        return serve()
     # Only the commands that put pixels on the panel need a layout they can
     # actually draw. A hook needs the IPC address and nothing else, and
     # install/uninstall need the paths — so a bad tile rect must not fail them.

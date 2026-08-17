@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-13T21:04:52Z",
+ "generated": "2026-08-17T20:21:32Z",
  "by_source": {
   "src/usb_lcd_dashboard/admin.py": [
    "docs/admin/settings-editor.md"
@@ -24,6 +24,24 @@
   ],
   "src/usb_lcd_dashboard/install.py": [
    "docs/integration/install.md"
+  ],
+  "src/usb_lcd_dashboard/discord.py": [
+   "docs/integration/messaging.md"
+  ],
+  "src/usb_lcd_dashboard/messaging.py": [
+   "docs/integration/messaging.md"
+  ],
+  "src/usb_lcd_dashboard/notifications.py": [
+   "docs/integration/messaging.md"
+  ],
+  "src/usb_lcd_dashboard/teams.py": [
+   "docs/integration/messaging.md"
+  ],
+  "src/usb_lcd_dashboard/todos.py": [
+   "docs/integration/todos.md"
+  ],
+  "src/usb_lcd_dashboard/mcp.py": [
+   "docs/integration/todos.md"
   ],
   "packaging/linux/build-deb.sh": [
    "docs/packaging/linux.md"
@@ -94,6 +112,15 @@
   "src/usb_lcd_dashboard/widgets/legacy.py": [
    "docs/rendering/widgets.md"
   ],
+  "src/usb_lcd_dashboard/widgets/messages.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/notifications.py": [
+   "docs/rendering/widgets.md"
+  ],
+  "src/usb_lcd_dashboard/widgets/todos.py": [
+   "docs/rendering/widgets.md"
+  ],
   "src/usb_lcd_dashboard/config.py": [
    "docs/runtime/config.md"
   ],
@@ -101,6 +128,9 @@
    "docs/runtime/daemon.md"
   ],
   "src/usb_lcd_dashboard/device.py": [
+   "docs/runtime/device.md"
+  ],
+  "src/usb_lcd_dashboard/turing_usb.py": [
    "docs/runtime/device.md"
   ],
   "src/usb_lcd_dashboard/display.py": [

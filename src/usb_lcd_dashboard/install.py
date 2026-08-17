@@ -7,6 +7,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -44,6 +45,13 @@ def _atomic_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(data, indent=2) + "\n")
+    os.replace(temporary, path)
+
+
+def _atomic_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text)
     os.replace(temporary, path)
 
 
@@ -87,6 +95,45 @@ def _command_prefix(explicit: str | None = None) -> str:
             return f'"{script.as_posix()}"'
         return _quote_command([str(script)])
     return _quote_command([_hook_interpreter(), "-m", "usb_lcd_dashboard"])
+
+
+def _mcp_command(explicit: str | None = None) -> tuple[str, list[str]]:
+    if explicit:
+        return explicit, ["mcp"]
+    executable_name = "usb-lcd-dashboard.exe" if os.name == "nt" else "usb-lcd-dashboard"
+    script = Path(sys.executable).with_name(executable_name)
+    if script.exists():
+        return str(script), ["mcp"]
+    # MCP is stdio: unlike hooks it must use console python.exe on Windows so
+    # the client can attach pipes. pythonw.exe deliberately has no stdio.
+    interpreter = Path(sys.executable)
+    if os.name == "nt" and interpreter.name.casefold() == "pythonw.exe":
+        interpreter = interpreter.with_name("python.exe")
+    return str(interpreter), ["-m", "usb_lcd_dashboard", "mcp"]
+
+
+MCP_NAME = "usb-lcd-dashboard-todos"
+_CODEX_MCP_HEADER = f"[mcp_servers.{MCP_NAME}]"
+_CODEX_MCP_PATTERN = re.compile(
+    rf"(?ms)^\[mcp_servers\.(?:{re.escape(MCP_NAME)}|\"{re.escape(MCP_NAME)}\")\]\s*\n.*?(?=^\[|\Z)"
+)
+
+
+def _codex_mcp_section(command: str, args: list[str]) -> str:
+    return (
+        f"{_CODEX_MCP_HEADER}\n"
+        f"command = {json.dumps(command)}\n"
+        f"args = {json.dumps(args)}\n"
+    )
+
+
+def _replace_codex_mcp(text: str, replacement: str | None) -> tuple[str, str | None]:
+    match = _CODEX_MCP_PATTERN.search(text)
+    previous = match.group(0).rstrip() if match else None
+    without = _CODEX_MCP_PATTERN.sub("", text).rstrip()
+    if replacement:
+        without = f"{without}\n\n{replacement.strip()}" if without else replacement.strip()
+    return without.rstrip() + "\n", previous
 
 
 def _hook_interpreter() -> str:
@@ -175,6 +222,7 @@ def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -
 
 def install(executable: str | None = None) -> None:
     command_prefix = _command_prefix(executable)
+    mcp_command, mcp_args = _mcp_command(executable)
     state_dir = config_home() / "usb-lcd-dashboard"
     state_dir.mkdir(parents=True, exist_ok=True)
     state_path = state_dir / "install-state.json"
@@ -182,10 +230,16 @@ def install(executable: str | None = None) -> None:
 
     claude_path = Path.home() / ".claude/settings.json"
     codex_path = Path.home() / ".codex/hooks.json"
+    claude_user_path = Path.home() / ".claude.json"
+    codex_config_path = Path.home() / ".codex/config.toml"
     if "claude_backup" not in state:
         state["claude_backup"] = _backup(claude_path)
     if "codex_backup" not in state:
         state["codex_backup"] = _backup(codex_path)
+    if "claude_user_backup" not in state:
+        state["claude_user_backup"] = _backup(claude_user_path)
+    if "codex_config_backup" not in state:
+        state["codex_config_backup"] = _backup(codex_config_path)
 
     claude = _read_json(claude_path)
     original_status = claude.get("statusLine")
@@ -211,6 +265,29 @@ def install(executable: str | None = None) -> None:
     _merge_hooks(codex, "codex", command_prefix)
     _atomic_json(codex_path, codex)
 
+    claude_user = _read_json(claude_user_path)
+    claude_servers = claude_user.setdefault("mcpServers", {})
+    if not isinstance(claude_servers, dict):
+        raise ValueError("~/.claude.json mcpServers must be an object")
+    if "claude_todo_mcp_previous" not in state:
+        state["claude_todo_mcp_previous"] = claude_servers.get(MCP_NAME)
+        state["claude_todo_mcp_had_previous"] = MCP_NAME in claude_servers
+    claude_servers[MCP_NAME] = {
+        "type": "stdio", "command": mcp_command, "args": mcp_args, "env": {}
+    }
+    _atomic_json(claude_user_path, claude_user)
+
+    try:
+        codex_text = codex_config_path.read_text()
+    except FileNotFoundError:
+        codex_text = ""
+    codex_updated, previous_section = _replace_codex_mcp(
+        codex_text, _codex_mcp_section(mcp_command, mcp_args)
+    )
+    if "codex_todo_mcp_previous" not in state:
+        state["codex_todo_mcp_previous"] = previous_section
+    _atomic_text(codex_config_path, codex_updated)
+
     config_path = state_dir / "config.toml"
     if not config_path.exists():
         device = "AUTO" if os.name == "nt" else "/dev/turing-lcd"
@@ -227,7 +304,6 @@ def install(executable: str | None = None) -> None:
             "After=graphical-session.target\n\n"
             "[Service]\n"
             "Type=simple\n"
-            f"EnvironmentFile=-{state_dir}/teams.env\n"
             f"ExecStart={command_prefix} run\n"
             "Restart=on-failure\n"
             "RestartSec=3\n"
@@ -259,6 +335,7 @@ def install(executable: str | None = None) -> None:
             print("  systemctl --user daemon-reload")
             print("  systemctl --user enable --now usb-lcd-dashboard")
     print("The existing Claude status-line command is preserved behind a proxy.")
+    print("Installed human-todo MCP tools for Claude Code and Codex.")
 
 
 def uninstall() -> None:
@@ -266,6 +343,8 @@ def uninstall() -> None:
     state = _read_json(state_path)
     claude_path = Path.home() / ".claude/settings.json"
     codex_path = Path.home() / ".codex/hooks.json"
+    claude_user_path = Path.home() / ".claude.json"
+    codex_config_path = Path.home() / ".codex/config.toml"
 
     claude = _read_json(claude_path)
     for event, groups in list((claude.get("hooks") or {}).items()):
@@ -290,6 +369,27 @@ def uninstall() -> None:
             codex["hooks"].pop(event, None)
     _atomic_json(codex_path, codex)
 
+    claude_user = _read_json(claude_user_path)
+    servers = claude_user.setdefault("mcpServers", {})
+    if not isinstance(servers, dict):
+        raise ValueError("~/.claude.json mcpServers must be an object")
+    if state.get("claude_todo_mcp_had_previous"):
+        servers[MCP_NAME] = state.get("claude_todo_mcp_previous")
+    else:
+        servers.pop(MCP_NAME, None)
+    if not servers:
+        claude_user.pop("mcpServers", None)
+    _atomic_json(claude_user_path, claude_user)
+
+    try:
+        codex_text = codex_config_path.read_text()
+    except FileNotFoundError:
+        codex_text = ""
+    restored, _current = _replace_codex_mcp(
+        codex_text, state.get("codex_todo_mcp_previous")
+    )
+    _atomic_text(codex_config_path, restored)
+
     if os.name != "nt":
         default_unit = config_home() / f"systemd/user/{UNIT_NAME}"
         unit_path = Path(state.get("unit_path") or default_unit)
@@ -299,3 +399,4 @@ def uninstall() -> None:
         _systemctl("daemon-reload")
     print("Removed USB LCD hooks and restored the prior Claude status line.")
     print("The dashboard configuration and backups were retained.")
+    print("Removed the human-todo MCP tools; todo history was retained.")

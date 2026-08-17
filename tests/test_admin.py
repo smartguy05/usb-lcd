@@ -15,6 +15,7 @@ from usb_lcd_dashboard.admin import (
 )
 from usb_lcd_dashboard.config import Config, load_config
 from usb_lcd_dashboard.layout import Tile
+from usb_lcd_dashboard.todos import TodoStore
 
 
 WIDE = """
@@ -48,6 +49,7 @@ def state(tmp_path):
         config_path=path,
         get_config=lambda: holder["config"],
         get_preview=lambda: holder["frame"],
+        todo_store=TodoStore(tmp_path / "todos.sqlite3"),
     ), holder
 
 
@@ -144,6 +146,7 @@ def test_the_page_is_served(server):
     assert status == 200
     assert headers["Content-Type"].startswith("text/html")
     assert b"USB LCD settings" in body
+    assert b"Human todos" in body
 
 
 def test_the_config_endpoint_returns_the_layout(server):
@@ -159,50 +162,112 @@ def test_the_widgets_endpoint_describes_the_registry(server):
     base, _, _ = server
     _, body, _ = get(base, "/api/widgets")
     widgets = {w["name"]: w for w in json.loads(body)["widgets"]}
-    assert set(widgets) == {"agent", "clock", "crab", "legacy", "messages"}
+    assert set(widgets) == {"agent", "clock", "crab", "legacy", "messages", "notifications", "todos"}
     assert widgets["agent"]["wants_session"] is True
     assert widgets["crab"]["wants_session"] is True
     assert any(o["name"] == "hour12" for o in widgets["clock"]["options"])
     assert widgets["messages"]["wants_messages"] is True
+    assert widgets["todos"]["wants_todos"] is True
 
 
-def test_the_teams_status_endpoint_contains_no_token(server):
+def test_todo_routes_cover_crud_history_reopen_and_delete(server):
     base, _, _ = server
-    status, body, _ = get(base, "/api/integrations/teams")
+    status, created = post(base, "/api/todos", {"title": "Call dentist", "priority": "high", "due_date": "2026-08-20"})
+    assert status == 201
+    item_id = created["todo"]["id"]
+    status, body, _ = get(base, "/api/todos")
+    assert status == 200 and json.loads(body)["todos"][0]["title"] == "Call dentist"
+
+    request = urllib.request.Request(base + "/api/todos/" + item_id,
+        data=json.dumps({"details": "Ask about Tuesday"}).encode(),
+        headers={"Content-Type": "application/json"}, method="PATCH")
+    with urllib.request.urlopen(request, timeout=5) as response:
+        assert json.loads(response.read())["todo"]["details"] == "Ask about Tuesday"
+    assert post(base, f"/api/todos/{item_id}/complete", {})[0] == 200
+    assert json.loads(get(base, "/api/todos")[1])["todos"] == []
+    assert len(json.loads(get(base, "/api/todos?include_completed=1")[1])["todos"]) == 1
+    assert post(base, f"/api/todos/{item_id}/reopen", {})[0] == 200
+
+    request = urllib.request.Request(base + "/api/todos/" + item_id,
+        data=json.dumps({"confirm": True}).encode(), headers={"Content-Type": "application/json"}, method="DELETE")
+    with urllib.request.urlopen(request, timeout=5) as response:
+        assert json.loads(response.read())["deleted"] is True
+
+
+def test_todo_delete_requires_confirmation(server):
+    base, _, _ = server
+    item_id = post(base, "/api/todos", {"title": "Keep me"})[1]["todo"]["id"]
+    request = urllib.request.Request(base + "/api/todos/" + item_id,
+        data=b"{}", headers={"Content-Type": "application/json"}, method="DELETE")
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(request, timeout=5)
+    assert exc.value.code == 400
+
+
+def test_the_discord_status_endpoint_contains_no_token(server):
+    base, _, _ = server
+    status, body, _ = get(base, "/api/integrations/discord")
     assert status == 200
     payload = json.loads(body)
     assert payload["status"] == "unconfigured"
     assert "token" not in body.decode().lower()
 
 
-def test_teams_connect_and_disconnect_actions_are_forwarded(tmp_path):
+def test_discord_actions_are_forwarded(tmp_path):
     path = tmp_path / "config.toml"
     path.write_text(WIDE, encoding="utf-8")
     actions = []
-    integration = {"configured": True, "status": "disconnected"}
+    integration = {"configured": True, "status": "connected", "channels": []}
     state = AdminState(
         path,
         lambda: load_config(path),
         lambda: None,
-        get_teams=lambda: integration,
-        connect_teams=lambda: actions.append("connect") or {**integration, "status": "connecting"},
-        disconnect_teams=lambda: actions.append("disconnect"),
+        get_discord=lambda: integration,
+        save_discord_token=lambda token: actions.append(("token", token)) or integration,
+        disconnect_discord=lambda: actions.append(("disconnect", None)) or integration,
+        refresh_discord_channels=lambda: actions.append(("channels", None)),
+        clear_discord=lambda: actions.append(("clear", None)) or integration,
     )
     srv = admin.start(state, 0)
     base = f"http://127.0.0.1:{srv.server_address[1]}"
     try:
-        assert post(base, "/api/integrations/teams/connect", {})[0] == 200
-        assert post(base, "/api/integrations/teams/disconnect", {})[0] == 200
+        assert post(base, "/api/integrations/discord/token", {"token": "secret"})[0] == 200
+        assert post(base, "/api/integrations/discord/channels", {})[0] == 200
+        assert post(base, "/api/integrations/discord/clear", {})[0] == 200
+        assert post(base, "/api/integrations/discord/disconnect", {})[0] == 200
     finally:
         srv.shutdown()
         srv.server_close()
-    assert actions == ["connect", "disconnect"]
+    assert actions == [("token", "secret"), ("channels", None), ("clear", None), ("disconnect", None)]
 
 
-def test_a_cross_site_form_cannot_trigger_a_teams_action(server):
+def test_windows_notification_status_and_access_are_forwarded(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(WIDE, encoding="utf-8")
+    actions = []
+    integration = {"status": "permission_required", "apps": [], "matching": 0, "error": ""}
+    state = AdminState(
+        path,
+        lambda: load_config(path),
+        lambda: None,
+        get_windows_notifications=lambda: integration,
+        request_windows_notification_access=lambda: actions.append("access") or integration,
+    )
+    srv = admin.start(state, 0)
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        assert json.loads(get(base, "/api/integrations/windows-notifications")[1])["status"] == "permission_required"
+        assert post(base, "/api/integrations/windows-notifications/access", {})[0] == 200
+    finally:
+        srv.shutdown()
+        srv.server_close()
+    assert actions == ["access"]
+
+
+def test_a_cross_site_form_cannot_trigger_a_discord_action(server):
     base, _, _ = server
     request = urllib.request.Request(
-        base + "/api/integrations/teams/connect",
+        base + "/api/integrations/discord/clear",
         data=b"",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         method="POST",

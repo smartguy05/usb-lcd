@@ -8,11 +8,13 @@ import time
 
 from .config import Config, default_path, load_config
 from .display import Display
+from .discord import DiscordIntegration
 from .layout import agent_slots, compose
 from .model import StateStore, utc_now
 from .normalize import normalize_event
+from .notifications import WindowsNotificationIntegration
 from .transport import bind_socket, poll_timeout, receive_event
-from .teams import TeamsIntegration
+from .todos import TodoStore
 
 LOG = logging.getLogger(__name__)
 
@@ -24,7 +26,9 @@ class DashboardDaemon:
         self.config_path = config_path or default_path()
         self.display = Display(config, simulate=simulate)
         self.store = StateStore()
-        self.teams = TeamsIntegration()
+        self.discord = DiscordIntegration()
+        self.windows_notifications = WindowsNotificationIntegration()
+        self.todos = TodoStore(self.config_path.parent / "todos.sqlite3")
         self._apply_config(config)
         self.running = True
         self.next_connect = 0.0
@@ -44,7 +48,13 @@ class DashboardDaemon:
         self.store.switch_dwell = config.switch_dwell_seconds
         # The tiles are the cap on how many sessions can be on screen at once.
         self.slot_count = agent_slots(config.tiles)
-        self.teams.set_enabled(any(tile.widget == "messages" for tile in config.tiles))
+        self.discord.configure(config.discord_channel_ids)
+        self.windows_notifications.configure(
+            config.windows_notifications_enabled,
+            config.windows_notification_app_ids,
+            config.windows_notification_include_terms,
+            config.windows_notification_exclude_terms,
+        )
         # getattr, because this runs once before the tray exists.
         if getattr(self, "tray", None) is not None:
             # The tooltip names the device and the menu offers the editor, both
@@ -114,9 +124,14 @@ class DashboardDaemon:
                     config_path=self.config_path,
                     get_config=lambda: self.config,
                     get_preview=lambda: self.last_frame,
-                    get_teams=self.teams.status,
-                    connect_teams=self.teams.connect,
-                    disconnect_teams=self.teams.disconnect,
+                    get_discord=self.discord.status,
+                    save_discord_token=self.discord.save_token,
+                    disconnect_discord=self.discord.disconnect,
+                    refresh_discord_channels=self.discord.refresh_channels,
+                    clear_discord=self.discord.clear,
+                    get_windows_notifications=self.windows_notifications.status,
+                    request_windows_notification_access=self.windows_notifications.request_access,
+                    todo_store=self.todos,
                 ),
                 self.config.admin_port,
             )
@@ -154,7 +169,8 @@ class DashboardDaemon:
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
         server = bind_socket(self.config)
-        self.teams.start(enabled=any(tile.widget == "messages" for tile in self.config.tiles))
+        self.discord.start()
+        self.windows_notifications.start()
         self._start_admin()
         self._start_tray()
         try:
@@ -198,7 +214,9 @@ class DashboardDaemon:
                         background=self.config.background,
                         connected=self.display.connected,
                         idle_title=self.config.idle_title,
-                        messages=self.teams.snapshot(),
+                        messages=self.discord.snapshot(),
+                    notifications=self.windows_notifications.snapshot(),
+                    todos=self.todos.snapshot(),
                     )
                 except Exception:
                     # compose already isolates a single widget's fault to its own
@@ -235,5 +253,6 @@ class DashboardDaemon:
             if self.tray is not None:
                 self.tray.stop()
             self.display.close()
-            self.teams.stop()
+            self.discord.stop()
+            self.windows_notifications.stop()
 

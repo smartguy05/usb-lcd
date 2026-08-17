@@ -87,6 +87,13 @@ class Config:
     # The system tray icon: proof the daemon is running, and the way to stop it.
     # Windows only; there is no tray to put it in under a systemd user unit.
     tray_enabled: bool = True
+    # Discord channel snowflakes are configuration, not credentials. The bot
+    # token lives in a separate protected secret store.
+    discord_channel_ids: tuple[str, ...] = field(default=())
+    windows_notifications_enabled: bool = False
+    windows_notification_app_ids: tuple[str, ...] = field(default=())
+    windows_notification_include_terms: tuple[str, ...] = field(default=())
+    windows_notification_exclude_terms: tuple[str, ...] = field(default=())
     # Why the configured layout was rejected, when it was loaded leniently and
     # replaced by the default. Carried rather than discarded so `doctor` can say
     # what is wrong with the file instead of reporting a layout nobody wrote.
@@ -249,6 +256,29 @@ def dump_config_toml(cfg: Config) -> str:
         "[tray]",
         f"enabled = {_toml_value(cfg.tray_enabled)}",
     ]
+    if cfg.discord_channel_ids:
+        channels = ", ".join(_toml_value(value) for value in cfg.discord_channel_ids)
+        lines += ["", "[discord]", f"channel_ids = [{channels}]"]
+    if (
+        cfg.windows_notifications_enabled
+        or cfg.windows_notification_app_ids
+        or cfg.windows_notification_include_terms
+        or cfg.windows_notification_exclude_terms
+    ):
+        lines += [
+            "",
+            "[windows_notifications]",
+            f"enabled = {_toml_value(cfg.windows_notifications_enabled)}",
+            "app_ids = ["
+            + ", ".join(_toml_value(value) for value in cfg.windows_notification_app_ids)
+            + "]",
+            "include_terms = ["
+            + ", ".join(_toml_value(value) for value in cfg.windows_notification_include_terms)
+            + "]",
+            "exclude_terms = ["
+            + ", ".join(_toml_value(value) for value in cfg.windows_notification_exclude_terms)
+            + "]",
+        ]
     for tile in cfg.tiles:
         lines += [
             "",
@@ -314,14 +344,16 @@ def _parse_tiles(raw: list) -> tuple["Tile", ...]:
     tiles = []
     for index, entry in enumerate(raw):
         try:
+            widget = str(entry["widget"])
+            options = dict(entry.get("options") or {})
             tiles.append(
                 Tile(
-                    widget=str(entry["widget"]),
+                    widget=widget,
                     x=int(entry["x"]),
                     y=int(entry["y"]),
                     w=int(entry["w"]),
                     h=int(entry["h"]),
-                    options=dict(entry.get("options") or {}),
+                    options=options,
                 )
             )
         except KeyError as exc:
@@ -391,6 +423,23 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
     ipc = data.get("ipc", {})
     admin = data.get("admin", {})
     tray = data.get("tray", {})
+    discord = data.get("discord", {})
+    windows_notifications = data.get("windows_notifications", {})
+    raw_channel_ids = discord.get("channel_ids", [])
+    if not isinstance(raw_channel_ids, list):
+        raise ValueError("discord.channel_ids must be a list")
+    channel_ids = tuple(dict.fromkeys(str(value).strip() for value in raw_channel_ids))
+    if any(not value.isdigit() for value in channel_ids):
+        raise ValueError("discord.channel_ids must contain Discord numeric IDs")
+    def string_list(table: dict, key: str) -> tuple[str, ...]:
+        raw = table.get(key, [])
+        if not isinstance(raw, list):
+            raise ValueError(f"windows_notifications.{key} must be a list")
+        return tuple(dict.fromkeys(str(value).strip() for value in raw if str(value).strip()))
+
+    notification_app_ids = string_list(windows_notifications, "app_ids")
+    notification_include_terms = string_list(windows_notifications, "include_terms")
+    notification_exclude_terms = string_list(windows_notifications, "exclude_terms")
     cfg = replace(
         cfg,
         device=str(display.get("device", cfg.device)),
@@ -419,6 +468,11 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
         admin_enabled=bool(admin.get("enabled", cfg.admin_enabled)),
         admin_port=int(admin.get("port", cfg.admin_port)),
         tray_enabled=bool(tray.get("enabled", cfg.tray_enabled)),
+        discord_channel_ids=channel_ids,
+        windows_notifications_enabled=bool(windows_notifications.get("enabled", False)),
+        windows_notification_app_ids=notification_app_ids,
+        windows_notification_include_terms=notification_include_terms,
+        windows_notification_exclude_terms=notification_exclude_terms,
     )
     if cfg.orientation not in {"portrait", "landscape"}:
         raise ValueError("display.orientation must be portrait or landscape")

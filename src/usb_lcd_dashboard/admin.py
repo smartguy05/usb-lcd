@@ -28,6 +28,7 @@ from .background import Background
 from .config import ADMIN_HOST, Config, dump_config_toml, parse_config_text, write_config
 from .layout import Tile
 from .widgets import describe
+from .todos import TodoStore
 
 LOG = logging.getLogger(__name__)
 
@@ -81,6 +82,13 @@ def config_to_json(cfg: Config) -> dict[str, Any]:
             "switch_dwell_seconds": cfg.switch_dwell_seconds,
             "idle_title": cfg.idle_title,
         },
+        "discord": {"channel_ids": list(cfg.discord_channel_ids)},
+        "windows_notifications": {
+            "enabled": cfg.windows_notifications_enabled,
+            "app_ids": list(cfg.windows_notification_app_ids),
+            "include_terms": list(cfg.windows_notification_include_terms),
+            "exclude_terms": list(cfg.windows_notification_exclude_terms),
+        },
         # Shown but not editable: changing the IPC transport would orphan the
         # installed hooks, and changing the admin port would cut off this page.
         "readonly": {
@@ -113,6 +121,16 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
         raise ValueError("expected a JSON object")
     display = payload.get("display") or {}
     dashboard = payload.get("dashboard") or {}
+    discord = payload.get("discord") or {}
+    windows_notifications = payload.get("windows_notifications") or {}
+    raw_channel_ids = discord.get("channel_ids", current.discord_channel_ids)
+    if not isinstance(raw_channel_ids, (list, tuple)):
+        raise ValueError("discord.channel_ids must be a list")
+    def string_values(key, fallback):
+        raw = windows_notifications.get(key, fallback)
+        if not isinstance(raw, (list, tuple)):
+            raise ValueError(f"windows_notifications.{key} must be a list")
+        return tuple(str(value) for value in raw)
     raw_tiles = payload.get("tiles")
     if not isinstance(raw_tiles, list):
         raise ValueError("tiles must be a list")
@@ -187,6 +205,19 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
             dashboard, "switch_dwell_seconds", float, current.switch_dwell_seconds
         ),
         idle_title=str(dashboard.get("idle_title", current.idle_title)),
+        discord_channel_ids=tuple(str(value) for value in raw_channel_ids),
+        windows_notifications_enabled=bool(
+            windows_notifications.get("enabled", current.windows_notifications_enabled)
+        ),
+        windows_notification_app_ids=string_values(
+            "app_ids", current.windows_notification_app_ids
+        ),
+        windows_notification_include_terms=string_values(
+            "include_terms", current.windows_notification_include_terms
+        ),
+        windows_notification_exclude_terms=string_values(
+            "exclude_terms", current.windows_notification_exclude_terms
+        ),
         tiles=tuple(tiles),
     )
 
@@ -199,29 +230,32 @@ class AdminState:
         config_path: Path,
         get_config: Callable[[], Config],
         get_preview: Callable[[], Image.Image | None],
-        get_teams: Callable[[], dict[str, Any]] | None = None,
-        connect_teams: Callable[[], dict[str, Any]] | None = None,
-        disconnect_teams: Callable[[], None] | None = None,
+        get_discord: Callable[[], dict[str, Any]] | None = None,
+        save_discord_token: Callable[[str], dict[str, Any]] | None = None,
+        disconnect_discord: Callable[[], dict[str, Any]] | None = None,
+        refresh_discord_channels: Callable[[], Any] | None = None,
+        clear_discord: Callable[[], dict[str, Any]] | None = None,
+        get_windows_notifications: Callable[[], dict[str, Any]] | None = None,
+        request_windows_notification_access: Callable[[], dict[str, Any]] | None = None,
+        todo_store: TodoStore | None = None,
     ):
         self.config_path = config_path
         self.get_config = get_config
         self.get_preview = get_preview
-        self.get_teams = get_teams or (
-            lambda: {
-                "configured": False,
-                "status": "unconfigured",
-                "account": "",
-                "updated_at": None,
-                "unread_conversations": 0,
-                "stale": False,
-                "error": "",
-                "verification_uri": None,
-                "user_code": None,
-                "expires_at": None,
-            }
+        self.get_discord = get_discord or (lambda: {
+            "configured": False, "status": "unconfigured", "bot": "",
+            "updated_at": None, "new_messages": 0, "stale": False,
+            "error": "", "channels": [], "selected_channel_ids": [],
+        })
+        self.save_discord_token = save_discord_token
+        self.disconnect_discord = disconnect_discord
+        self.refresh_discord_channels = refresh_discord_channels
+        self.clear_discord = clear_discord
+        self.get_windows_notifications = get_windows_notifications or (
+            lambda: {"status": "unsupported", "error": "", "updated_at": None, "apps": [], "matching": 0}
         )
-        self.connect_teams = connect_teams
-        self.disconnect_teams = disconnect_teams
+        self.request_windows_notification_access = request_windows_notification_access
+        self.todo_store = todo_store
 
     def save(self, payload: dict[str, Any]) -> Config:
         """Validate through the loader, then replace config.toml atomically."""
@@ -260,6 +294,43 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
             self._json(403, {"error": "this editor only serves 127.0.0.1"})
             return False
 
+        def _read_json(self) -> dict[str, Any] | None:
+            if not (self.headers.get("Content-Type") or "").lower().startswith("application/json"):
+                self._json(415, {"error": "todo actions require JSON"})
+                return None
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                self._json(400, {"error": "bad Content-Length"})
+                return None
+            if length > MAX_BODY_BYTES:
+                self._json(413, {"error": "request is implausibly large"})
+                return None
+            try:
+                payload = json.loads(self.rfile.read(length) or b"{}")
+            except json.JSONDecodeError as exc:
+                self._json(400, {"error": f"invalid JSON: {exc}"})
+                return None
+            if not isinstance(payload, dict):
+                self._json(400, {"error": "JSON body must be an object"})
+                return None
+            return payload
+
+        def _todo_store(self) -> TodoStore | None:
+            if state.todo_store is None:
+                self._json(503, {"error": "todo storage is unavailable"})
+                return None
+            return state.todo_store
+
+        def _todo_error(self, exc: Exception) -> None:
+            if isinstance(exc, KeyError):
+                self._json(404, {"error": "no such todo"})
+            elif isinstance(exc, ValueError):
+                self._json(400, {"error": str(exc)})
+            else:
+                LOG.exception("Todo action failed")
+                self._json(500, {"error": "todo storage failed"})
+
         # -- routes ----------------------------------------------------------
         def do_GET(self):  # noqa: N802 - base class name
             if not self._guard():
@@ -271,8 +342,15 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
                 self._json(200, config_to_json(state.get_config()))
             elif route == "/api/widgets":
                 self._json(200, {"widgets": describe()})
-            elif route == "/api/integrations/teams":
-                self._json(200, state.get_teams())
+            elif route == "/api/integrations/discord":
+                self._json(200, state.get_discord())
+            elif route == "/api/integrations/windows-notifications":
+                self._json(200, state.get_windows_notifications())
+            elif route == "/api/todos":
+                store = self._todo_store()
+                if store is not None:
+                    include_completed = "include_completed=1" in self.path.split("?", 1)[-1]
+                    self._json(200, {"todos": [item.to_json() for item in store.list(include_completed)]})
             elif route == "/api/preview.png":
                 frame = state.get_preview()
                 if frame is None:
@@ -288,33 +366,90 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
             if not self._guard():
                 return
             route = self.path.split("?", 1)[0]
-            if route in {
-                "/api/integrations/teams/connect",
-                "/api/integrations/teams/disconnect",
-            }:
+            if route == "/api/todos" or route.startswith("/api/todos/"):
+                store = self._todo_store()
+                if store is None:
+                    return
+                payload = self._read_json()
+                if payload is None:
+                    return
+                try:
+                    if route == "/api/todos":
+                        item = store.create(
+                            payload.get("title"), payload.get("details", ""),
+                            payload.get("priority", "normal"), payload.get("due_date"),
+                        )
+                        self._json(201, {"todo": item.to_json()})
+                    elif route == "/api/todos/reorder":
+                        items = store.reorder(payload.get("ordered_ids") or [])
+                        self._json(200, {"todos": [item.to_json() for item in items]})
+                    else:
+                        parts = route.strip("/").split("/")
+                        if len(parts) != 4 or parts[3] not in ("complete", "reopen"):
+                            self._json(404, {"error": "no such route"})
+                            return
+                        item = store.set_completed(parts[2], parts[3] == "complete")
+                        self._json(200, {"todo": item.to_json()})
+                except Exception as exc:
+                    self._todo_error(exc)
+                return
+            if route == "/api/integrations/windows-notifications/access":
                 if not (self.headers.get("Content-Type") or "").lower().startswith(
                     "application/json"
                 ):
                     self._json(415, {"error": "integration actions require JSON"})
                     return
-                action = (
-                    state.connect_teams
-                    if route.endswith("/connect")
-                    else state.disconnect_teams
-                )
-                if action is None:
-                    self._json(503, {"error": "Teams integration is unavailable"})
+                if state.request_windows_notification_access is None:
+                    self._json(503, {"error": "Windows notification integration is unavailable"})
                     return
                 try:
-                    result = action()
+                    result = state.request_windows_notification_access()
+                except Exception as exc:
+                    LOG.exception("Windows notification access request failed")
+                    self._json(502, {"error": str(exc)})
+                    return
+                self._json(200, result)
+                return
+            if route.startswith("/api/integrations/discord/"):
+                if not (self.headers.get("Content-Type") or "").lower().startswith(
+                    "application/json"
+                ):
+                    self._json(415, {"error": "integration actions require JSON"})
+                    return
+                try:
+                    length = int(self.headers.get("Content-Length") or 0)
+                    if length > MAX_BODY_BYTES:
+                        self._json(413, {"error": "request is implausibly large"})
+                        return
+                    payload = json.loads(self.rfile.read(length) or b"{}")
+                    if route.endswith("/token"):
+                        if state.save_discord_token is None:
+                            raise RuntimeError("Discord integration is unavailable")
+                        result = state.save_discord_token(str(payload.get("token") or ""))
+                    elif route.endswith("/disconnect"):
+                        if state.disconnect_discord is None:
+                            raise RuntimeError("Discord integration is unavailable")
+                        result = state.disconnect_discord()
+                    elif route.endswith("/channels"):
+                        if state.refresh_discord_channels is None:
+                            raise RuntimeError("Discord integration is unavailable")
+                        state.refresh_discord_channels()
+                        result = state.get_discord()
+                    elif route.endswith("/clear"):
+                        if state.clear_discord is None:
+                            raise RuntimeError("Discord integration is unavailable")
+                        result = state.clear_discord()
+                    else:
+                        self._json(404, {"error": "no such route"})
+                        return
                 except ValueError as exc:
                     self._json(400, {"error": str(exc)})
                     return
                 except Exception as exc:
-                    LOG.exception("Teams integration action failed")
+                    LOG.exception("Discord integration action failed")
                     self._json(502, {"error": str(exc)})
                     return
-                self._json(200, result if isinstance(result, dict) else state.get_teams())
+                self._json(200, result if isinstance(result, dict) else state.get_discord())
                 return
             if route != "/api/config":
                 self._json(404, {"error": "no such route"})
@@ -357,6 +492,51 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
                 return
             LOG.info("Config saved from the editor: %s", state.config_path)
             self._json(200, {"saved": True, "config": config_to_json(saved)})
+
+        def do_PATCH(self):  # noqa: N802 - base class name
+            if not self._guard():
+                return
+            route = self.path.split("?", 1)[0]
+            parts = route.strip("/").split("/")
+            if len(parts) != 3 or parts[:2] != ["api", "todos"]:
+                self._json(404, {"error": "no such route"})
+                return
+            store = self._todo_store()
+            if store is None:
+                return
+            payload = self._read_json()
+            if payload is None:
+                return
+            try:
+                item = store.update(parts[2], **payload)
+            except Exception as exc:
+                self._todo_error(exc)
+                return
+            self._json(200, {"todo": item.to_json()})
+
+        def do_DELETE(self):  # noqa: N802 - base class name
+            if not self._guard():
+                return
+            route = self.path.split("?", 1)[0]
+            parts = route.strip("/").split("/")
+            if len(parts) != 3 or parts[:2] != ["api", "todos"]:
+                self._json(404, {"error": "no such route"})
+                return
+            store = self._todo_store()
+            if store is None:
+                return
+            payload = self._read_json()
+            if payload is None:
+                return
+            if payload.get("confirm") is not True:
+                self._json(400, {"error": "permanent deletion requires confirm=true"})
+                return
+            try:
+                store.delete(parts[2])
+            except Exception as exc:
+                self._todo_error(exc)
+                return
+            self._json(200, {"deleted": True})
 
     return Handler
 

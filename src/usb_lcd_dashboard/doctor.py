@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import os
+import json
+import importlib.util
 import shutil
 import subprocess
+import urllib.request
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -23,6 +26,13 @@ def _hook_present(path: Path) -> bool:
     try:
         text = path.read_text()
         return "usb-lcd-dashboard emit" in text or "usb_lcd_dashboard emit" in text
+    except OSError:
+        return False
+
+
+def _todo_mcp_present(path: Path) -> bool:
+    try:
+        return "usb-lcd-dashboard-todos" in path.read_text()
     except OSError:
         return False
 
@@ -85,10 +95,51 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
             _hook_present(Path.home() / ".codex/hooks.json"),
             "~/.codex/hooks.json",
         ),
+        (
+            "Claude todo tools",
+            _todo_mcp_present(Path.home() / ".claude.json"),
+            "~/.claude.json",
+        ),
+        (
+            "Codex todo tools",
+            _todo_mcp_present(Path.home() / ".codex/config.toml"),
+            "~/.codex/config.toml",
+        ),
     ]
     if os.name == "nt":
         shortcut = _windows_startup_shortcut()
         items.append(("login autostart", shortcut.exists(), str(shortcut)))
+        package = subprocess.run(
+            [
+                "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive",
+                "-Command", "if (Get-AppxPackage -Name USBLCDDashboard.Personal) { 'registered' }",
+            ],
+            capture_output=True, text=True, check=False,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        items.append((
+            "notification identity",
+            package.returncode == 0 and package.stdout.strip() == "registered",
+            package.stdout.strip() or "not registered",
+        ))
+        try:
+            winrt_ready = importlib.util.find_spec("winrt.windows.ui.notifications.management") is not None
+        except ModuleNotFoundError:
+            winrt_ready = False
+        items.append(("notification WinRT", winrt_ready, "PyWinRT bindings"))
+        try:
+            with urllib.request.urlopen(
+                f"http://127.0.0.1:{config.admin_port}/api/integrations/windows-notifications",
+                timeout=1,
+            ) as response:
+                notification_status = str(json.load(response).get("status") or "unknown")
+        except Exception:
+            notification_status = "daemon unavailable"
+        items.append((
+            "notification access",
+            notification_status == "connected",
+            notification_status,
+        ))
         return items
 
     device = Path(resolved or config.device)

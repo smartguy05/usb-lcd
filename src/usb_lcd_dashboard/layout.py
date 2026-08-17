@@ -10,6 +10,8 @@ from PIL import Image, ImageDraw
 from .background import Background, background_layer
 from .model import SessionState
 from .messaging import MessageSnapshot
+from .notifications import NotificationSnapshot
+from .todos import TodoSnapshot
 from .render import ERROR, MUTED, PANEL, _fit
 
 LOG = logging.getLogger(__name__)
@@ -55,6 +57,8 @@ class TileContext:
     connected: bool = True
     idle_title: str = ""
     messages: MessageSnapshot | None = None
+    notifications: NotificationSnapshot | None = None
+    todos: TodoSnapshot | None = None
 
 
 def _overlap(a: Tile, b: Tile) -> bool:
@@ -87,6 +91,13 @@ def validate(tiles: Sequence[Tile], size: tuple[int, int]) -> None:
             raise ValueError(
                 f"{where} at {tile.rect} does not fit the {width}x{height} display"
             )
+        if tile.widget == "notifications" and "rotation_seconds" in tile.options:
+            try:
+                rotation_seconds = float(tile.options["rotation_seconds"])
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"{where} rotation_seconds must be a number") from exc
+            if not 1 <= rotation_seconds <= 300:
+                raise ValueError(f"{where} rotation_seconds must be between 1 and 300")
     for index, tile in enumerate(tiles):
         for other_index in range(index + 1, len(tiles)):
             other = tiles[other_index]
@@ -136,6 +147,8 @@ def compose(
     connected: bool = True,
     idle_title: str = "",
     messages: MessageSnapshot | None = None,
+    notifications: NotificationSnapshot | None = None,
+    todos: TodoSnapshot | None = None,
 ) -> Image.Image:
     """Render every tile and composite them into one frame.
 
@@ -167,6 +180,8 @@ def compose(
             connected=connected,
             idle_title=idle_title,
             messages=messages if spec.wants_messages else None,
+            notifications=notifications if spec.wants_notifications else None,
+            todos=todos if spec.wants_todos else None,
         )
         try:
             drawn = spec.render(context)

@@ -1,4 +1,4 @@
-# The 9.2" 1920x462 ultra-wide panel: clock, agent, Teams messages and crab.
+# The 9.2" 1920x462 ultra-wide panel: clock, agent, Discord messages and crab.
 #
 # kind = "window" is the path for a panel the OS enumerates as a monitor, and it
 # is NOT IMPLEMENTED yet — the panel's transport cannot be settled from its
@@ -71,7 +71,7 @@ y = 12
 w = 486
 h = 438
 [tile.options]
-title = "TEAMS"
+title = "DISCORD"
 
 [[tile]]
 widget = "crab"

@@ -1,7 +1,10 @@
 from types import SimpleNamespace
 
 from usb_lcd_dashboard import install as install_mod
-from usb_lcd_dashboard.install import EVENTS_BY_PROVIDER, _merge_hooks
+from usb_lcd_dashboard.install import (
+    EVENTS_BY_PROVIDER, MCP_NAME, _codex_mcp_section, _merge_hooks,
+    _replace_codex_mcp,
+)
 from usb_lcd_dashboard.normalize import PHASES
 
 
@@ -64,6 +67,45 @@ def test_merging_twice_does_not_duplicate_our_hook():
         if "usb-lcd-dashboard" in entry["command"]
     ]
     assert len(ours) == 1
+
+
+def test_codex_mcp_merge_preserves_other_configuration_and_is_idempotent():
+    original = 'model = "gpt-5"\n\n[mcp_servers.other]\ncommand = "other"\n'
+    section = _codex_mcp_section("C:/Program Files/USB LCD/python.exe", ["-m", "usb_lcd_dashboard", "mcp"])
+    once, previous = _replace_codex_mcp(original, section)
+    twice, displaced = _replace_codex_mcp(once, section)
+    assert previous is None
+    assert displaced is not None
+    assert once == twice
+    assert once.count(MCP_NAME) == 1
+    assert '[mcp_servers.other]' in once and 'model = "gpt-5"' in once
+
+
+def test_codex_mcp_uninstall_can_restore_a_displaced_entry():
+    prior = f'[mcp_servers.{MCP_NAME}]\ncommand = "mine"'
+    installed, displaced = _replace_codex_mcp(prior + "\n", _codex_mcp_section("ours", ["mcp"]))
+    restored, _ = _replace_codex_mcp(installed, displaced)
+    assert 'command = "mine"' in restored
+    assert 'command = "ours"' not in restored
+
+
+def test_install_and_uninstall_manage_both_user_mcp_configs(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    state_home = tmp_path / "state"
+    home.mkdir()
+    monkeypatch.setattr(install_mod.Path, "home", classmethod(lambda cls: home))
+    monkeypatch.setattr(install_mod, "config_home", lambda: state_home)
+    install_mod.install("usb-lcd-dashboard")
+    claude = install_mod._read_json(home / ".claude.json")
+    codex_text = (home / ".codex/config.toml").read_text()
+    assert claude["mcpServers"][MCP_NAME]["args"] == ["mcp"]
+    assert codex_text.count(MCP_NAME) == 1
+
+    install_mod.install("usb-lcd-dashboard")
+    assert (home / ".codex/config.toml").read_text().count(MCP_NAME) == 1
+    install_mod.uninstall()
+    assert MCP_NAME not in (home / ".codex/config.toml").read_text()
+    assert MCP_NAME not in install_mod._read_json(home / ".claude.json").get("mcpServers", {})
 
 
 # ------------------------------------------------------- the systemd user unit

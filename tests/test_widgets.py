@@ -11,6 +11,10 @@ from usb_lcd_dashboard.widgets.agent import render_agent
 from usb_lcd_dashboard.widgets.base import panel_fill
 from usb_lcd_dashboard.widgets.clock import render_clock
 from usb_lcd_dashboard.widgets.messages import render_messages
+from usb_lcd_dashboard.widgets.notifications import render_notifications
+from usb_lcd_dashboard.widgets.todos import render_todos
+from usb_lcd_dashboard.notifications import NotificationItem, NotificationSnapshot
+from usb_lcd_dashboard.todos import TodoItem, TodoSnapshot
 
 
 NOW = datetime(2026, 8, 6, 14, 37, 5, tzinfo=timezone.utc)
@@ -52,11 +56,59 @@ def full_session(**kwargs):
 # ------------------------------------------------------------------- registry
 
 def test_the_registry_exposes_the_expected_widgets():
-    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy", "messages"}
+    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy", "messages", "notifications", "todos"}
     assert WIDGETS["agent"].wants_session is True
     assert WIDGETS["crab"].wants_session is True
     assert WIDGETS["clock"].wants_session is False
     assert WIDGETS["messages"].wants_messages is True
+    assert WIDGETS["notifications"].wants_notifications is True
+    assert WIDGETS["todos"].wants_todos is True
+
+
+# ---------------------------------------------------------------------- todos
+
+@pytest.mark.parametrize("size", SIZES)
+def test_the_todo_widget_renders_empty_and_populated_at_every_size(size):
+    empty = render_todos(context(size, todos=TodoSnapshot()))
+    item = TodoItem("a", "Call the dentist", "", "high", "2026-08-17", "open", 0,
+                    NOW.isoformat(), NOW.isoformat(), None)
+    populated = render_todos(context(size, todos=TodoSnapshot((item,), NOW.isoformat())))
+    assert empty.size == populated.size == size
+    assert empty.mode == populated.mode == "RGBA"
+    assert differs(empty, populated)
+
+
+def test_todo_pages_rotate_deterministically():
+    items = tuple(
+        TodoItem(str(i), f"Todo {i}", "", "normal", None, "open", i,
+                 NOW.isoformat(), NOW.isoformat(), None)
+        for i in range(12)
+    )
+    snapshot = TodoSnapshot(items, NOW.isoformat())
+    first = render_todos(context((240, 100), todos=snapshot, options={"rotation_seconds": 8}))
+    later = render_todos(TileContext((240, 100), NOW + timedelta(seconds=8), {"rotation_seconds": 8}, todos=snapshot))
+    assert differs(first, later)
+
+
+# ------------------------------------------------------------- notifications
+
+@pytest.mark.parametrize("size", SIZES)
+@pytest.mark.parametrize("status", ["unsupported", "permission_required", "denied", "connecting", "error"])
+def test_every_empty_notification_state_fills_its_tile(size, status):
+    image = render_notifications(context(size, notifications=NotificationSnapshot(status=status)))
+    assert image.size == size
+    assert image.mode == "RGBA"
+
+
+def test_notifications_rotate_at_the_configured_interval():
+    items = tuple(
+        NotificationItem(index, f"app.{index}", f"App {index}", f"Title {index}", "Body", NOW)
+        for index in range(2)
+    )
+    snapshot = NotificationSnapshot(status="connected", items=items, updated_at=NOW, changed_at=NOW)
+    first = render_notifications(context((300, 180), notifications=snapshot, options={"rotation_seconds": 8}))
+    later = render_notifications(TileContext((300, 180), NOW + timedelta(seconds=8), {"rotation_seconds": 8}, notifications=snapshot))
+    assert differs(first, later)
 
 
 # ------------------------------------------------------------------- messages
@@ -74,7 +126,7 @@ def test_the_latest_message_renders_at_every_size(size):
     snapshot = MessageSnapshot(
         status="connected",
         latest=MessageItem(
-            provider="teams",
+            provider="discord",
             conversation="Project launch",
             sender="Alex",
             preview="Can you review this pull request before the meeting?",

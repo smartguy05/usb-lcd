@@ -1,3 +1,17 @@
+usb-lcd-dashboard (0.8.0) noble; urgency=medium
+
+  * Add a persistent human todo widget with admin management and history.
+  * Install shared Claude Code and Codex MCP tools for human action items.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 22:00:00 +0000
+
+usb-lcd-dashboard (0.7.1) noble; urgency=medium
+
+  * Replace the visible Teams experiment with a supported Discord bot widget.
+  * Add protected token entry, channel discovery, and persistent local new counts.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 18:00:00 +0000
+
 usb-lcd-dashboard (0.7.0) noble; urgency=medium
 
   * Add the Microsoft Teams unread-messaging widget, delegated device login,

@@ -1,6 +1,6 @@
 # Ubuntu package
 
-`usb-lcd-dashboard_0.7.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
+`usb-lcd-dashboard_0.8.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
 (noble) and later.
 
 Unlike the Windows installer it does **not** bundle a Python runtime. Ubuntu
@@ -12,10 +12,17 @@ step that would need network access at install time.
 
 The package is architecture-independent: nothing in it is compiled.
 
+Built 2026-08-17 from the current source tree and smoke-tested on Ubuntu 24.04:
+
+```text
+dist/usb-lcd-dashboard_0.8.0_all.deb
+sha256 0d03d52b8cbbfa18652b191e05c107f651a8d00df3384f7f56a80310c2fbae21
+```
+
 ## Install
 
 ```bash
-sudo apt install ./usb-lcd-dashboard_0.7.0_all.deb
+sudo apt install ./usb-lcd-dashboard_0.8.0_all.deb
 ```
 
 That is the system-wide half: the program, and the udev rule that creates
@@ -31,7 +38,8 @@ usb-lcd-dashboard doctor
 
 `install` merges the Claude and Codex hooks, preserves any existing Claude
 status line behind a proxy, writes `~/.config/usb-lcd-dashboard/config.toml` if
-you have none, and enables and starts the systemd user service.
+you have none, installs the shared human-todo MCP tools, and enables and starts
+the systemd user service.
 
 If the panel was already plugged in when you installed the package, unplug and
 replug it — or just log out and back in — so your session picks up the new
@@ -56,9 +64,11 @@ Per-user, created by `usb-lcd-dashboard install`:
 
 ```text
 ~/.config/usb-lcd-dashboard/config.toml        your layout
+~/.config/usb-lcd-dashboard/todos.sqlite3      human todo history
 ~/.config/usb-lcd-dashboard/install-state.json what to undo on uninstall
 ~/.config/systemd/user/usb-lcd-dashboard.service
 ~/.claude/settings.json, ~/.codex/hooks.json   merged, with a backup alongside
+~/.claude.json, ~/.codex/config.toml           todo MCP server entries
 ```
 
 ## Running it
@@ -71,13 +81,6 @@ systemctl --user status usb-lcd-dashboard
 systemctl --user restart usb-lcd-dashboard
 journalctl --user -u usb-lcd-dashboard -f
 ```
-
-For the Teams messages widget, create
-`~/.config/usb-lcd-dashboard/teams.env` with `USB_LCD_TEAMS_CLIENT_ID` and
-`USB_LCD_TEAMS_TENANT_ID`, one assignment per line. Restart the user service,
-then connect from the settings editor. The Entra application needs delegated
-`Chat.Read` and `User.Read` plus public-client/device-code authentication; do
-not put a client secret in the environment file.
 
 There is no log file on Linux and no tray icon: the daemon logs to the journal,
 and `systemctl --user` is the stop button.

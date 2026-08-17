@@ -7,6 +7,8 @@ that it did.
 | --- | --- |
 | [cli.md](cli.md) | Every subcommand, and what `doctor` checks. |
 | [install.md](install.md) | Hook merging, the status-line proxy, the systemd unit. |
+| [messaging.md](messaging.md) | Discord messages and filtered Windows notifications. |
+| [todos.md](todos.md) | Persistent human actions, admin CRUD, and MCP tools. |
 
 ## Where to start
 

@@ -18,6 +18,10 @@ lives at `cli.py:26`.
 
 Global `--verbose` switches logging to DEBUG.
 
+`mcp` runs the local stdio server for the human todo tools and exits 0 at EOF.
+It starts before config loading, because a broken display or IPC setting must
+not prevent the user or an agent from managing the list.
+
 ## The hook commands never draw
 
 `emit` and `statusline-proxy` are short-lived processes that read stdin, call
@@ -52,6 +56,7 @@ it must never do is fail the way the thing it is diagnosing failed.
 | `read/write access` (POSIX) | `os.access(device, R_OK\|W_OK)`. |
 | `layout` | `layout_error` is empty **and** there is at least one agent slot. |
 | `Claude hooks` / `Codex hooks` | The settings file mentions the emit command. |
+| `Claude todo tools` / `Codex todo tools` | The user MCP configuration names the todo server. |
 | `login autostart` (Windows) | The Startup shortcut exists. |
 | `systemd` / `service` (POSIX) | `systemctl` exists; the unit is active. |
 

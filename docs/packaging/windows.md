@@ -3,8 +3,9 @@
 > **Covers:** `packaging/windows/build-installer.sh`, `packaging/windows/installer.nsi`, `packaging/windows/config.example.toml`
 
 A self-contained NSIS installer that bundles its own CPython, because Windows
-has none. Built in a container, so it can be produced from Linux or from Windows
-under Git Bash.
+has none. Notification access also needs package identity, so release builds run
+from Windows Git Bash with the Windows 10/11 SDK installed; the container still
+prepares the Python payload and NSIS inputs.
 
 ```bash
 packaging/windows/build-installer.sh          # -> dist/USB-LCD-Dashboard-Setup-<version>.exe
@@ -24,8 +25,10 @@ CONTAINER_RUNTIME=podman packaging/windows/build-installer.sh
    in beside them, strip `__pycache__`.
 6. Patch `python312._pth` to add `Lib/site-packages` and uncomment `import site`
    — the embeddable distribution disables both by default.
-7. Run `makensis -DAPP_VERSION=…` inside `ubuntu:24.04`.
-8. Print `file` and `sha256sum` of the result.
+7. Reuse or create a five-year, non-exportable personal code-signing certificate,
+   embed matching identity metadata in `pythonw.exe`, and build/sign the sparse
+   identity MSIX with the Windows SDK.
+8. Run `makensis`, then print `file` and `sha256sum` of the result.
 
 **No console script is installed**, which is why `_command_prefix` has its
 `python.exe -m usb_lcd_dashboard` fallback — see
@@ -44,7 +47,9 @@ Ordered contract:
 
 1. **Shut down any running instance** — `python.exe -m usb_lcd_dashboard shutdown`,
    then sleep 500 ms.
-2. Copy the payload; write `Uninstall.exe`.
+2. Copy the payload, trust the bundled self-signed public identity certificate
+   as an exact current-user root, register the sparse MSIX against `$INSTDIR`, and write
+   `Uninstall.exe`.
 3. **Run the app's own setup**: `python.exe -m usb_lcd_dashboard install`. NSIS
    never touches hook files itself.
 4. **Verify it worked** by checking for `install-state.json`, and abort loudly
@@ -58,7 +63,8 @@ Ordered contract:
 7. **Launch it immediately**: `Exec pythonw.exe -m usb_lcd_dashboard run`. The
    user does not have to log out.
 
-Uninstall reverses it: shutdown, `uninstall` (hooks and status line), delete the
+Uninstall reverses it: shutdown, `uninstall` (hooks and status line), unregister
+the identity package and its exact personal certificate, delete the
 shortcuts, delete both registry keys, `RMDir /r "$INSTDIR"`. It leaves
 `%LOCALAPPDATA%\usb-lcd-dashboard` — config, state and backups — alone.
 

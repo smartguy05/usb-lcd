@@ -1,6 +1,6 @@
 # device.py — the wire to a panel
 
-> **Covers:** `src/usb_lcd_dashboard/device.py`
+> **Covers:** `src/usb_lcd_dashboard/device.py`, `src/usb_lcd_dashboard/turing_usb.py`
 
 Defines the `PanelDevice` protocol and its three implementations: the real
 Turing serial panel, a file-writing simulator, and a deliberately unimplemented

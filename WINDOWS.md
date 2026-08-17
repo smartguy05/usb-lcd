@@ -1,40 +1,39 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.7.0.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.8.0.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
 
-Built 2026-08-17 with tile support, the tray icon, the crab, direct USB, and the
-Teams unread-messaging widget:
+Built 2026-08-17 with tile support, the tray icon, the crab, direct USB,
+filterable Windows notifications, and shared human todo tools:
 
 ```text
-dist/USB-LCD-Dashboard-Setup-0.7.0.exe
-sha256 dacb458723b746cf09ba8ac1e1163b4493f43210f2221997799af90bc4277994
+dist/USB-LCD-Dashboard-Setup-0.8.0.exe
+sha256 b55f741b8fe8dc8317534f9307eeaef4e66c0a22f632b5d4486f4cc9279456cf
 ```
 
-`dist/` also still holds the 0.4.0 installer, which predates both features.
+Older installers in `dist/` predate the current notification-capable package.
 
 ## Install
 
 1. Copy the installer to the Windows 11 PC and double-click it.
-2. Accept the install location and finish setup. The installer is not
+2. Approve the Windows administrator prompt, accept the install location, and
+   finish setup. Elevation is needed to trust the notification identity's
+   self-signed public certificate. The installer is not
    code-signed, so Windows SmartScreen may require **More info → Run anyway**.
 3. Plug in the 3.5-inch display. Windows should expose this CDC device as a
    `USB Serial Device (COMx)` using its built-in `usbser.sys` driver.
 4. Within a few seconds the LCD should replace its factory screen with the idle
    dashboard. The dashboard starts automatically at each user login.
 
-For the Teams messages widget, set `USB_LCD_TEAMS_CLIENT_ID` and
-`USB_LCD_TEAMS_TENANT_ID` as Windows user environment variables, restart the
-dashboard, then use **Connections → Connect** in the settings editor. The Entra
-application must be a public client with delegated `Chat.Read` and `User.Read`;
-no client secret is used.
-
 The installer adds global Claude Code and Codex hooks without replacing other
 configured hooks. If either CLI was already open, start a new session. Codex
 requires newly installed command hooks to be reviewed once: run `/hooks` and
 trust the USB LCD Dashboard definitions.
+
+It also installs a user-scoped `usb-lcd-dashboard-todos` MCP server in both
+clients. Restart an open client, then use `/mcp` to verify the human todo tools.
 
 ## The tray icon
 
@@ -54,7 +53,8 @@ dashboard with except `python.exe -m usb_lcd_dashboard shutdown`.
 ## Diagnostics
 
 Open **Start → USB LCD Dashboard → Diagnostics**. It checks COM-port detection,
-Claude hooks, Codex hooks, and login autostart. Runtime logs are stored at:
+Claude hooks, Codex hooks, login autostart, and Windows notification identity,
+bindings, and access. Runtime logs are stored at:
 
 ```text
 %LOCALAPPDATA%\usb-lcd-dashboard\dashboard.log
@@ -105,4 +105,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.7.0.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.8.0.exe`.

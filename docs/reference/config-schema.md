@@ -42,8 +42,17 @@ port = 45723               # must differ from ipc.port
 [tray]                     # Windows only
 enabled = true
 
+[discord]                  # selected server text-channel snowflakes
+channel_ids = ["123456789012345678"]
+
+[windows_notifications]    # Windows only; configured by the editor
+enabled = false
+app_ids = []                # exact Windows application model IDs
+include_terms = []          # any case-insensitive literal may match
+exclude_terms = []          # any match vetoes the notification
+
 [[tile]]                   # repeat per tile; omit entirely for the legacy layout
-widget = "clock"           # clock | agent | crab | messages | legacy
+widget = "clock"           # clock | agent | crab | legacy | messages | notifications | todos
 x = 12
 y = 12
 w = 404
@@ -68,6 +77,8 @@ Every widget built on `new_tile` honours:
 | `crab` | `color`, `animate`, `show_project`, `show_activity`, `show_context`, `alarm` |
 | `legacy` | `title` only — it paints its own opaque background |
 | `messages` | `title` plus the common options |
+| `notifications` | `title`, `rotation_seconds` plus the common options |
+| `todos` | `title`, `rotation_seconds` plus the common options |
 
 The authoritative list is the registry itself; `GET /api/widgets` on the editor
 returns it as JSON. See [../rendering/widgets.md](../rendering/widgets.md).
@@ -78,6 +89,8 @@ returns it as JSON. See [../rendering/widgets.md](../rendering/widgets.md).
   rects are all rejected, naming the offending tile. A shared edge is not an
   overlap; gaps are fine.
 - `admin.port` must differ from `ipc.port`.
+- `discord.channel_ids` must be a list of numeric Discord snowflakes.
+- Windows notification app IDs and text filters must be lists of strings.
 - `brightness` 0–50; `width`/`height` 1–4096; ports 1024–65535.
 - No `[[tile]]` at all means one full-screen `legacy` tile, so an existing
   install keeps working with no edits.

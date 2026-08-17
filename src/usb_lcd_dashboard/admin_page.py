@@ -67,11 +67,12 @@ PAGE = r"""<!doctype html>
     background: var(--accent); cursor: nwse-resize; border-radius: 3px 0 4px 0;
   }
   label { display: block; font-size: 12px; color: var(--muted); margin: 9px 0 3px; }
-  input, select {
+  input, select, textarea {
     font: inherit; width: 100%; color: var(--text); background: var(--bg);
     border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px;
   }
   input[type=checkbox] { width: auto; }
+  textarea { resize: vertical; min-height: 58px; }
   input:focus, select:focus { outline: none; border-color: var(--accent); }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
@@ -84,6 +85,10 @@ PAGE = r"""<!doctype html>
   .empty { color: var(--muted); font-size: 13px; }
   .connection { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   .code { font: 600 18px/1.4 ui-monospace, monospace; letter-spacing: .08em; }
+  .todo { border-top: 1px solid var(--edge); padding: 10px 0; }
+  .todo:first-child { border-top: 0; }
+  .todo.done input { color: var(--muted); text-decoration: line-through; }
+  .todo-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
 </style>
 </head>
 <body>
@@ -143,8 +148,20 @@ PAGE = r"""<!doctype html>
     </section>
 
     <section>
-      <h2>Connections</h2>
-      <div id="teamsConnection"><p class="empty">Loading Teams status…</p></div>
+      <h2>Human todos</h2>
+      <div id="todoCreate"></div>
+      <div class="connection"><button id="todoHistory">Show completed</button></div>
+      <div id="todoList"><p class="empty">Loading todosâ€¦</p></div>
+    </section>
+
+    <section>
+      <h2>Discord messages</h2>
+      <div id="discordConnection"><p class="empty">Loading Discord status…</p></div>
+    </section>
+
+    <section>
+      <h2>Windows notifications</h2>
+      <div id="windowsNotifications"><p class="empty">Loading notification access…</p></div>
     </section>
 
     <section>
@@ -158,7 +175,10 @@ PAGE = r"""<!doctype html>
 "use strict";
 const $ = (id) => document.getElementById(id);
 let cfg = null, widgets = [], sel = -1, dirty = false;
-let teams = null;
+let discord = null;
+let windowsNotifications = null;
+let todos = [];
+let showTodoHistory = false;
 
 const STAGE_MAX = 1000;
 const scale = () => Math.min(1, STAGE_MAX / Math.max(1, cfg.display.width));
@@ -171,76 +191,189 @@ function setStatus(text, cls) {
   el.className = cls || "";
 }
 
-async function teamsAction(action) {
-  setStatus(action === "connect" ? "Starting Teams sign-in…" : "Disconnecting Teams…", "busy");
-  const response = await fetch("api/integrations/teams/" + action, {
-    method: "POST", headers: {"Content-Type": "application/json"}, body: "{}"
-  });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Teams action failed");
-  teams = body;
-  drawTeams();
-  setStatus("", "");
-}
-
-function drawTeams() {
-  const host = $("teamsConnection");
-  if (!host || !teams) return;
-  host.innerHTML = "";
-  const line = document.createElement("div");
-  const status = teams.status || "unknown";
-  line.textContent = "Microsoft Teams · " + status + (teams.account ? " · " + teams.account : "");
-  host.appendChild(line);
-  if (!teams.configured) {
-    const hint = document.createElement("div");
-    hint.className = "hint";
-    hint.textContent = "Set USB_LCD_TEAMS_CLIENT_ID and USB_LCD_TEAMS_TENANT_ID, then restart the dashboard.";
-    host.appendChild(hint);
-    return;
-  }
-  if (teams.user_code) {
-    const instruction = document.createElement("div");
-    instruction.className = "hint";
-    instruction.textContent = "Open the Microsoft sign-in page and enter:";
-    const code = document.createElement("div");
-    code.className = "code"; code.textContent = teams.user_code;
-    const link = document.createElement("a");
-    link.href = teams.verification_uri; link.target = "_blank"; link.rel = "noopener";
-    link.textContent = teams.verification_uri || "Open Microsoft sign-in";
-    host.append(instruction, code, link);
-  }
-  if (teams.error) {
-    const error = document.createElement("div");
-    error.className = "hint"; error.style.color = "var(--err)"; error.textContent = teams.error;
-    host.appendChild(error);
-  }
-  const actions = document.createElement("div"); actions.className = "connection";
-  if (status !== "connecting") {
-    const connect = document.createElement("button");
-    connect.textContent = status === "connected" ? "Reconnect" : "Connect";
-    connect.addEventListener("click", () => teamsAction("connect").catch((e) => setStatus(String(e), "err")));
-    actions.appendChild(connect);
-  }
-  if (status === "connected" || teams.account) {
-    const disconnect = document.createElement("button"); disconnect.className = "danger";
-    disconnect.textContent = "Disconnect";
-    disconnect.addEventListener("click", () => teamsAction("disconnect").catch((e) => setStatus(String(e), "err")));
-    actions.appendChild(disconnect);
-  }
-  host.appendChild(actions);
-}
-
-async function refreshTeams() {
-  try {
-    const response = await fetch("api/integrations/teams");
-    teams = await response.json();
-    drawTeams();
-  } catch (_) { /* The panel editor remains useful if an integration check fails. */ }
-}
-
 function markDirty() {
   dirty = true;
   setStatus("Unsaved changes", "busy");
+}
+
+async function discordAction(action, payload) {
+  setStatus("Updating Discord…", "busy");
+  const response = await fetch("api/integrations/discord/" + action, {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload || {})
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Discord action failed");
+  discord = body; drawDiscord(); setStatus("Discord updated", "ok");
+}
+
+function drawDiscord() {
+  const host = $("discordConnection");
+  if (!host || !discord || !cfg) return;
+  host.innerHTML = "";
+  const line = document.createElement("div");
+  line.textContent = "Discord · " + (discord.status || "unknown") + (discord.bot ? " · " + discord.bot : "");
+  host.appendChild(line);
+  if (discord.error) { const e = document.createElement("div"); e.className="hint"; e.style.color="var(--err)"; e.textContent=discord.error; host.appendChild(e); }
+  if (!discord.configured) {
+    const label = document.createElement("label"); label.textContent = "Bot token";
+    const token = document.createElement("input"); token.type="password"; token.autocomplete="off"; token.placeholder="Paste a Discord bot token";
+    const save = document.createElement("button"); save.textContent="Save and verify"; save.style.marginTop="8px";
+    save.addEventListener("click", () => discordAction("token", {token: token.value}).catch((e) => setStatus(String(e), "err")));
+    host.append(label, token, save); return;
+  }
+  const selected = new Set((cfg.discord || {}).channel_ids || []);
+  (discord.channels || []).forEach((channel) => {
+    const row=document.createElement("div"); row.className="check";
+    const box=document.createElement("input"); box.type="checkbox"; box.checked=selected.has(channel.id);
+    box.addEventListener("change", () => { if(box.checked) selected.add(channel.id); else selected.delete(channel.id); cfg.discord={channel_ids:Array.from(selected)}; markDirty(); });
+    const label=document.createElement("label"); label.textContent=channel.guild + " / #" + channel.name;
+    row.append(box,label); host.appendChild(row);
+  });
+  if (!(discord.channels || []).length) { const hint=document.createElement("p"); hint.className="empty"; hint.textContent="No readable text channels discovered."; host.appendChild(hint); }
+  const actions=document.createElement("div"); actions.className="connection";
+  [["channels","Refresh channels"],["clear","Clear new messages"],["disconnect","Disconnect"]].forEach(([action,text]) => {
+    const button=document.createElement("button"); button.textContent=text; if(action==="disconnect") button.className="danger";
+    button.addEventListener("click", () => discordAction(action, {}).catch((e) => setStatus(String(e), "err"))); actions.appendChild(button);
+  });
+  host.appendChild(actions);
+}
+
+async function refreshDiscord() {
+  try { discord = await fetch("api/integrations/discord").then((r) => r.json()); drawDiscord(); }
+  catch (_) { /* Settings remain usable if Discord is unavailable. */ }
+}
+
+function termList(text) {
+  return text.split(",").map((x) => x.trim()).filter((x) => x);
+}
+
+function drawWindowsNotifications() {
+  const host = $("windowsNotifications");
+  if (!host || !windowsNotifications || !cfg) return;
+  cfg.windows_notifications ||= {enabled:false, app_ids:[], include_terms:[], exclude_terms:[]};
+  const settings = cfg.windows_notifications;
+  host.innerHTML = "";
+  const line = document.createElement("div");
+  line.textContent = "Windows · " + (windowsNotifications.status || "unknown") +
+    " · " + (windowsNotifications.matching || 0) + " matching";
+  host.appendChild(line);
+  if (windowsNotifications.error) {
+    const error = document.createElement("div"); error.className="hint";
+    error.style.color="var(--err)"; error.textContent=windowsNotifications.error;
+    host.appendChild(error);
+  }
+  if (windowsNotifications.status === "permission_required") {
+    const enable = document.createElement("button"); enable.textContent="Enable access";
+    enable.style.marginTop="8px";
+    enable.addEventListener("click", async () => {
+      setStatus("Requesting Windows notification access…", "busy");
+      const response = await fetch("api/integrations/windows-notifications/access", {
+        method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Access request failed");
+      setTimeout(refreshWindowsNotifications, 750);
+    });
+    host.appendChild(enable);
+  }
+  if (windowsNotifications.status === "denied") {
+    const hint=document.createElement("p"); hint.className="hint";
+    hint.textContent="Access was denied. Re-enable USB LCD Dashboard under Windows notification privacy settings.";
+    host.appendChild(hint);
+  }
+  const enabledRow=document.createElement("div"); enabledRow.className="check";
+  const enabled=document.createElement("input"); enabled.type="checkbox"; enabled.checked=!!settings.enabled;
+  enabled.addEventListener("change", () => { settings.enabled=enabled.checked; markDirty(); });
+  const enabledLabel=document.createElement("label"); enabledLabel.textContent="Show selected applications";
+  enabledRow.append(enabled, enabledLabel); host.appendChild(enabledRow);
+  const selected = new Set(settings.app_ids || []);
+  (windowsNotifications.apps || []).forEach((app) => {
+    const row=document.createElement("div"); row.className="check";
+    const box=document.createElement("input"); box.type="checkbox"; box.checked=selected.has(app.id);
+    box.addEventListener("change", () => {
+      if(box.checked) selected.add(app.id); else selected.delete(app.id);
+      settings.app_ids=Array.from(selected); markDirty();
+    });
+    const label=document.createElement("label"); label.textContent=app.name;
+    label.title=app.id; row.append(box,label); host.appendChild(row);
+  });
+  if (!(windowsNotifications.apps || []).length) {
+    const hint=document.createElement("p"); hint.className="empty";
+    hint.textContent="Applications appear here after they emit a notification."; host.appendChild(hint);
+  }
+  field(host, "Include terms", (settings.include_terms || []).join(", "), "text",
+    (value) => { settings.include_terms=termList(value); }, "Comma-separated; any term may match");
+  field(host, "Exclude terms", (settings.exclude_terms || []).join(", "), "text",
+    (value) => { settings.exclude_terms=termList(value); }, "Comma-separated; exclusion wins");
+}
+
+async function refreshWindowsNotifications() {
+  try {
+    windowsNotifications = await fetch("api/integrations/windows-notifications").then((r) => r.json());
+    drawWindowsNotifications();
+  } catch (_) { /* Settings remain usable if this source is unavailable. */ }
+}
+
+// --------------------------------------------------------------- human todos
+async function todoRequest(path, method, payload) {
+  setStatus("Updating todosâ€¦", "busy");
+  const response = await fetch("api/todos" + path, {
+    method, headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(payload || {})
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || "Todo action failed");
+  await refreshTodos();
+  setStatus("Todos updated", "ok");
+  return body;
+}
+
+function todoFields(host, item, onSave) {
+  const title=document.createElement("input"); title.placeholder="What do you need to do?"; title.value=item.title || "";
+  const details=document.createElement("textarea"); details.placeholder="Optional details"; details.value=item.details || "";
+  const row=document.createElement("div"); row.className="row";
+  const priority=document.createElement("select");
+  ["urgent","high","normal","low"].forEach((value) => { const o=document.createElement("option"); o.value=value; o.textContent=value; o.selected=(item.priority || "normal")===value; priority.appendChild(o); });
+  const due=document.createElement("input"); due.type="date"; due.value=item.due_date || "";
+  row.append(priority,due); host.append(title,details,row);
+  const save=document.createElement("button"); save.className="primary"; save.textContent=onSave.label;
+  save.addEventListener("click", () => onSave.run({title:title.value,details:details.value,priority:priority.value,due_date:due.value || null}).catch((e) => setStatus(String(e),"err")));
+  host.appendChild(save);
+}
+
+function drawTodoCreate() {
+  const host=$("todoCreate"); host.innerHTML="";
+  todoFields(host, {priority:"normal"}, {label:"Add todo", run:async (payload) => {
+    await todoRequest("", "POST", payload); drawTodoCreate();
+  }});
+}
+
+function drawTodos() {
+  const host=$("todoList"); if(!host) return; host.innerHTML="";
+  const visible=todos.filter((item) => showTodoHistory || item.status === "open");
+  if(!visible.length) { const p=document.createElement("p"); p.className="empty"; p.textContent=showTodoHistory ? "No todos yet." : "All clear."; host.appendChild(p); return; }
+  const open=todos.filter((item) => item.status === "open");
+  visible.forEach((item) => {
+    const card=document.createElement("div"); card.className="todo" + (item.status === "completed" ? " done" : "");
+    todoFields(card,item,{label:"Save",run:(payload)=>todoRequest("/"+item.id,"PATCH",payload)});
+    const actions=document.createElement("div"); actions.className="todo-actions";
+    const complete=document.createElement("button"); complete.textContent=item.status === "open" ? "Complete" : "Reopen";
+    complete.addEventListener("click",()=>todoRequest("/"+item.id+"/"+(item.status === "open" ? "complete" : "reopen"),"POST",{}).catch((e)=>setStatus(String(e),"err")));
+    actions.appendChild(complete);
+    if(item.status === "open") {
+      [["â†‘",-1],["â†“",1]].forEach(([label,delta])=>{ const b=document.createElement("button"); b.textContent=label; b.title=delta<0?"Move up":"Move down";
+        b.addEventListener("click",()=>{ const index=open.findIndex((x)=>x.id===item.id), target=index+delta; if(target<0||target>=open.length)return; [open[index],open[target]]=[open[target],open[index]]; todoRequest("/reorder","POST",{ordered_ids:open.map((x)=>x.id)}).catch((e)=>setStatus(String(e),"err")); }); actions.appendChild(b); });
+    }
+    const remove=document.createElement("button"); remove.className="danger"; remove.textContent="Delete";
+    remove.addEventListener("click",()=>{ if(confirm("Permanently delete this todo?")) todoRequest("/"+item.id,"DELETE",{confirm:true}).catch((e)=>setStatus(String(e),"err")); });
+    actions.appendChild(remove); card.appendChild(actions); host.appendChild(card);
+  });
+}
+
+async function refreshTodos() {
+  try { const body=await fetch("api/todos?include_completed=1").then((r)=>r.json()); todos=body.todos || []; drawTodos(); }
+  catch (_) { /* The layout editor remains usable if todo storage is unavailable. */ }
 }
 
 // ---------------------------------------------------------------- validation
@@ -562,6 +695,10 @@ async function load() {
   drawStage();
   drawTileForm();
   drawSideForms();
+  await refreshDiscord();
+  await refreshWindowsNotifications();
+  drawTodoCreate();
+  await refreshTodos();
   setStatus("Loaded", "ok");
 }
 
@@ -578,6 +715,8 @@ async function save() {
       display: cfg.display,
       background: cfg.background,
       dashboard: cfg.dashboard,
+      discord: cfg.discord,
+      windows_notifications: cfg.windows_notifications,
       tiles: cfg.tiles,
     }),
   });
@@ -618,14 +757,19 @@ $("add").addEventListener("click", () => {
   drawTileForm();
 });
 $("snap").addEventListener("change", () => {});
+$("todoHistory").addEventListener("click", () => {
+  showTodoHistory=!showTodoHistory;
+  $("todoHistory").textContent=showTodoHistory ? "Hide completed" : "Show completed";
+  drawTodos();
+});
 window.addEventListener("beforeunload", (e) => {
   if (dirty) { e.preventDefault(); e.returnValue = ""; }
 });
 
 load().then(refreshPreview).catch((err) => setStatus(String(err), "err"));
 setInterval(refreshPreview, 2000);
-refreshTeams();
-setInterval(refreshTeams, 2000);
+setInterval(refreshDiscord, 5000);
+setInterval(refreshTodos, 5000);
 </script>
 </body>
 </html>

@@ -9,8 +9,8 @@ one config file per machine:
 ```
 
 The 3.5" panel shows one session on one card. The ultra-wide is divided into
-**tiles**, each holding a widget — a clock, an agent card, an animated crab, or
-the latest unread Microsoft Teams chat.
+**tiles**, each holding a widget — a clock, an agent card, an animated crab,
+selected-channel Discord messages, notifications, or a human todo list.
 
 **To install it, jump to [Installing](#installing)** — there is a prebuilt
 package for [Windows 11](#windows-11) and for [Ubuntu](#ubuntu).
@@ -34,7 +34,7 @@ its own `config.toml`.
 
 ```toml
 [[tile]]
-widget = "clock"          # clock | agent | crab | messages | legacy
+widget = "clock"          # clock | agent | crab | messages | notifications | todos | legacy
 x = 12
 y = 12
 w = 404
@@ -74,41 +74,93 @@ machines can name a wallpaper that only exists on one.
 See [config.example.wide.toml](config.example.wide.toml) for the full ultra-wide
 layout.
 
-## Microsoft Teams messages
+## Messaging integrations
 
-The `messages` widget shows the newest unread Teams chat with its conversation,
-sender, plain-text preview and age. Its count is unread conversations, not
-individual messages, and the dashboard never marks a chat read.
+The `messages` widget shows the newest human message from selected Discord
+server channels and a local count of messages received since **Clear new
+messages** was pressed. It never marks anything read in Discord. Bots, webhooks,
+DMs, forums and threads are excluded in this first version.
 
-Create a Microsoft Entra public-client application with device-code access and
-delegated `Chat.Read` and `User.Read`. Supply its identity to the daemon:
+### Discord bot setup
 
-```text
-USB_LCD_TEAMS_CLIENT_ID=<application-client-id>
-USB_LCD_TEAMS_TENANT_ID=<tenant-id>
-```
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications),
+   choose **New Application**, give it a name such as `USB LCD Dashboard`, and
+   open the application.
+2. Open **Bot** in the sidebar. Create the bot if Discord has not already done
+   so, then enable **Message Content Intent** under **Privileged Gateway
+   Intents**. Message metadata remains visible without it, but Discord removes
+   the text and attachment fields that the LCD preview needs.
+3. On the same page, choose **Reset Token** and copy the resulting bot token.
+   Discord shows it only once. Treat it like a password; do not paste it into
+   `config.toml`, a shell command, an issue, or a chat message.
+4. Open **Installation** and enable a **Guild Install** using the `bot` scope.
+   Grant only these bot permissions:
 
-On Windows, set user environment variables and restart the dashboard. On Linux,
-put those assignments in `~/.config/usb-lcd-dashboard/teams.env` and restart the
-systemd user service. Do not configure a client secret.
+   - **View Channels**
+   - **Read Message History**
 
-Open the settings editor, find **Connections**, choose **Connect**, and follow
-the Microsoft device-login link and code. The cache uses OS-backed encryption
-where available, with a protected per-user file fallback and warning.
+   The dashboard never sends, edits, deletes, acknowledges, or reacts to
+   messages, so it does not need **Send Messages**, **Manage Messages**, or
+   administrator access.
+5. Copy the generated install link, open it, select the server, and authorize
+   the bot. Repeat this for every server containing channels you want on the
+   LCD. You must have permission to add applications to each server.
+6. Open the dashboard editor at <http://127.0.0.1:45723>. Under **Discord
+   messages**, paste the bot token and choose **Save and verify**.
+7. The editor discovers the server text channels visible to the bot. Check the
+   channels to monitor, then choose the main **Save** button at the top of the
+   page. Use **Refresh channels** after adding the bot to another server or
+   changing channel permissions.
+8. Add a `messages` tile from the layout picker if the layout does not already
+   contain one. The default title is `Discord`; the tile title can be changed in
+   its options.
 
-```toml
-[[tile]]
-widget = "messages"
-x = 926
-y = 12
-w = 486
-h = 438
-[tile.options]
-title = "TEAMS"
-```
+The count is local to the dashboard, not Discord's personal unread count. A
+newly selected channel starts at its current newest message, so installing the
+bot does not flood the LCD with history. **Clear new messages** resets the local
+count without changing read state or messages in Discord.
 
-V1 covers direct, group, meeting and federated chats. Teams channels, Slack and
-Discord remain future provider extensions.
+The token is never returned by the local API or written to `config.toml`.
+Windows encrypts it for the current user with DPAPI; Linux stores it in the
+dashboard configuration directory with mode `0600`. **Disconnect** deletes the
+stored token. If a token is ever exposed, reset it in the Developer Portal and
+connect the dashboard again.
+
+If no channels appear, confirm that the bot was installed in the server and
+that both required permissions are allowed by the server role and any channel
+overrides. If channel names appear but previews are empty, confirm that
+**Message Content Intent** is enabled. DMs, group DMs, forum channels, threads,
+bot posts, and webhook posts are intentionally excluded.
+
+Do not paste a normal Discord user token. Discord forbids automating normal user
+accounts (self-bots), and this integration rejects non-bot credentials.
+
+## Human todos
+
+The `todos` widget shows one global personal action list shared by the LCD,
+settings editor, Claude Code, and Codex. Add a `todos` tile from the editor,
+then manage items under **Human todos** or ask either agent to list, add, edit,
+complete, or reopen them. Completed items leave the LCD but remain in history.
+
+Items support details, priority, a date-only deadline, and manual ordering.
+Overdue, today, and next-seven-day items lead; remaining items follow priority.
+Large lists rotate in deterministic pages. The MCP tools explicitly describe
+this as the human's list: agents may add concrete actions you need to take, but
+must never use it for their own implementation plan or scratch work. Permanent
+deletion requires an explicit request and confirmation.
+
+### Windows notifications
+
+The Windows-only `notifications` widget reads the notifications currently held
+by Windows, without an app-specific bot or API. In the settings editor, choose
+**Enable access**, approve the Windows prompt, select the applications to show,
+and optionally enter comma-separated include or exclude terms. Exclusion wins;
+otherwise any include term may match the app name, title, or body.
+
+Matching notifications rotate newest-first. The dashboard never dismisses them
+and does not store their text on disk. Applications only appear in the picker
+after emitting a notification, and an application that hides message previews
+from Windows cannot be made to reveal them here.
 
 ## The crab
 
@@ -309,9 +361,10 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.7.0.exe` | `usb-lcd-dashboard_0.7.0_all.deb` |
+| Package | `USB-LCD-Dashboard-Setup-0.8.0.exe` | `usb-lcd-dashboard_0.8.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
-| Size | ~20 MB | ~67 KB plus dependencies |
+| Size | 22.6 MB | 88.7 KB plus dependencies |
+| SHA-256 | `b55f741b8fe8dc8317534f9307eeaef4e66c0a22f632b5d4486f4cc9279456cf` | `0d03d52b8cbbfa18652b191e05c107f651a8d00df3384f7f56a80310c2fbae21` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
 | Hooks wired by | The installer, automatically | You, with one command |
 
@@ -325,10 +378,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.7.0.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.8.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.7.0.exe
+.\dist\USB-LCD-Dashboard-Setup-0.8.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -337,8 +390,10 @@ It then auto-detects the panel as a COM port, installs the Claude Code and Codex
 hooks for you, adds a startup shortcut, and launches the dashboard immediately.
 There is nothing else to run.
 
-The installer is not code-signed, so SmartScreen may interrupt with a blue
-warning — **More info → Run anyway**. Add `/S` to install silently instead.
+The installer requests administrator approval so Windows can trust its
+notification identity certificate. It is not code-signed, so SmartScreen may
+also interrupt with a blue warning — **More info → Run anyway**. Add `/S` to
+install silently instead (elevation is still required).
 
 Check it afterwards from the Start menu's **Diagnostics** shortcut, or:
 
@@ -358,7 +413,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.7.0_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.8.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and
@@ -372,7 +427,8 @@ usb-lcd-dashboard doctor
 
 That merges the Claude and Codex hooks, writes
 `~/.config/usb-lcd-dashboard/config.toml`, and enables and starts the systemd
-user service. If the panel was already plugged in, replug it so your session
+user service. It also installs the human-todo MCP tools into both clients; start
+a new client session and use `/mcp` to verify them. If the panel was already plugged in, replug it so your session
 picks up the new device permissions.
 
 ```bash

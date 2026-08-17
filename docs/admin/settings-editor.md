@@ -28,6 +28,9 @@ All guarded by `_guard()` first.
 | GET | `/api/config` | `200` `config_to_json(...)`. |
 | GET | `/api/widgets` | `200` `{"widgets": describe()}`. |
 | GET | `/api/preview.png` | `200` PNG, or **`503`** if no frame has been rendered yet. |
+| GET | `/api/todos?include_completed=1` | Open todos, optionally with completed history. |
+| POST | `/api/todos`, `/api/todos/reorder`, `.../complete`, `.../reopen` | Create, order, or change status. |
+| PATCH / DELETE | `/api/todos/{id}` | Edit, or permanently delete with `{"confirm":true}`. |
 | POST | `/api/config` | `200` the saved config, `400` bad JSON or invalid config, `413` oversized body. |
 | any | anything else | `404`. |
 | any | non-loopback `Host` | `403`. |
@@ -65,6 +68,11 @@ to start on, and there is no second copy of the validation rules. A rejection
 names the offending field or tile and writes nothing.
 
 The write itself is `write_config`, which replaces the file atomically.
+
+Todo actions are deliberately separate from config saving. They commit
+immediately through `TodoStore`, so Save/Revert for layout edits cannot discard
+or overwrite the human list. Completed items are hidden from the LCD but remain
+available in the editor for reopening or confirmed deletion.
 
 ## How the daemon notices
 

@@ -10,6 +10,7 @@ from usb_lcd_dashboard.config import (
     default_config_toml,
     dump_config_toml,
     load_config,
+    parse_config_text,
     write_config,
 )
 from usb_lcd_dashboard.layout import Tile
@@ -115,6 +116,15 @@ def test_a_background_image_that_is_absent_warns_but_loads(tmp_path, caplog):
         cfg = load_config(write(tmp_path, text))
     assert cfg.background is not None and cfg.background.image is not None
     assert any("does not exist" in r.message for r in caplog.records)
+
+
+def test_messages_tiles_remain_provider_neutral(tmp_path):
+    text = (
+        '[[tile]]\nwidget = "messages"\nx = 0\ny = 0\nw = 480\nh = 320\n'
+        '[tile.options]\ntitle = "TEAMS"\n'
+    )
+    cfg = load_config(write(tmp_path, text))
+    assert cfg.tiles == (Tile("messages", 0, 0, 480, 320, {"title": "TEAMS"}),)
 
 
 @pytest.mark.parametrize(
@@ -303,3 +313,29 @@ def test_an_overlapping_layout_is_also_forgiven_when_lenient(tmp_path):
     with pytest.raises(ValueError, match="overlaps"):
         load_config(path)
     assert load_config(path, strict=False).tiles == (Tile("legacy", 0, 0, 480, 320),)
+
+
+def test_windows_notification_filters_round_trip():
+    cfg = parse_config_text(
+        '[windows_notifications]\n'
+        'enabled = true\n'
+        'app_ids = ["App.Chat", "App.Mail"]\n'
+        'include_terms = ["review"]\n'
+        'exclude_terms = ["secret"]\n'
+    )
+    assert cfg.windows_notifications_enabled is True
+    assert cfg.windows_notification_app_ids == ("App.Chat", "App.Mail")
+    assert parse_config_text(dump_config_toml(cfg)) == cfg
+
+
+def test_windows_notification_filters_must_be_lists():
+    with pytest.raises(ValueError, match="windows_notifications.app_ids must be a list"):
+        parse_config_text('[windows_notifications]\napp_ids = "App.Chat"\n')
+
+
+def test_notification_rotation_must_be_in_range():
+    with pytest.raises(ValueError, match="rotation_seconds must be between 1 and 300"):
+        parse_config_text(
+            '[[tile]]\nwidget="notifications"\nx=0\ny=0\nw=100\nh=100\n'
+            '[tile.options]\nrotation_seconds=0\n'
+        )

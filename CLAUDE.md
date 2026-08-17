@@ -1,9 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
----
-
+<!-- code-basics: enhancement:memory -->
 ## CRITICAL: Memory Files
 
 **ALWAYS update the per-work-item memory files when relevant.** Memory is scoped **per feature/bug** under `.memories/features/{feature-name}/` or `.memories/bugs/{bug-name}/`, not at the `.memories/` root. These files track work item state across sessions:
@@ -26,6 +23,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 6. Periodically prune `todos.md` to remove old completed items.
 7. Periodically summarize and prune `completed.md` to keep the file size small.
 8. **Cross-work-item patterns** (gotchas that recur across multiple work items) belong in `CLAUDE.md` (root or the relevant per-project `CLAUDE.md`), not in any single work item's `notes.md`.
+<!-- /code-basics: enhancement:memory -->
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+---
 
 ## CRITICAL: Use `docs/` before reading source
 
@@ -95,7 +97,7 @@ preserve them when editing nearby.
 ```bash
 python3 -m venv .venv
 .venv/Scripts/pip install -e '.[test]'      # .venv/bin/pip on Linux
-.venv/Scripts/pytest                        # 383 passing, ~13s
+.venv/Scripts/pytest                        # 461 passing + 1 platform skip, ~18s
 .venv/Scripts/pytest tests/test_layout.py::test_name -x
 .venv/Scripts/usb-lcd-dashboard doctor
 .venv/Scripts/usb-lcd-dashboard run --simulate    # writes ./screencap.png
@@ -118,15 +120,46 @@ echo '{"hook_event_name":"PreToolUse","session_id":"a","cwd":"'"$PWD"'",
 `USB_LCD_DASHBOARD_CONFIG` overrides the config path (`config.py:default_path`),
 which is the only way to test against a config other than the installed one.
 
-Packaging (containerised, so either target builds from either host; needs Docker
-or Podman, `CONTAINER_RUNTIME=podman` to switch, version read from
-`pyproject.toml`):
+Packaging needs Docker or Podman (`CONTAINER_RUNTIME=podman` to switch) and
+reads the version from `pyproject.toml`. The Debian package builds from either
+host; the identity-enabled Windows installer must build from Windows Git Bash:
 
 ```bash
 packaging/windows/build-installer.sh    # -> dist/USB-LCD-Dashboard-Setup-<v>.exe
 packaging/linux/build-deb.sh            # -> dist/usb-lcd-dashboard_<v>_all.deb
 packaging/linux/smoke-test.sh           # installs the .deb in a throwaway container
 ```
+
+### CRITICAL: Keep installer artifacts current
+
+The versioned files in `dist/` are release artifacts:
+
+- `USB-LCD-Dashboard-Setup-<version>.exe`
+- `usb-lcd-dashboard_<version>_all.deb`
+
+Any change to runtime code, dependencies, configuration, install/uninstall
+behavior, Windows identity/capabilities, Linux service setup, or the project
+version requires rebuilding both applicable installers before declaring the
+work complete. A matching filename is not evidence that an artifact contains
+the current source.
+
+The notification-enabled Windows build is the exception to the older
+"either-host" rule: run it from Windows Git Bash with the Windows SDK and a
+running Docker or Podman engine. It embeds identity into `pythonw.exe`, creates
+or reuses the current user's non-exportable personal signing certificate, signs
+the sparse identity MSIX, and then builds NSIS. The Debian package remains a
+container build from either host.
+
+After rebuilding, verify package metadata and SHA-256 hashes, run the Debian
+smoke test when supported, and update `README.md`, `WINDOWS.md`, `LINUX.md`,
+`docs/packaging/`, `packaging/linux/changelog`, and every documented artifact
+filename/hash. Never execute the NSIS installer merely to inspect it.
+
+The self-signed identity certificate must be imported into
+`Cert:\LocalMachine\TrustedPeople` before `Add-AppxPackage`. Current-user
+`TrustedPeople` and `Root` both yield `0x800B0109` on Windows 11, even when
+ordinary signature validation succeeds. NSIS requests elevation and uses
+noninteractive `certutil`; the uninstaller removes that exact thumbprint.
 
 ## Architecture
 
@@ -225,3 +258,43 @@ and an installer sha256.
 Plus `docs/`, which is verified rather than remembered: run
 `python docs/tools/build_index.py && python docs/tools/search.py --check`. It
 will tell you which documents you have invalidated.
+
+<!-- code-basics: agent intent -->
+## Recording why you changed something
+
+When you finish a turn in which you edited files, end your reply with one line
+saying why:
+
+```
+Intent: <3-5 words describing why>
+```
+
+If the turn made unrelated changes, scope each reason to its files instead of
+writing several plain lines — only the first plain line is used. Paths are
+workspace-relative, comma-separated:
+
+```
+Intent(src/api.ts, src/apiLogic.test.ts): <why, for those files>
+```
+
+Each entry is a workspace-relative path with forward slashes — a specific file,
+or a directory to cover everything you edited beneath it (e.g.
+`Intent(src/components): …`). Prefer naming the specific files; reach for a
+directory only when the turn's edits are one cohesive set under it.
+
+A scoped line covers the files it names; one plain line may cover the rest.
+Keep each label short enough to read at a glance — it titles a group of hunks
+in the Changes tab, not a commit message.
+
+## Rejected changes
+
+A comment beginning `AI-REJECTED` means that change was reverted during review
+and the reason is on the following line. It is a task, not documentation:
+
+1. Implement a correct version that addresses the stated reason.
+2. Delete the whole `AI-REJECTED` comment block in the same edit.
+
+Do not reinstate the reverted code as it was, and do not leave the comment
+behind once the code is right — a commit that still carries one is refused by
+a `pre-commit` hook.
+<!-- /code-basics -->
