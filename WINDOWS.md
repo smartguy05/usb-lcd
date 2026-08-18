@@ -10,7 +10,7 @@ filterable Windows notifications, shared human todos, and Claude limit meters:
 
 ```text
 dist/USB-LCD-Dashboard-Setup-0.10.0.exe
-sha256 7e19312f846ecb7002f67a67945e72902339d9df474a79403e5ed8f3b473fea4
+sha256 133c98e1e97c5d40745cb9b7852ae3134b97330b26d36b7ff06fbda7c62ca8f5
 ```
 
 Older installers in `dist/` predate the current notification-capable package.

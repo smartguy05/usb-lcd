@@ -58,7 +58,7 @@ rather than a symlink somewhere else.
    itself.
 4. **Merge hooks.** `_merge_hooks` strips any group whose JSON contains
    `usb-lcd-dashboard` or `usb_lcd_dashboard` — that substring is how it
-   identifies its own entries — then appends a fresh one with `timeout: 5`.
+   identifies its own entries — then appends a fresh one with `timeout: 10`.
    Other tools' hooks are left alone. Written atomically.
 5. **Merge todo MCP tools.** Add a user-scoped stdio server to Claude Code and
    Codex without rewriting unrelated settings; record a displaced same-name
@@ -70,7 +70,9 @@ rather than a symlink somewhere else.
 8. Write `install-state.json` and print what happened.
 
 Hook commands load only the IPC table, not the display layout or renderer stack.
-This keeps startup comfortably below the timeout when the panel is unplugged or
+Each managed hook has a ten-second timeout and exits successfully even when the
+optional dashboard telemetry cannot be emitted. This keeps agent events healthy
+when the panel is unplugged or
 the daemon is stopped. Codex requires a fresh session and explicit trust through
 `/hooks` after its hook file changes.
 

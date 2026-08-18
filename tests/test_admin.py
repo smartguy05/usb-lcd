@@ -9,6 +9,7 @@ import pytest
 from PIL import Image
 
 from usb_lcd_dashboard import admin
+from usb_lcd_dashboard.admin_page import PAGE
 from usb_lcd_dashboard.admin import (
     AdminState,
     config_from_json,
@@ -41,6 +42,14 @@ y = 12
 w = 486
 h = 438
 """
+
+
+def test_switching_to_the_legacy_panel_restores_its_fixed_profile():
+    """The old panel must not inherit a wide panel's canvas and tile layout."""
+    assert '["turing_rev_a", "turing_usb", "auto", "simulated", "window"], changeDisplayKind' in PAGE
+    assert 'cfg.display.width = portrait ? 320 : 480;' in PAGE
+    assert 'cfg.display.height = portrait ? 480 : 320;' in PAGE
+    assert 'widget: "legacy", x: 0, y: 0' in PAGE
 
 
 @pytest.fixture

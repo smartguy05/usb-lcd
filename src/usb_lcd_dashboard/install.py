@@ -197,7 +197,15 @@ def _systemd_disable() -> None:
 
 def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -> None:
     hooks = settings.setdefault("hooks", {})
-    command = f"{command_prefix} emit --provider {provider}"
+    # These hooks only report optional display telemetry. A missing daemon,
+    # damaged local config, or transient interpreter failure must never turn an
+    # otherwise successful agent event into a hook failure. Claude uses Bash on
+    # Windows, while Codex uses Windows PowerShell: a quoted executable needs
+    # PowerShell's call operator and PowerShell 5.1 cannot parse ``||``.
+    if provider == "codex" and os.name == "nt":
+        command = f"& {command_prefix} emit --provider {provider}; exit 0"
+    else:
+        command = f"{command_prefix} emit --provider {provider} || exit 0"
     for event, groups in list(hooks.items()):
         cleaned = _strip_ours(groups)
         if cleaned:
@@ -212,7 +220,7 @@ def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -
                     {
                         "type": "command",
                         "command": command,
-                        "timeout": 5,
+                        "timeout": 10,
                     }
                 ]
             }

@@ -47,7 +47,7 @@ def _hook_timeout_ready(path: Path) -> bool:
                     ours.append(hook)
     try:
         return bool(ours) and all(
-            float(hook.get("timeout", 0)) >= 5 for hook in ours
+            float(hook.get("timeout", 0)) >= 10 for hook in ours
         )
     except (TypeError, ValueError):
         return False
@@ -140,12 +140,12 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
         (
             "Claude hook timeout",
             _hook_timeout_ready(Path.home() / ".claude/settings.json"),
-            "managed hooks use at least 5 seconds",
+            "managed hooks use at least 10 seconds",
         ),
         (
             "Codex hook timeout",
             _hook_timeout_ready(Path.home() / ".codex/hooks.json"),
-            "managed hooks use at least 5 seconds",
+            "managed hooks use at least 10 seconds",
         ),
         (
             "Claude todo tools",

@@ -103,6 +103,14 @@ declares. Register a widget and it appears in the editor with working inputs and
 its own help text, with no change here — see
 [../rendering/widgets.md](../rendering/widgets.md#adding-a-widget).
 
+### Switching back to the legacy LCD
+
+Choosing `turing_rev_a` or `auto` in the display-kind picker restores the
+orientation-correct legacy canvas (`480×320` landscape or `320×480` portrait)
+and replaces the current layout with one full-screen `legacy` tile. This prevents
+a wide-panel layout from being sent to the fixed-size Rev A serial display. Other
+display kinds retain their editable dimensions and tiles.
+
 ## Tests
 
 `tests/test_admin.py` — every route and status code, the loopback guard, the

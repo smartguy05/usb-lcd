@@ -608,7 +608,7 @@ function drawSideForms() {
   const d = $("displayForm");
   d.innerHTML = "";
   choice(d, "Kind", cfg.display.kind,
-    ["turing_rev_a", "turing_usb", "auto", "simulated", "window"], (v) => { cfg.display.kind = v; });
+    ["turing_rev_a", "turing_usb", "auto", "simulated", "window"], changeDisplayKind);
   field(d, "Device", cfg.display.device, "text", (v) => { cfg.display.device = v; },
     'Serial port, or AUTO');
   const size = document.createElement("div");
@@ -717,6 +717,27 @@ function drawSideForms() {
     ro.ipc_port + "</code><br>Editor port: <code>" + ro.admin_port + "</code></p>" +
     "<p>Changing the IPC transport would orphan the installed hooks, and changing " +
     "the editor port would cut off this page — edit config.toml for those.</p>";
+}
+
+function changeDisplayKind(kind) {
+  cfg.display.kind = kind;
+  if (kind !== "turing_rev_a" && kind !== "auto") return;
+
+  // The serial Rev A panel has one fixed native size. Keeping a wide panel's
+  // dimensions and tiles when its transport is changed strands the daemon at
+  // connect time, leaving the Rev A panel on its white power-on screen.
+  const portrait = cfg.display.orientation === "portrait" ||
+    cfg.display.orientation === "portrait_flipped";
+  cfg.display.width = portrait ? 320 : 480;
+  cfg.display.height = portrait ? 480 : 320;
+  cfg.tiles = [{
+    widget: "legacy", x: 0, y: 0,
+    w: cfg.display.width, h: cfg.display.height, options: {}
+  }];
+  sel = 0;
+  drawStage();
+  drawTileForm();
+  drawSideForms();
 }
 
 async function rotateLayout(target) {

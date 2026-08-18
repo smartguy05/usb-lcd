@@ -33,8 +33,31 @@ def test_the_notification_hook_is_installed():
     hooks = merged()
     assert "Notification" in hooks
     command = hooks["Notification"][0]["hooks"][0]["command"]
-    assert command == "usb-lcd-dashboard emit --provider claude"
-    assert hooks["Notification"][0]["hooks"][0]["timeout"] == 5
+    assert command == "usb-lcd-dashboard emit --provider claude || exit 0"
+    assert hooks["Notification"][0]["hooks"][0]["timeout"] == 10
+
+
+def test_every_dashboard_hook_is_nonfatal_and_has_startup_headroom():
+    for provider in EVENTS_BY_PROVIDER:
+        hooks = merged(provider)
+        for event in EVENTS_BY_PROVIDER[provider]:
+            installed = hooks[event][0]["hooks"][0]
+            expected_suffix = (
+                "; exit 0"
+                if provider == "codex" and install_mod.os.name == "nt"
+                else " || exit 0"
+            )
+            assert installed["command"].endswith(expected_suffix)
+            assert installed["timeout"] == 10
+
+
+def test_codex_windows_hook_uses_powershell_invocation(monkeypatch):
+    monkeypatch.setattr(install_mod.os, "name", "nt")
+    hooks = merged("codex")
+    command = hooks["SessionStart"][0]["hooks"][0]["command"]
+    assert command == (
+        "& usb-lcd-dashboard emit --provider codex; exit 0"
+    )
 
 
 def test_the_approval_hook_is_still_installed():
@@ -54,7 +77,7 @@ def test_merging_preserves_someone_elses_hook():
         for entry in group["hooks"]
     ]
     assert "notify-send hello" in commands
-    assert "usb-lcd-dashboard emit --provider claude" in commands
+    assert "usb-lcd-dashboard emit --provider claude || exit 0" in commands
 
 
 def test_merging_twice_does_not_duplicate_our_hook():
