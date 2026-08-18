@@ -213,3 +213,16 @@ def test_a_full_screen_opaque_tile_is_returned_directly():
     frame = compose([tile], (100, 100), now=NOW)
     assert frame.mode == "RGB"
     assert frame.getpixel((50, 50)) == (0, 255, 0)
+
+
+def test_wallpaper_makes_the_legacy_card_translucent(tmp_path):
+    wallpaper = tmp_path / "wallpaper.png"
+    Image.new("RGB", (480, 320), "#ff00ff").save(wallpaper)
+    frame = compose(
+        [Tile("legacy", 0, 0, 480, 320)],
+        (480, 320),
+        now=NOW,
+        background=Background(image=wallpaper, card_opacity=0.5),
+    )
+    assert frame.mode == "RGB"
+    assert frame.getpixel((0, 0)) != (8, 16, 24)

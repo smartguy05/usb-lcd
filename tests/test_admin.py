@@ -1,7 +1,9 @@
 import json
+import io
 import urllib.error
 import urllib.request
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -12,6 +14,7 @@ from usb_lcd_dashboard.admin import (
     config_from_json,
     config_to_json,
     _host_is_loopback,
+    rotate_layout_payload,
 )
 from usb_lcd_dashboard.config import Config, load_config
 from usb_lcd_dashboard.layout import Tile
@@ -82,6 +85,20 @@ def post(base, route, payload):
         return exc.code, json.loads(exc.read())
 
 
+def post_bytes(base, route, payload):
+    request = urllib.request.Request(
+        base + route,
+        data=payload,
+        headers={"Content-Type": "application/octet-stream"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            return response.status, json.loads(response.read())
+    except urllib.error.HTTPError as exc:
+        return exc.code, json.loads(exc.read())
+
+
 # --------------------------------------------------------------- serialisation
 
 def test_config_to_json_carries_the_layout_and_marks_ipc_readonly():
@@ -93,6 +110,7 @@ def test_config_to_json_carries_the_layout_and_marks_ipc_readonly():
     ]
     assert payload["readonly"]["ipc_port"] == 45722
     assert payload["background"] is None
+    assert payload["screensaver"] == {"enabled": True, "idle_seconds": 600}
 
 
 def test_json_round_trips_a_config(state):
@@ -107,11 +125,25 @@ def test_config_from_json_applies_edits(state):
     payload = config_to_json(holder["config"])
     payload["display"]["brightness"] = 41
     payload["dashboard"]["idle_title"] = "HOME"
+    payload["screensaver"]["idle_seconds"] = 1200
     payload["tiles"][0]["options"]["title"] = "HOME"
     result = config_from_json(holder["config"], payload)
     assert result.brightness == 41
     assert result.idle_title == "HOME"
+    assert result.screensaver_idle_seconds == 1200
     assert result.tiles[0].options["title"] == "HOME"
+
+
+def test_layout_rotation_payload_rotates_every_tile():
+    result = rotate_layout_payload({
+        "source": "landscape", "target": "portrait",
+        "width": 480, "height": 320,
+        "tiles": [{"widget": "clock", "x": 10, "y": 20, "w": 30, "h": 40}],
+    })
+    assert (result["width"], result["height"]) == (320, 480)
+    assert result["tiles"][0] == {
+        "widget": "clock", "x": 260, "y": 10, "w": 40, "h": 30
+    }
 
 
 @pytest.mark.parametrize(
@@ -149,6 +181,38 @@ def test_the_page_is_served(server):
     assert b"Human todos" in body
 
 
+def test_layout_rotation_route(server):
+    base, _, _ = server
+    status, body = post(base, "/api/layout/rotate", {
+        "source": "landscape", "target": "landscape_flipped",
+        "width": 100, "height": 50,
+        "tiles": [{"widget": "clock", "x": 5, "y": 6, "w": 20, "h": 10}],
+    })
+    assert status == 200
+    assert body["tiles"][0]["x"] == 75
+    assert body["tiles"][0]["y"] == 34
+
+
+def test_background_upload_stores_a_managed_png(server):
+    base, state, _ = server
+    buffer = io.BytesIO()
+    Image.new("RGB", (80, 40), "#123456").save(buffer, format="JPEG")
+    status, body = post_bytes(base, "/api/background-image", buffer.getvalue())
+    assert status == 201
+    stored = state.background_dir / Path(body["image"]).name
+    assert stored.parent == state.background_dir
+    with Image.open(stored) as image:
+        assert image.format == "PNG"
+        assert image.size == (80, 40)
+
+
+def test_background_upload_rejects_non_images(server):
+    base, _, _ = server
+    status, body = post_bytes(base, "/api/background-image", b"not an image")
+    assert status == 400
+    assert "readable image" in body["error"]
+
+
 def test_the_config_endpoint_returns_the_layout(server):
     base, _, _ = server
     status, body, _ = get(base, "/api/config")
@@ -162,12 +226,13 @@ def test_the_widgets_endpoint_describes_the_registry(server):
     base, _, _ = server
     _, body, _ = get(base, "/api/widgets")
     widgets = {w["name"]: w for w in json.loads(body)["widgets"]}
-    assert set(widgets) == {"agent", "clock", "crab", "legacy", "messages", "notifications", "todos"}
+    assert set(widgets) == {"agent", "claude_limits", "clock", "crab", "legacy", "messages", "notifications", "todos"}
     assert widgets["agent"]["wants_session"] is True
     assert widgets["crab"]["wants_session"] is True
     assert any(o["name"] == "hour12" for o in widgets["clock"]["options"])
     assert widgets["messages"]["wants_messages"] is True
     assert widgets["todos"]["wants_todos"] is True
+    assert widgets["claude_limits"]["wants_claude_limits"] is True
 
 
 def test_todo_routes_cover_crud_history_reopen_and_delete(server):

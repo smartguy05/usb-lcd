@@ -17,7 +17,8 @@ Description: Live Claude Code and Codex dashboard for a USB LCD panel
  .
  The panel is divided into tiles, each holding a widget: a clock, an agent
  card, an animated crab, the latest selected-channel Discord message, or a
- persistent human todo list shared with Claude Code and Codex.
+ persistent human todo list shared with Claude Code and Codex, or Claude
+ subscription usage and reset times.
  .
  Installing this package puts the program and its udev rule in place. Wiring it
  into your own Claude and Codex sessions is a per-user step: run

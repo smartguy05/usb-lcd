@@ -15,6 +15,8 @@ from .normalize import normalize_event
 from .notifications import WindowsNotificationIntegration
 from .transport import bind_socket, poll_timeout, receive_event
 from .todos import TodoStore
+from .claude_limits import ClaudeLimitsIntegration
+from .screensaver import render_screensaver
 
 LOG = logging.getLogger(__name__)
 
@@ -29,6 +31,7 @@ class DashboardDaemon:
         self.discord = DiscordIntegration()
         self.windows_notifications = WindowsNotificationIntegration()
         self.todos = TodoStore(self.config_path.parent / "todos.sqlite3")
+        self.claude_limits = ClaudeLimitsIntegration(self.config_path.parent / "claude-limits.json")
         self._apply_config(config)
         self.running = True
         self.next_connect = 0.0
@@ -36,8 +39,33 @@ class DashboardDaemon:
         self.next_config_check = 0.0
         # The last composed frame, for the settings editor's preview.
         self.last_frame = None
+        self.last_activity = time.monotonic()
+        self.activity_token = self._content_activity_token()
         self.admin = None
         self.tray = None
+
+    def _content_activity_token(self):
+        """Stable identifiers for visible content that can arrive off-loop."""
+        messages = self.discord.snapshot()
+        notifications = self.windows_notifications.snapshot()
+        todos = self.todos.snapshot()
+        return (
+            messages.latest.created_at if messages.latest is not None else None,
+            tuple(item.id for item in notifications.items),
+            todos.updated_at,
+        )
+
+    def _notice_content_activity(self) -> None:
+        token = self._content_activity_token()
+        if token != self.activity_token:
+            self.activity_token = token
+            self.last_activity = time.monotonic()
+
+    def _screensaver_active(self) -> bool:
+        return self.config.screensaver_enabled and (
+            time.monotonic() - self.last_activity
+            >= self.config.screensaver_idle_seconds
+        )
 
     def _apply_config(self, config: Config) -> None:
         """Adopt a config, whether at startup or after an edit."""
@@ -55,6 +83,7 @@ class DashboardDaemon:
             config.windows_notification_include_terms,
             config.windows_notification_exclude_terms,
         )
+        self.claude_limits.configure(any(tile.widget == "claude_limits" for tile in config.tiles))
         # getattr, because this runs once before the tray exists.
         if getattr(self, "tray", None) is not None:
             # The tooltip names the device and the menu offers the editor, both
@@ -103,6 +132,7 @@ class DashboardDaemon:
             or fresh.brightness != self.config.brightness
         )
         self._apply_config(fresh)
+        self.last_activity = time.monotonic()
         LOG.info(
             "Config reloaded: %s tiles, %s agent slots", len(fresh.tiles), self.slot_count
         )
@@ -171,6 +201,7 @@ class DashboardDaemon:
         server = bind_socket(self.config)
         self.discord.start()
         self.windows_notifications.start()
+        self.claude_limits.start()
         self._start_admin()
         self._start_tray()
         try:
@@ -187,6 +218,10 @@ class DashboardDaemon:
                         self.running = False
                         continue
                     if envelope.get("schema_version") == 1:
+                        self.last_activity = time.monotonic()
+                        self.claude_limits.observe(
+                            str(envelope["provider"]), envelope.get("payload") or {}
+                        )
                         update = normalize_event(
                             str(envelope["provider"]),
                             envelope.get("payload") or {},
@@ -205,19 +240,24 @@ class DashboardDaemon:
 
                 now = utc_now()
                 sessions = self.store.assign(self.slot_count, now)
+                self._notice_content_activity()
                 try:
-                    frame = compose(
-                        self.config.tiles,
-                        self.config.size,
-                        sessions=sessions,
-                        now=now,
-                        background=self.config.background,
-                        connected=self.display.connected,
-                        idle_title=self.config.idle_title,
-                        messages=self.discord.snapshot(),
-                    notifications=self.windows_notifications.snapshot(),
-                    todos=self.todos.snapshot(),
-                    )
+                    if self._screensaver_active():
+                        frame = render_screensaver(self.config.size, now)
+                    else:
+                        frame = compose(
+                            self.config.tiles,
+                            self.config.size,
+                            sessions=sessions,
+                            now=now,
+                            background=self.config.background,
+                            connected=self.display.connected,
+                            idle_title=self.config.idle_title,
+                            messages=self.discord.snapshot(),
+                            notifications=self.windows_notifications.snapshot(),
+                            todos=self.todos.snapshot(),
+                            claude_limits=self.claude_limits.snapshot(),
+                        )
                 except Exception:
                     # compose already isolates a single widget's fault to its own
                     # tile; this is the backstop for a fault in composition
@@ -255,4 +295,5 @@ class DashboardDaemon:
             self.display.close()
             self.discord.stop()
             self.windows_notifications.stop()
+            self.claude_limits.stop()
 

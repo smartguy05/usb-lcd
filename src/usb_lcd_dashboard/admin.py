@@ -13,20 +13,23 @@ and talks to this server through the browser.
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import logging
+import os
 import threading
 from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable
 
-from PIL import Image
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .admin_page import PAGE
 from .background import Background
 from .config import ADMIN_HOST, Config, dump_config_toml, parse_config_text, write_config
 from .layout import Tile
+from .orientation import ORIENTATIONS, rotate_layout
 from .widgets import describe
 from .todos import TodoStore
 
@@ -34,6 +37,8 @@ LOG = logging.getLogger(__name__)
 
 ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
 MAX_BODY_BYTES = 256 * 1024
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
+MAX_IMAGE_PIXELS = 25_000_000
 # How much of an over-sized body to swallow so the 413 actually reaches the
 # client rather than racing an unread request into a connection reset.
 DRAIN_LIMIT = 4 * 1024 * 1024
@@ -74,6 +79,11 @@ def config_to_json(cfg: Config) -> dict[str, Any]:
             if cfg.background.image is None
             else cfg.background.image.as_posix(),
             "fit": cfg.background.fit,
+            "card_opacity": cfg.background.card_opacity,
+        },
+        "screensaver": {
+            "enabled": cfg.screensaver_enabled,
+            "idle_seconds": cfg.screensaver_idle_seconds,
         },
         "dashboard": {
             "active_ttl_seconds": cfg.active_ttl_seconds,
@@ -121,6 +131,7 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
         raise ValueError("expected a JSON object")
     display = payload.get("display") or {}
     dashboard = payload.get("dashboard") or {}
+    screensaver = payload.get("screensaver") or {}
     discord = payload.get("discord") or {}
     windows_notifications = payload.get("windows_notifications") or {}
     raw_channel_ids = discord.get("channel_ids", current.discord_channel_ids)
@@ -164,6 +175,14 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
         except (TypeError, ValueError) as exc:
             raise ValueError(f"tile[{index}] is malformed: {exc}") from exc
 
+    def number(source, key, cast, fallback):
+        if key not in source:
+            return fallback
+        try:
+            return cast(source[key])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{key} must be a number") from exc
+
     raw_background = payload.get("background")
     background = None
     if isinstance(raw_background, dict):
@@ -172,15 +191,8 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
             color=str(raw_background.get("color", Background().color)),
             image=Path(str(image)).expanduser() if image else None,
             fit=str(raw_background.get("fit", "cover")),
+            card_opacity=number(raw_background, "card_opacity", float, Background().card_opacity),
         )
-
-    def number(source, key, cast, fallback):
-        if key not in source:
-            return fallback
-        try:
-            return cast(source[key])
-        except (TypeError, ValueError) as exc:
-            raise ValueError(f"{key} must be a number") from exc
 
     return replace(
         current,
@@ -205,6 +217,12 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
             dashboard, "switch_dwell_seconds", float, current.switch_dwell_seconds
         ),
         idle_title=str(dashboard.get("idle_title", current.idle_title)),
+        screensaver_enabled=bool(
+            screensaver.get("enabled", current.screensaver_enabled)
+        ),
+        screensaver_idle_seconds=number(
+            screensaver, "idle_seconds", int, current.screensaver_idle_seconds
+        ),
         discord_channel_ids=tuple(str(value) for value in raw_channel_ids),
         windows_notifications_enabled=bool(
             windows_notifications.get("enabled", current.windows_notifications_enabled)
@@ -264,7 +282,79 @@ class AdminState:
         # config the daemon would then refuse to start on.
         validated = parse_config_text(dump_config_toml(candidate))
         write_config(validated, self.config_path)
+        self._prune_managed_backgrounds(
+            validated.background.image if validated.background is not None else None
+        )
         return validated
+
+    @property
+    def background_dir(self) -> Path:
+        return self.config_path.parent / "backgrounds"
+
+    def save_background(self, raw: bytes) -> Path:
+        if not raw:
+            raise ValueError("image upload is empty")
+        if len(raw) > MAX_IMAGE_BYTES:
+            raise ValueError("image upload must be 10 MiB or smaller")
+        try:
+            with Image.open(io.BytesIO(raw)) as opened:
+                if opened.format not in {"PNG", "JPEG", "WEBP"}:
+                    raise ValueError("background must be PNG, JPEG, or WebP")
+                if opened.width * opened.height > MAX_IMAGE_PIXELS:
+                    raise ValueError("background must be 25 megapixels or smaller")
+                image = ImageOps.exif_transpose(opened).convert("RGB")
+                image.load()
+        except (UnidentifiedImageError, OSError) as exc:
+            raise ValueError("background is not a readable image") from exc
+        digest = hashlib.sha256(raw).hexdigest()[:20]
+        self.background_dir.mkdir(parents=True, exist_ok=True)
+        target = self.background_dir / f"wallpaper-{digest}.png"
+        if not target.exists():
+            buffer = io.BytesIO()
+            image.save(buffer, format="PNG", optimize=True)
+            temporary = target.with_suffix(".tmp")
+            temporary.write_bytes(buffer.getvalue())
+            os.replace(temporary, target)
+        return target
+
+    def _prune_managed_backgrounds(self, keep: Path | None) -> None:
+        if not self.background_dir.exists():
+            return
+        try:
+            keep_resolved = keep.resolve() if keep is not None else None
+        except OSError:
+            keep_resolved = None
+        for candidate in self.background_dir.glob("wallpaper-*.png"):
+            try:
+                if candidate.resolve() != keep_resolved:
+                    candidate.unlink()
+            except OSError as exc:
+                LOG.warning("Could not prune old background %s: %s", candidate, exc)
+
+
+def rotate_layout_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        source = str(payload["source"])
+        target = str(payload["target"])
+        size = (int(payload["width"]), int(payload["height"]))
+        tiles = payload["tiles"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("rotation needs source, target, width, height, and tiles") from exc
+    if source not in ORIENTATIONS or target not in ORIENTATIONS:
+        raise ValueError("unknown display orientation")
+    if not isinstance(tiles, list):
+        raise ValueError("tiles must be a list")
+    rects = []
+    for index, tile in enumerate(tiles):
+        try:
+            rects.append(tuple(int(tile[key]) for key in ("x", "y", "w", "h")))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(f"tile[{index}] has an invalid rectangle") from exc
+    new_size, rotated = rotate_layout(size, rects, source, target)
+    result_tiles = []
+    for tile, rect in zip(tiles, rotated):
+        result_tiles.append({**tile, **dict(zip(("x", "y", "w", "h"), rect))})
+    return {"width": new_size[0], "height": new_size[1], "tiles": result_tiles}
 
 
 def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
@@ -316,6 +406,24 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
                 return None
             return payload
 
+        def _read_upload(self) -> bytes | None:
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                self._json(400, {"error": "bad Content-Length"})
+                return None
+            if length > MAX_IMAGE_BYTES:
+                remaining = min(length, MAX_IMAGE_BYTES + 1)
+                while remaining > 0:
+                    chunk = self.rfile.read(min(remaining, 65536))
+                    if not chunk:
+                        break
+                    remaining -= len(chunk)
+                self.close_connection = True
+                self._json(413, {"error": "image upload must be 10 MiB or smaller"})
+                return None
+            return self.rfile.read(length) if length else b""
+
         def _todo_store(self) -> TodoStore | None:
             if state.todo_store is None:
                 self._json(503, {"error": "todo storage is unavailable"})
@@ -366,6 +474,30 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
             if not self._guard():
                 return
             route = self.path.split("?", 1)[0]
+            if route == "/api/layout/rotate":
+                payload = self._read_json()
+                if payload is None:
+                    return
+                try:
+                    self._json(200, rotate_layout_payload(payload))
+                except ValueError as exc:
+                    self._json(400, {"error": str(exc)})
+                return
+            if route == "/api/background-image":
+                raw = self._read_upload()
+                if raw is None:
+                    return
+                try:
+                    image_path = state.save_background(raw)
+                except ValueError as exc:
+                    self._json(400, {"error": str(exc)})
+                    return
+                except OSError as exc:
+                    LOG.exception("Could not store background image")
+                    self._json(500, {"error": f"could not store background: {exc}"})
+                    return
+                self._json(201, {"image": image_path.as_posix()})
+                return
             if route == "/api/todos" or route.startswith("/api/todos/"):
                 store = self._todo_store()
                 if store is None:

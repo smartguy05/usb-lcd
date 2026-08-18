@@ -31,7 +31,7 @@ def _deadline(item: TodoItem, today: date) -> tuple[str, str]:
 
 def render_todos(ctx: TileContext) -> Image.Image:
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, ctx.options)
+    image, draw = new_tile(ctx.size, ctx.options, ctx.card_opacity)
     snapshot = ctx.todos or TodoSnapshot()
     title = str(ctx.options.get("title") or "Todos")
     pad = max(5, round(min(width, height) * 0.05))

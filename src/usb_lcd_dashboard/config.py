@@ -94,6 +94,8 @@ class Config:
     windows_notification_app_ids: tuple[str, ...] = field(default=())
     windows_notification_include_terms: tuple[str, ...] = field(default=())
     windows_notification_exclude_terms: tuple[str, ...] = field(default=())
+    screensaver_enabled: bool = True
+    screensaver_idle_seconds: int = 600
     # Why the configured layout was rejected, when it was loaded leniently and
     # replaced by the default. Carried rather than discarded so `doctor` can say
     # what is wrong with the file instead of reporting a layout nobody wrote.
@@ -127,6 +129,10 @@ height = {height}
 orientation = "{orientation}"
 brightness = {brightness}
 refresh_hz = {refresh_hz}
+
+[screensaver]
+enabled = {screensaver_enabled}
+idle_seconds = {screensaver_idle_seconds}
 
 [dashboard]
 active_ttl_seconds = {active_ttl_seconds}
@@ -172,6 +178,8 @@ def default_config_toml(device: str | None = None, ipc_mode: str | None = None) 
         orientation=cfg.orientation,
         brightness=cfg.brightness,
         refresh_hz=cfg.refresh_hz,
+        screensaver_enabled="true" if cfg.screensaver_enabled else "false",
+        screensaver_idle_seconds=cfg.screensaver_idle_seconds,
         active_ttl_seconds=cfg.active_ttl_seconds,
         approval_ttl_seconds=cfg.approval_ttl_seconds,
         tool_ttl_seconds=cfg.tool_ttl_seconds,
@@ -232,10 +240,15 @@ def dump_config_toml(cfg: Config) -> str:
             "[display.background]",
             f"color = {_toml_value(cfg.background.color)}",
             f"fit = {_toml_value(cfg.background.fit)}",
+            f"card_opacity = {_toml_value(cfg.background.card_opacity)}",
         ]
         if cfg.background.image is not None:
             lines.append(f"image = {_toml_value(cfg.background.image)}")
     lines += [
+        "",
+        "[screensaver]",
+        f"enabled = {_toml_value(cfg.screensaver_enabled)}",
+        f"idle_seconds = {_toml_value(cfg.screensaver_idle_seconds)}",
         "",
         "[dashboard]",
         f"active_ttl_seconds = {_toml_value(cfg.active_ttl_seconds)}",
@@ -332,7 +345,13 @@ def _parse_background(table: dict) -> "Background | None":
         # Not fatal: the same config may name a wallpaper that only exists on the
         # other machine, and the layer falls back to the colour.
         LOG.warning("display.background.image does not exist: %s", image)
-    background = Background(fit=fit, image=image)
+    try:
+        card_opacity = float(table.get("card_opacity", Background().card_opacity))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("display.background.card_opacity must be a number") from exc
+    if not 0 <= card_opacity <= 1:
+        raise ValueError("display.background.card_opacity must be between 0 and 1")
+    background = Background(fit=fit, image=image, card_opacity=card_opacity)
     if "color" in table:
         background = replace(background, color=str(table["color"]))
     return background
@@ -407,6 +426,32 @@ def load_config(path: Path | None = None, *, strict: bool = True) -> Config:
     return parse_config(data, strict=strict)
 
 
+def load_ipc_config(path: Path | None = None) -> Config:
+    """Load only the IPC address needed by short-lived hook commands.
+
+    This deliberately avoids parsing backgrounds, tiles, and widget metadata.
+    Besides making display mistakes irrelevant to hooks, it keeps a hook process
+    from importing Pillow and every integration on every tool call.
+    """
+    selected = path or default_path()
+    try:
+        with selected.open("rb") as handle:
+            ipc = (tomllib.load(handle).get("ipc") or {})
+    except FileNotFoundError:
+        ipc = {}
+    defaults = Config()
+    cfg = Config(
+        ipc_mode=str(ipc.get("mode", defaults.ipc_mode)),
+        ipc_host=str(ipc.get("host", defaults.ipc_host)),
+        ipc_port=int(ipc.get("port", defaults.ipc_port)),
+    )
+    if cfg.ipc_mode not in {"unix", "tcp"}:
+        raise ValueError("ipc.mode must be unix or tcp")
+    if not 1024 <= cfg.ipc_port <= 65535:
+        raise ValueError("ipc.port must be between 1024 and 65535")
+    return cfg
+
+
 def parse_config_text(text: str) -> Config:
     """Validate a config document without going through the filesystem.
 
@@ -420,6 +465,7 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
     cfg = Config()
     display = data.get("display", {})
     dashboard = data.get("dashboard", {})
+    screensaver = data.get("screensaver", {})
     ipc = data.get("ipc", {})
     admin = data.get("admin", {})
     tray = data.get("tray", {})
@@ -473,9 +519,36 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
         windows_notification_app_ids=notification_app_ids,
         windows_notification_include_terms=notification_include_terms,
         windows_notification_exclude_terms=notification_exclude_terms,
+        screensaver_enabled=bool(
+            screensaver.get("enabled", cfg.screensaver_enabled)
+        ),
+        screensaver_idle_seconds=int(
+            screensaver.get("idle_seconds", cfg.screensaver_idle_seconds)
+        ),
     )
-    if cfg.orientation not in {"portrait", "landscape"}:
-        raise ValueError("display.orientation must be portrait or landscape")
+    from .orientation import ORIENTATIONS, rotate_layout
+
+    if cfg.orientation not in ORIENTATIONS:
+        raise ValueError("display.orientation must be one of " + ", ".join(ORIENTATIONS))
+    # Before four-way mounting support, portrait configs retained landscape
+    # dimensions. Normalize that old representation in memory; the next editor
+    # save persists the canonical portrait canvas.
+    if cfg.orientation == "portrait" and cfg.width > cfg.height:
+        new_size, rects = rotate_layout(
+            cfg.size,
+            ((tile.x, tile.y, tile.w, tile.h) for tile in cfg.tiles),
+            "landscape",
+            "portrait",
+        )
+        cfg = replace(
+            cfg,
+            width=new_size[0],
+            height=new_size[1],
+            tiles=tuple(
+                replace(tile, x=rect[0], y=rect[1], w=rect[2], h=rect[3])
+                for tile, rect in zip(cfg.tiles, rects)
+            ),
+        )
     if not 0 <= cfg.brightness <= 50:
         raise ValueError("display.brightness must be between 0 and 50")
     if cfg.display_kind not in DISPLAY_KINDS:
@@ -490,5 +563,7 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
         raise ValueError("admin.port must be between 1024 and 65535")
     if cfg.admin_port == cfg.ipc_port:
         raise ValueError("admin.port and ipc.port must differ")
+    if not 60 <= cfg.screensaver_idle_seconds <= 86400:
+        raise ValueError("screensaver.idle_seconds must be between 60 and 86400")
     return _with_layout(cfg, strict=strict)
 

@@ -5,6 +5,7 @@ import json
 import importlib.util
 import shutil
 import subprocess
+import sys
 import urllib.request
 from pathlib import Path
 
@@ -24,16 +25,57 @@ TARGET_SERIAL = "USB35INCHIPSV2"
 
 def _hook_present(path: Path) -> bool:
     try:
-        text = path.read_text()
+        text = path.read_text(encoding="utf-8")
         return "usb-lcd-dashboard emit" in text or "usb_lcd_dashboard emit" in text
-    except OSError:
+    except (OSError, UnicodeError):
         return False
+
+
+def _hook_timeout_ready(path: Path) -> bool:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return False
+    ours = []
+    for groups in (data.get("hooks") or {}).values():
+        for group in groups if isinstance(groups, list) else []:
+            for hook in group.get("hooks", []) if isinstance(group, dict) else []:
+                if isinstance(hook, dict) and (
+                    "usb-lcd-dashboard" in str(hook.get("command", ""))
+                    or "usb_lcd_dashboard" in str(hook.get("command", ""))
+                ):
+                    ours.append(hook)
+    try:
+        return bool(ours) and all(
+            float(hook.get("timeout", 0)) >= 5 for hook in ours
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def _hook_smoke() -> tuple[bool, str]:
+    interpreter = Path(sys.executable)
+    if os.name == "nt" and interpreter.name.casefold() == "pythonw.exe":
+        interpreter = interpreter.with_name("python.exe")
+    try:
+        result = subprocess.run(
+            [str(interpreter), "-m", "usb_lcd_dashboard", "emit", "--provider", "claude"],
+            input='{"hook_event_name":"Doctor","session_id":"doctor"}',
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=3,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, str(exc)
+    return result.returncode == 0, "completed within 3 seconds" if result.returncode == 0 else "exit code " + str(result.returncode)
 
 
 def _todo_mcp_present(path: Path) -> bool:
     try:
-        return "usb-lcd-dashboard-todos" in path.read_text()
-    except OSError:
+        return "usb-lcd-dashboard-todos" in path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
         return False
 
 
@@ -96,6 +138,16 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
             "~/.codex/hooks.json",
         ),
         (
+            "Claude hook timeout",
+            _hook_timeout_ready(Path.home() / ".claude/settings.json"),
+            "managed hooks use at least 5 seconds",
+        ),
+        (
+            "Codex hook timeout",
+            _hook_timeout_ready(Path.home() / ".codex/hooks.json"),
+            "managed hooks use at least 5 seconds",
+        ),
+        (
             "Claude todo tools",
             _todo_mcp_present(Path.home() / ".claude.json"),
             "~/.claude.json",
@@ -106,6 +158,8 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
             "~/.codex/config.toml",
         ),
     ]
+    smoke_ok, smoke_detail = _hook_smoke()
+    items.append(("hook emitter", smoke_ok, smoke_detail))
     if os.name == "nt":
         shortcut = _windows_startup_shortcut()
         items.append(("login autostart", shortcut.exists(), str(shortcut)))

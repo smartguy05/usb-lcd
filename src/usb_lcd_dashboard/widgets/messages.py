@@ -37,7 +37,7 @@ def _empty(draw, size, title: str, detail: str, colour: str) -> None:
 
 def render_messages(ctx: TileContext) -> Image.Image:
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, ctx.options)
+    image, draw = new_tile(ctx.size, ctx.options, ctx.card_opacity)
     snapshot = ctx.messages or MessageSnapshot()
     title = str(ctx.options.get("title") or "Discord")
 

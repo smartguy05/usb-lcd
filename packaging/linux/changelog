@@ -1,3 +1,23 @@
+usb-lcd-dashboard (0.10.0) noble; urgency=medium
+
+  * Add four-way display mounting orientation with automatic layout rotation.
+  * Add an inactivity screen saver and managed wallpaper uploads.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 23:30:00 +0000
+
+usb-lcd-dashboard (0.9.1) noble; urgency=medium
+
+  * Make Windows upgrades staged and rollback-safe.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 22:00:00 +0000
+
+usb-lcd-dashboard (0.9.0) noble; urgency=medium
+
+  * Add a persistent Claude session, weekly, and Fable limits widget.
+  * Reduce hook startup work and raise managed hook timeouts for reliability.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 23:00:00 +0000
+
 usb-lcd-dashboard (0.8.0) noble; urgency=medium
 
   * Add a persistent human todo widget with admin management and history.

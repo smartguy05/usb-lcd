@@ -52,7 +52,7 @@ def _empty(ctx: TileContext) -> Image.Image:
     """A tile with no session. Deliberately quiet — several of these at once
     should not compete with the ones that have something to say."""
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, ctx.options)
+    image, draw = new_tile(ctx.size, ctx.options, ctx.card_opacity)
     inner = max(1, width - 2 * max(6, round(width * 0.06)))
     slot = f"SLOT {ctx.slot + 1}" if ctx.slot >= 0 else "IDLE"
     label, label_font = _fit(draw, slot, inner, max(9, round(height * 0.055)), True)
@@ -70,7 +70,7 @@ def render_agent(ctx: TileContext) -> Image.Image:
         return _empty(ctx)
 
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, ctx.options)
+    image, draw = new_tile(ctx.size, ctx.options, ctx.card_opacity)
     accent = _accent(state.phase, state.provider)
     pad = max(8, round(width * 0.05))
     inner = max(1, width - 2 * pad)

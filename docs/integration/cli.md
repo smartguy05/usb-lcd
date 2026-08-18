@@ -56,6 +56,8 @@ it must never do is fail the way the thing it is diagnosing failed.
 | `read/write access` (POSIX) | `os.access(device, R_OK\|W_OK)`. |
 | `layout` | `layout_error` is empty **and** there is at least one agent slot. |
 | `Claude hooks` / `Codex hooks` | The settings file mentions the emit command. |
+| `Claude hook timeout` / `Codex hook timeout` | Every managed hook allows at least five seconds. |
+| `hook emitter` | A synthetic emitter process completes within three seconds. |
 | `Claude todo tools` / `Codex todo tools` | The user MCP configuration names the todo server. |
 | `login autostart` (Windows) | The Startup shortcut exists. |
 | `systemd` / `service` (POSIX) | `systemctl` exists; the unit is active. |

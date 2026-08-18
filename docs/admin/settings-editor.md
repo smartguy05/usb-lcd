@@ -32,6 +32,8 @@ All guarded by `_guard()` first.
 | POST | `/api/todos`, `/api/todos/reorder`, `.../complete`, `.../reopen` | Create, order, or change status. |
 | PATCH / DELETE | `/api/todos/{id}` | Edit, or permanently delete with `{"confirm":true}`. |
 | POST | `/api/config` | `200` the saved config, `400` bad JSON or invalid config, `413` oversized body. |
+| POST | `/api/layout/rotate` | Rotate the canvas and every tile between mounting orientations. |
+| POST | `/api/background-image` | Validate and stage a managed PNG/JPEG/WebP wallpaper. |
 | any | anything else | `404`. |
 | any | non-loopback `Host` | `403`. |
 
@@ -68,6 +70,12 @@ to start on, and there is no second copy of the validation rules. A rejection
 names the offending field or tile and writes nothing.
 
 The write itself is `write_config`, which replaces the file atomically.
+
+Wallpaper uploads are decoded with Pillow, limited to 10 MiB and 25 megapixels,
+EXIF-oriented, stripped to RGB PNG, and stored under a content-derived name in
+`backgrounds/` beside the config. Uploading does not activate the file; Save
+does, while Revert leaves the current config untouched. A later successful save
+prunes superseded files only from that managed directory.
 
 Todo actions are deliberately separate from config saving. They commit
 immediately through `TodoStore`, so Save/Revert for layout edits cannot discard

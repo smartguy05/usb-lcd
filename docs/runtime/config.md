@@ -38,6 +38,8 @@ Full list at `config.py:55-94`. The ones that bite:
 | `ipc_mode` | `tcp` (Win) / `unix` | |
 | `admin_port` | `45723` | Must differ from `ipc_port` (`:437-438`). |
 | `layout_error` | `""` | Set only by a lenient load; always empty on a strict one. |
+| `orientation` | `landscape` | Four mounting rotations; portrait canvases swap width/height. |
+| `screensaver_enabled` / `screensaver_idle_seconds` | `true` / `600` | Moving-clock idle protection. |
 
 Constants: `DEFAULT_IPC_PORT = 45722`, `DEFAULT_ADMIN_PORT = 45723`,
 `ADMIN_HOST = "127.0.0.1"`, `DISPLAY_KINDS`, `NO_WINDOW`, `DEVICE_BY_ID`.
@@ -75,7 +77,7 @@ Four places, and a test will fail if you miss one:
 1. A field on `Config` (`:55`).
 2. Parsing in `parse_config` (`:387`).
 3. Serialising in `dump_config_toml` (`:206`) — tomllib reads but cannot write.
-4. The template `DEFAULT_CONFIG_TOML` (`:114`) plus its `.format()` call in
+4. The template `DEFAULT_CONFIG_TOML` plus its `.format()` call in
    `default_config_toml` (`:155`).
 
 `default_config_toml` is generated from `Config()` precisely so this cannot

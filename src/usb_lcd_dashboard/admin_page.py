@@ -143,6 +143,11 @@ PAGE = r"""<!doctype html>
     </section>
 
     <section>
+      <h2>Screen saver</h2>
+      <div id="screensaverForm"></div>
+    </section>
+
+    <section>
       <h2>Dashboard</h2>
       <div id="dashForm"></div>
     </section>
@@ -617,8 +622,9 @@ function drawSideForms() {
   field(hCell, "Height", cfg.display.height, "number", (v) => {
     cfg.display.height = Math.round(v) || 1; drawStage();
   });
-  choice(d, "Orientation", cfg.display.orientation, ["landscape", "portrait"],
-    (v) => { cfg.display.orientation = v; });
+  choice(d, "Orientation", cfg.display.orientation,
+    ["landscape", "portrait", "landscape_flipped", "portrait_flipped"],
+    (v) => rotateLayout(v));
   field(d, "Brightness", cfg.display.brightness, "number",
     (v) => { cfg.display.brightness = Math.round(v) || 0; }, "0 to 50");
   field(d, "Refresh (Hz)", cfg.display.refresh_hz, "number",
@@ -636,7 +642,7 @@ function drawSideForms() {
   on.append(box, tag);
   b.appendChild(on);
   box.addEventListener("change", () => {
-    cfg.background = box.checked ? { color: "#081018", image: "", fit: "cover" } : null;
+    cfg.background = box.checked ? { color: "#081018", image: "", fit: "cover", card_opacity: 0.82 } : null;
     markDirty();
     drawSideForms();
   });
@@ -644,10 +650,49 @@ function drawSideForms() {
     field(b, "Colour", cfg.background.color, "text",
       (v) => { cfg.background.color = v; });
     field(b, "Image", cfg.background.image || "", "text",
-      (v) => { cfg.background.image = v; }, "Leave empty for a plain colour");
+      (v) => { cfg.background.image = v; }, "External path, or upload a managed copy below");
+    const upload = document.createElement("input");
+    upload.type = "file"; upload.accept = "image/png,image/jpeg,image/webp";
+    upload.addEventListener("change", async () => {
+      const file = upload.files && upload.files[0];
+      if (!file) return;
+      setStatus("Uploading backgroundâ€¦", "busy");
+      try {
+        const response = await fetch("api/background-image", {
+          method: "POST", headers: {"Content-Type": "application/octet-stream"}, body: file
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "upload failed");
+        cfg.background.image = body.image;
+        markDirty(); drawSideForms();
+        setStatus("Background uploaded; Save to apply", "busy");
+      } catch (error) { setStatus(String(error), "err"); }
+    });
+    b.appendChild(upload);
+    if (cfg.background.image) {
+      const current = document.createElement("div"); current.className = "hint";
+      current.textContent = "Selected: " + cfg.background.image;
+      const clear = document.createElement("button"); clear.textContent = "Clear picture";
+      clear.style.marginTop = "8px";
+      clear.addEventListener("click", () => {
+        cfg.background.image = ""; markDirty(); drawSideForms();
+      });
+      b.append(current, clear);
+    }
     choice(b, "Fit", cfg.background.fit, ["cover", "contain", "stretch", "center"],
       (v) => { cfg.background.fit = v; });
+    field(b, "Card opacity", cfg.background.card_opacity ?? 0.82, "number",
+      (v) => { cfg.background.card_opacity = v; }, "0 to 1; tile-specific opacity wins");
   }
+
+  const saver = $("screensaverForm");
+  saver.innerHTML = "";
+  cfg.screensaver ||= {enabled: true, idle_seconds: 600};
+  field(saver, "Enabled", cfg.screensaver.enabled, "bool",
+    (v) => { cfg.screensaver.enabled = v; });
+  field(saver, "Idle delay (minutes)", cfg.screensaver.idle_seconds / 60, "number",
+    (v) => { cfg.screensaver.idle_seconds = Math.round(v * 60); },
+    "Shows a moving clock on black; new dashboard activity wakes it");
 
   const k = $("dashForm");
   k.innerHTML = "";
@@ -672,6 +717,27 @@ function drawSideForms() {
     ro.ipc_port + "</code><br>Editor port: <code>" + ro.admin_port + "</code></p>" +
     "<p>Changing the IPC transport would orphan the installed hooks, and changing " +
     "the editor port would cut off this page — edit config.toml for those.</p>";
+}
+
+async function rotateLayout(target) {
+  const source = cfg.display.orientation;
+  if (target === source) return;
+  setStatus("Rotating layoutâ€¦", "busy");
+  try {
+    const response = await fetch("api/layout/rotate", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({source, target, width: cfg.display.width,
+        height: cfg.display.height, tiles: cfg.tiles})
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || "rotation failed");
+    cfg.display.orientation = target;
+    cfg.display.width = body.width; cfg.display.height = body.height;
+    cfg.tiles = body.tiles;
+    markDirty(); drawStage(); drawTileForm(); drawSideForms();
+  } catch (error) {
+    setStatus(String(error), "err"); drawSideForms();
+  }
 }
 
 // --------------------------------------------------------------------- data
@@ -714,6 +780,7 @@ async function save() {
     body: JSON.stringify({
       display: cfg.display,
       background: cfg.background,
+      screensaver: cfg.screensaver,
       dashboard: cfg.dashboard,
       discord: cfg.discord,
       windows_notifications: cfg.windows_notifications,

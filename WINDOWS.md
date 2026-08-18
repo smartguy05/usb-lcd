@@ -1,16 +1,16 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.8.0.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.10.0.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, the
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
 
 Built 2026-08-17 with tile support, the tray icon, the crab, direct USB,
-filterable Windows notifications, and shared human todo tools:
+filterable Windows notifications, shared human todos, and Claude limit meters:
 
 ```text
-dist/USB-LCD-Dashboard-Setup-0.8.0.exe
-sha256 b55f741b8fe8dc8317534f9307eeaef4e66c0a22f632b5d4486f4cc9279456cf
+dist/USB-LCD-Dashboard-Setup-0.10.0.exe
+sha256 7e19312f846ecb7002f67a67945e72902339d9df474a79403e5ed8f3b473fea4
 ```
 
 Older installers in `dist/` predate the current notification-capable package.
@@ -69,6 +69,12 @@ VID/PID `1A86:5722`. To force a particular port, edit:
 
 and change `device = "AUTO"` to a value such as `device = "COM4"`.
 
+The tray's settings editor also provides four mounting orientations, a managed
+PNG/JPEG/WebP wallpaper upload with translucent cards, and the screen-saver
+enable/delay controls. Portrait selections rotate the canvas and every tile;
+the default screen saver shows a moving clock after ten minutes and wakes on
+new dashboard activity.
+
 ### After unplugging the display
 
 Re-plugging the panel resets it: the framebuffer clears and the orientation
@@ -105,4 +111,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.8.0.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.10.0.exe`.

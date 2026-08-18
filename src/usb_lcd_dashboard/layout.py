@@ -5,13 +5,14 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Sequence
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 from .background import Background, background_layer
 from .model import SessionState
 from .messaging import MessageSnapshot
 from .notifications import NotificationSnapshot
 from .todos import TodoSnapshot
+from .claude_limits import ClaudeLimitsSnapshot
 from .render import ERROR, MUTED, PANEL, _fit
 
 LOG = logging.getLogger(__name__)
@@ -59,6 +60,27 @@ class TileContext:
     messages: MessageSnapshot | None = None
     notifications: NotificationSnapshot | None = None
     todos: TodoSnapshot | None = None
+    claude_limits: ClaudeLimitsSnapshot | None = None
+    card_opacity: float = 1.0
+
+
+def _legacy_over_wallpaper(image: Image.Image, opacity: float) -> Image.Image:
+    """Make only the legacy card fills translucent; keep its text crisp."""
+    from .render import BACKGROUND
+
+    rgba = image.convert("RGBA")
+    alpha = Image.new("L", image.size, 255)
+
+    def exact_color_mask(color: str) -> Image.Image:
+        difference = ImageChops.difference(image, Image.new("RGB", image.size, color))
+        red, green, blue = difference.split()
+        different = ImageChops.lighter(ImageChops.lighter(red, green), blue)
+        return different.point(lambda value: 255 if value == 0 else 0)
+
+    alpha.paste(round(opacity * 0.45 * 255), mask=exact_color_mask(BACKGROUND))
+    alpha.paste(round(opacity * 255), mask=exact_color_mask(PANEL))
+    rgba.putalpha(alpha)
+    return rgba
 
 
 def _overlap(a: Tile, b: Tile) -> bool:
@@ -149,6 +171,7 @@ def compose(
     messages: MessageSnapshot | None = None,
     notifications: NotificationSnapshot | None = None,
     todos: TodoSnapshot | None = None,
+    claude_limits: ClaudeLimitsSnapshot | None = None,
 ) -> Image.Image:
     """Render every tile and composite them into one frame.
 
@@ -182,6 +205,12 @@ def compose(
             messages=messages if spec.wants_messages else None,
             notifications=notifications if spec.wants_notifications else None,
             todos=todos if spec.wants_todos else None,
+            claude_limits=claude_limits if spec.wants_claude_limits else None,
+            card_opacity=(
+                background.card_opacity
+                if background is not None and background.image is not None
+                else 1.0
+            ),
         )
         try:
             drawn = spec.render(context)
@@ -196,6 +225,14 @@ def compose(
                 *tile.size,
             )
             drawn = drawn.crop((0, 0, tile.w, tile.h))
+
+        if (
+            tile.widget == "legacy"
+            and drawn.mode == "RGB"
+            and background is not None
+            and background.image is not None
+        ):
+            drawn = _legacy_over_wallpaper(drawn, background.card_opacity)
 
         # A single full-screen opaque tile is the legacy 480x320 panel. Handing
         # its image straight back — no base layer, no paste — is what makes that

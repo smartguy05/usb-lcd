@@ -8,6 +8,7 @@ Everything that turns state into pixels.
 | [widgets.md](widgets.md) | The registry, the `base.py` helpers, and **how to add a widget**. |
 | [crab.md](crab.md) | The animated widget, and the hardware constraints behind it. |
 | [render.md](render.md) | Palette, fonts, text helpers, the legacy 480x320 card. |
+| [screensaver.md](screensaver.md) | The deterministic moving clock used after inactivity. |
 
 ## Where to start
 

@@ -7,6 +7,10 @@ orientation = "landscape"
 brightness = 25
 refresh_hz = 2.0
 
+[screensaver]
+enabled = true
+idle_seconds = 600
+
 [dashboard]
 active_ttl_seconds = 180
 approval_ttl_seconds = 90

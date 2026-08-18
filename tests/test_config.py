@@ -10,6 +10,7 @@ from usb_lcd_dashboard.config import (
     default_config_toml,
     dump_config_toml,
     load_config,
+    load_ipc_config,
     parse_config_text,
     write_config,
 )
@@ -58,7 +59,53 @@ def test_example_configs_load_to_the_defaults(tmp_path, path):
 
 
 def test_default_config_toml_is_parseable():
-    assert tomllib.loads(default_config_toml())["dashboard"]["idle_title"] == "AI WORKBENCH"
+    parsed = tomllib.loads(default_config_toml())
+    assert parsed["dashboard"]["idle_title"] == "AI WORKBENCH"
+    assert parsed["screensaver"] == {"enabled": True, "idle_seconds": 600}
+
+
+@pytest.mark.parametrize(
+    "orientation", ["landscape", "portrait", "landscape_flipped", "portrait_flipped"]
+)
+def test_all_mounting_orientations_are_valid(orientation):
+    width, height = (320, 480) if "portrait" in orientation else (480, 320)
+    cfg = parse_config_text(
+        f'[display]\norientation = "{orientation}"\nwidth = {width}\nheight = {height}\n'
+    )
+    assert cfg.orientation == orientation
+
+
+def test_old_portrait_layouts_are_normalized():
+    cfg = parse_config_text(
+        '[display]\norientation = "portrait"\nwidth = 480\nheight = 320\n'
+        '[[tile]]\nwidget = "clock"\nx = 10\ny = 20\nw = 30\nh = 40\n'
+    )
+    assert cfg.size == (320, 480)
+    assert (cfg.tiles[0].x, cfg.tiles[0].y, cfg.tiles[0].w, cfg.tiles[0].h) == (
+        260, 10, 40, 30
+    )
+
+
+@pytest.mark.parametrize("seconds", [0, 59, 86401])
+def test_screensaver_delay_is_bounded(seconds):
+    with pytest.raises(ValueError, match="screensaver.idle_seconds"):
+        parse_config_text(f"[screensaver]\nidle_seconds = {seconds}\n")
+
+
+def test_hook_config_loader_ignores_everything_except_ipc(tmp_path):
+    path = write(tmp_path, """
+[display]
+background = { image = "missing" }
+[ipc]
+mode = "tcp"
+host = "127.0.0.9"
+port = 45888
+[[tile]]
+widget = "does-not-exist"
+""")
+    config = load_ipc_config(path)
+    assert config.ipc_address == ("127.0.0.9", 45888)
+    assert config.tiles == ()
 
 
 # ------------------------------------------------------------------ the layout

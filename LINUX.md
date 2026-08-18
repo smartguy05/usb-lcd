@@ -1,6 +1,6 @@
 # Ubuntu package
 
-`usb-lcd-dashboard_0.8.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
+`usb-lcd-dashboard_0.10.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
 (noble) and later.
 
 Unlike the Windows installer it does **not** bundle a Python runtime. Ubuntu
@@ -15,14 +15,14 @@ The package is architecture-independent: nothing in it is compiled.
 Built 2026-08-17 from the current source tree and smoke-tested on Ubuntu 24.04:
 
 ```text
-dist/usb-lcd-dashboard_0.8.0_all.deb
-sha256 0d03d52b8cbbfa18652b191e05c107f651a8d00df3384f7f56a80310c2fbae21
+dist/usb-lcd-dashboard_0.10.0_all.deb
+sha256 a7298b396b71af771f3d2c6094d8eb02a3f43e3a969706686242c5774ad87e0a
 ```
 
 ## Install
 
 ```bash
-sudo apt install ./usb-lcd-dashboard_0.8.0_all.deb
+sudo apt install ./usb-lcd-dashboard_0.10.0_all.deb
 ```
 
 That is the system-wide half: the program, and the udev rule that creates
@@ -49,6 +49,11 @@ A CLI that was already running will not have the hooks, so start a new session.
 Codex additionally asks you to trust newly installed command hooks once: run
 `/hooks` in Codex and trust the USB LCD Dashboard definitions, or it will never
 emit anything.
+
+Open `http://127.0.0.1:45723` while the service is running to configure four-way
+panel mounting, upload a managed PNG/JPEG/WebP wallpaper, and change the enabled
+ten-minute moving-clock screen saver. Portrait changes rotate the canvas and
+all tile rectangles together.
 
 ## What went where
 

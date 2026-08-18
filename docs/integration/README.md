@@ -9,6 +9,7 @@ that it did.
 | [install.md](install.md) | Hook merging, the status-line proxy, the systemd unit. |
 | [messaging.md](messaging.md) | Discord messages and filtered Windows notifications. |
 | [todos.md](todos.md) | Persistent human actions, admin CRUD, and MCP tools. |
+| [claude-limits.md](claude-limits.md) | Native session/weekly usage and OAuth-backed Fable limits. |
 
 ## Where to start
 

@@ -34,6 +34,7 @@ def test_the_notification_hook_is_installed():
     assert "Notification" in hooks
     command = hooks["Notification"][0]["hooks"][0]["command"]
     assert command == "usb-lcd-dashboard emit --provider claude"
+    assert hooks["Notification"][0]["hooks"][0]["timeout"] == 5
 
 
 def test_the_approval_hook_is_still_installed():
@@ -106,6 +107,31 @@ def test_install_and_uninstall_manage_both_user_mcp_configs(tmp_path, monkeypatc
     install_mod.uninstall()
     assert MCP_NAME not in (home / ".codex/config.toml").read_text()
     assert MCP_NAME not in install_mod._read_json(home / ".claude.json").get("mcpServers", {})
+
+
+def test_install_reads_and_preserves_utf8_user_configuration(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    state_home = tmp_path / "state"
+    (home / ".claude").mkdir(parents=True)
+    (home / ".codex").mkdir()
+    (home / ".claude.json").write_text(
+        '{"displayName": "Agent 🦀"}\n', encoding="utf-8"
+    )
+    (home / ".claude/settings.json").write_text(
+        '{"note": "ready ✅"}\n', encoding="utf-8"
+    )
+    (home / ".codex/hooks.json").write_text("{}\n", encoding="utf-8")
+    (home / ".codex/config.toml").write_text(
+        'instructions = "café"\n', encoding="utf-8"
+    )
+    monkeypatch.setattr(install_mod.Path, "home", classmethod(lambda cls: home))
+    monkeypatch.setattr(install_mod, "config_home", lambda: state_home)
+
+    install_mod.install("usb-lcd-dashboard")
+
+    assert install_mod._read_json(home / ".claude.json")["displayName"] == "Agent 🦀"
+    assert install_mod._read_json(home / ".claude/settings.json")["note"] == "ready ✅"
+    assert "café" in (home / ".codex/config.toml").read_text(encoding="utf-8")
 
 
 # ------------------------------------------------------- the systemd user unit

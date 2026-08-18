@@ -2,7 +2,7 @@
 thing it must never do is fail the way the thing it is diagnosing failed."""
 
 from usb_lcd_dashboard.config import load_config
-from usb_lcd_dashboard.doctor import checks
+from usb_lcd_dashboard.doctor import _hook_timeout_ready, checks
 
 
 BROKEN = """\
@@ -40,6 +40,16 @@ def write(tmp_path, text):
     path = tmp_path / "config.toml"
     path.write_text(text)
     return path
+
+
+def test_malformed_hook_timeout_is_reported_not_raised(tmp_path):
+    path = tmp_path / "hooks.json"
+    path.write_text(
+        '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command",'
+        '"command":"usb-lcd-dashboard emit","timeout":"soon"}]}]}}',
+        encoding="utf-8",
+    )
+    assert _hook_timeout_ready(path) is False
 
 
 def test_a_layout_that_will_not_load_is_reported_not_raised(tmp_path):

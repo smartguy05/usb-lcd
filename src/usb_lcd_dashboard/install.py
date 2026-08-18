@@ -36,7 +36,7 @@ EVENTS_BY_PROVIDER = {
 
 def _read_json(path: Path) -> dict[str, Any]:
     try:
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         return {}
 
@@ -44,14 +44,14 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _atomic_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(data, indent=2) + "\n")
+    temporary.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     os.replace(temporary, path)
 
 
 def _atomic_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(text)
+    temporary.write_text(text, encoding="utf-8")
     os.replace(temporary, path)
 
 
@@ -212,7 +212,7 @@ def _merge_hooks(settings: dict[str, Any], provider: str, command_prefix: str) -
                     {
                         "type": "command",
                         "command": command,
-                        "timeout": 2,
+                        "timeout": 5,
                     }
                 ]
             }
@@ -278,7 +278,7 @@ def install(executable: str | None = None) -> None:
     _atomic_json(claude_user_path, claude_user)
 
     try:
-        codex_text = codex_config_path.read_text()
+        codex_text = codex_config_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         codex_text = ""
     codex_updated, previous_section = _replace_codex_mcp(
@@ -292,7 +292,7 @@ def install(executable: str | None = None) -> None:
     if not config_path.exists():
         device = "AUTO" if os.name == "nt" else "/dev/turing-lcd"
         ipc_mode = "tcp" if os.name == "nt" else "unix"
-        config_path.write_text(default_config_toml(device, ipc_mode))
+        config_path.write_text(default_config_toml(device, ipc_mode), encoding="utf-8")
 
     state["command_prefix"] = command_prefix
     if os.name != "nt":
@@ -313,7 +313,8 @@ def install(executable: str | None = None) -> None:
             "ProtectHome=read-only\n"
             f"ReadWritePaths={state_dir} %t\n\n"
             "[Install]\n"
-            "WantedBy=default.target\n"
+            "WantedBy=default.target\n",
+            encoding="utf-8",
         )
         state["unit_path"] = str(unit_path)
         state["unit_started"] = _systemd_enable()
@@ -382,7 +383,7 @@ def uninstall() -> None:
     _atomic_json(claude_user_path, claude_user)
 
     try:
-        codex_text = codex_config_path.read_text()
+        codex_text = codex_config_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         codex_text = ""
     restored, _current = _replace_codex_mcp(

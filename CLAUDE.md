@@ -214,6 +214,17 @@ Display diff → PanelDevice.**
 
 ### Invariants to respect
 
+- **User configuration is UTF-8 on every platform.** Always pass
+  `encoding="utf-8"` when reading or writing Claude/Codex JSON, TOML, status
+  line, or installer state. Windows' implicit CP-1252 codec fails on ordinary
+  Unicode configuration (emoji reproduced the 0.9.1 setup failure). Installer
+  tests must include non-ASCII user configuration.
+- **Windows upgrades are transactional and live-process aware.** Stage and
+  validate the complete payload before touching `$INSTDIR`; stop only processes
+  whose executable path is beneath that exact directory; preserve the old tree
+  until the new payload and per-user setup validate. Do not extract directly
+  over a live embedded Python tree. Use `robocopy` for recursive activation and
+  remember that its exit codes 0-7 mean success, not failure.
 - **Strict vs lenient config loading.** `cli.py` passes `strict=True` only for
   `run`. Everything else loads leniently and substitutes the default layout,
   recording why in `Config.layout_error`. A bad tile rect must never make hooks

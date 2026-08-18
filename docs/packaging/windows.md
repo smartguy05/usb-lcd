@@ -36,11 +36,12 @@ CONTAINER_RUNTIME=podman packaging/windows/build-installer.sh
 
 ## What the installer does
 
-Per-user, no administrator rights:
+Application files and settings are per-user, while setup requests elevation to
+trust the sparse identity certificate in `LocalMachine\TrustedPeople`:
 
 ```nsis
 InstallDir "$LOCALAPPDATA\Programs\USB LCD Dashboard"
-RequestExecutionLevel user
+RequestExecutionLevel admin
 ```
 
 Ordered contract:
@@ -72,6 +73,26 @@ Add `/S` for a silent install.
 
 > **Never run the exe to inspect it.** `/S` performs a full install, not an
 > extraction. Use `packaging/windows/payload/` if you want to see what is in it.
+
+## Upgrade safety invariants
+
+- Stage and validate the complete payload beside `$INSTDIR` before changing the
+  live installation. Never use `File /r` directly over a live embedded Python
+  tree: a single locked DLL can leave an unrecoverable mixture of versions.
+- Shut down the daemon, then stop only remaining processes whose executable path
+  is beneath the exact application directory. Codex and Claude can keep a
+  dashboard MCP server alive after the display daemon exits.
+- Preserve the old tree until the activated payload, identity registration, and
+  per-user setup all validate. Use `robocopy` for recursive activation and treat
+  its exit codes 0 through 7 as success; only 8 and above indicate failure.
+- `SetOutPath` changes setup's working directory. Move it outside a staged tree
+  before trying to remove or rename that tree.
+- Treat all installer-managed JSON, TOML, and state as UTF-8. Python text APIs
+  must pass `encoding="utf-8"`; Windows' implicit CP-1252 codec fails on valid
+  Unicode user configuration.
+- Installer tests must include non-ASCII configuration. When a setup helper
+  fails, reproduce against isolated copies of the user's real configuration;
+  ASCII-only fixtures did not expose the 0.9.1 Unicode failure.
 
 ## The payload directory is generated
 

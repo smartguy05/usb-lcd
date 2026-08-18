@@ -28,6 +28,7 @@ from .legacy import render_legacy
 from .messages import render_messages
 from .notifications import render_notifications
 from .todos import render_todos
+from .claude_limits import render_claude_limits
 
 Renderer = Callable[[TileContext], Image.Image]
 
@@ -59,6 +60,7 @@ class WidgetSpec:
     wants_messages: bool = False
     wants_notifications: bool = False
     wants_todos: bool = False
+    wants_claude_limits: bool = False
     options: dict[str, Option] = field(default_factory=dict)
     help: str = ""
 
@@ -105,6 +107,15 @@ WIDGETS: dict[str, WidgetSpec] = {
         help="The 3.5\" panel's original full-screen card. Meant to be the only "
         "tile, covering the whole display.",
     ),
+    "claude_limits": WidgetSpec(
+        render_claude_limits,
+        wants_claude_limits=True,
+        options={
+            "title": Option("text", "Claude", "Heading above the usage limits"),
+            **COMMON_OPTIONS,
+        },
+        help="Claude's five-hour, weekly, and Fable usage limits with reset countdowns.",
+    ),
     "messages": WidgetSpec(
         render_messages,
         wants_messages=True,
@@ -146,6 +157,7 @@ def describe() -> list[dict[str, Any]]:
             "wants_messages": spec.wants_messages,
             "wants_notifications": spec.wants_notifications,
             "wants_todos": spec.wants_todos,
+            "wants_claude_limits": spec.wants_claude_limits,
             "help": spec.help,
             "options": [
                 {

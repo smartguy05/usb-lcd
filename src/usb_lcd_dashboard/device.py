@@ -15,6 +15,7 @@ from typing import Protocol, runtime_checkable
 from PIL import Image
 
 from .config import Config
+from .orientation import native_size, native_write
 
 LOG = logging.getLogger(__name__)
 
@@ -41,14 +42,14 @@ class SerialPanel:
     """The Turing/UsbMonitor 3.5" panel over its CDC-ACM serial bridge."""
 
     def __init__(self, config: Config):
-        if config.size != LEGACY_SIZE:
+        if native_size(config.size, config.orientation) != LEGACY_SIZE:
             raise ValueError(
                 f"display.kind={config.display_kind!r} drives a "
                 f"{LEGACY_SIZE[0]}x{LEGACY_SIZE[1]} panel, but the config asks for "
-                f"{config.width}x{config.height}"
+                f"{config.width}x{config.height} in {config.orientation}"
             )
         self.config = config
-        self.size = LEGACY_SIZE
+        self.size = config.size
         self.device = config.device
         self.lcd = None
         self.serial_handle = None
@@ -66,12 +67,10 @@ class SerialPanel:
         lcd.initialize_comm()
         lcd.screen_on()
         lcd.set_brightness(self.config.brightness)
-        orientation = (
-            Orientation.LANDSCAPE
-            if self.config.orientation == "landscape"
-            else Orientation.PORTRAIT
-        )
-        lcd.set_orientation(orientation)
+        # Keep the controller in its canonical landscape coordinate system.
+        # Software quarter-turns provide both flipped mountings as well as
+        # consistent crop coordinates across transports.
+        lcd.set_orientation(Orientation.LANDSCAPE)
         self.device = lcd.com_port
         self.lcd = lcd
         self.serial_handle = getattr(lcd, "lcd_serial", None)
@@ -87,7 +86,10 @@ class SerialPanel:
     def write(self, image: Image.Image, pos: tuple[int, int] = (0, 0)) -> None:
         if self.lcd is None:
             raise ConnectionError("display is not connected")
-        self.lcd.paint(image, pos=pos)
+        native_image, native_pos = native_write(
+            image, pos, self.size, self.config.orientation
+        )
+        self.lcd.paint(native_image, pos=native_pos)
 
     def supports_partial(self) -> bool:
         return True
@@ -154,12 +156,13 @@ class TuringUsbPanel:
         from .turing_usb import PRODUCT_SIZES, find_device, send_command
 
         usb_device, product_id = find_device()
-        native_size = PRODUCT_SIZES[product_id]
-        if self.config.size != native_size:
+        product_size = PRODUCT_SIZES[product_id]
+        if native_size(self.config.size, self.config.orientation) != product_size:
             usb.util.dispose_resources(usb_device)
             raise ValueError(
-                f"TURZX USB {product_id:04x} is {native_size[0]}x{native_size[1]}, "
-                f"but the config asks for {self.config.width}x{self.config.height}"
+                f"TURZX USB {product_id:04x} is {product_size[0]}x{product_size[1]}, "
+                f"but the config asks for {self.config.width}x{self.config.height} "
+                f"in {self.config.orientation}"
             )
         send_command(usb_device, 10)  # synchronize
         send_command(usb_device, 14, bytes((round(self.config.brightness / 100 * 102),)))
@@ -181,11 +184,9 @@ class TuringUsbPanel:
             raise ValueError("TURZX USB panels require full-frame writes")
         from .turing_usb import send_image
 
+        image, _ = native_write(image, pos, self.size, self.config.orientation)
         # The USB protocol always consumes the panel's native portrait buffer.
-        if self.config.orientation == "landscape":
-            image = image.transpose(Image.Transpose.ROTATE_270)
-        else:
-            image = image.transpose(Image.Transpose.ROTATE_180)
+        image = image.transpose(Image.Transpose.ROTATE_270)
         send_image(self.usb, image)
 
     def supports_partial(self) -> bool:

@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-17T20:21:32Z",
+ "generated": "2026-08-18T00:52:35Z",
  "by_source": {
   "src/usb_lcd_dashboard/admin.py": [
    "docs/admin/settings-editor.md"
@@ -15,6 +15,9 @@
   ],
   "src/usb_lcd_dashboard/__main__.py": [
    "docs/architecture/overview.md"
+  ],
+  "src/usb_lcd_dashboard/claude_limits.py": [
+   "docs/integration/claude-limits.md"
   ],
   "src/usb_lcd_dashboard/cli.py": [
    "docs/integration/cli.md"
@@ -97,6 +100,9 @@
   "src/usb_lcd_dashboard/render.py": [
    "docs/rendering/render.md"
   ],
+  "src/usb_lcd_dashboard/screensaver.py": [
+   "docs/rendering/screensaver.md"
+  ],
   "src/usb_lcd_dashboard/widgets/__init__.py": [
    "docs/rendering/widgets.md"
   ],
@@ -121,6 +127,9 @@
   "src/usb_lcd_dashboard/widgets/todos.py": [
    "docs/rendering/widgets.md"
   ],
+  "src/usb_lcd_dashboard/widgets/claude_limits.py": [
+   "docs/rendering/widgets.md"
+  ],
   "src/usb_lcd_dashboard/config.py": [
    "docs/runtime/config.md"
   ],
@@ -131,6 +140,9 @@
    "docs/runtime/device.md"
   ],
   "src/usb_lcd_dashboard/turing_usb.py": [
+   "docs/runtime/device.md"
+  ],
+  "src/usb_lcd_dashboard/orientation.py": [
    "docs/runtime/device.md"
   ],
   "src/usb_lcd_dashboard/display.py": [

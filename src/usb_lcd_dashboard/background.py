@@ -25,6 +25,7 @@ class Background:
     color: str = BACKGROUND
     image: Path | None = None
     fit: str = "cover"
+    card_opacity: float = 0.82
 
 
 def _scaled(image: Image.Image, size: tuple[int, int], fit: str, color: str) -> Image.Image:

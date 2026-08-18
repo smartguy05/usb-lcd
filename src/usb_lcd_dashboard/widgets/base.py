@@ -11,7 +11,9 @@ from ..render import MUTED, PANEL, TEXT, TRACK, _font
 TRANSPARENT = ("transparent", "none", "")
 
 
-def panel_fill(options: dict[str, Any]) -> tuple[int, int, int, int] | None:
+def panel_fill(
+    options: dict[str, Any], default_opacity: float = 1.0
+) -> tuple[int, int, int, int] | None:
     """The tile's own backdrop, or None to let the background show through.
 
     A tile can be a solid card, translucent over a wallpaper, or nothing at all
@@ -22,7 +24,7 @@ def panel_fill(options: dict[str, Any]) -> tuple[int, int, int, int] | None:
         return None
     red, green, blue = ImageColor.getrgb(str(raw))[:3]
     try:
-        opacity = float(options.get("opacity", 1.0))
+        opacity = float(options.get("opacity", default_opacity))
     except (TypeError, ValueError):
         opacity = 1.0
     alpha = round(max(0.0, min(1.0, opacity)) * 255)
@@ -30,13 +32,13 @@ def panel_fill(options: dict[str, Any]) -> tuple[int, int, int, int] | None:
 
 
 def new_tile(
-    size: tuple[int, int], options: dict[str, Any]
+    size: tuple[int, int], options: dict[str, Any], default_opacity: float = 1.0
 ) -> tuple[Image.Image, ImageDraw.ImageDraw]:
     """A transparent tile-sized canvas with the configured card drawn on it."""
     width, height = size
     image = Image.new("RGBA", size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
-    fill = panel_fill(options)
+    fill = panel_fill(options, default_opacity)
     if fill is not None:
         radius = max(4, round(min(width, height) * 0.05))
         draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=radius, fill=fill)

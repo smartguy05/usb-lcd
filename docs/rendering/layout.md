@@ -86,7 +86,7 @@ composite path instead. Still correct, no longer identical.
 
 ## background.py
 
-`Background(color, image, fit)` and `background_layer(bg, size)`
+`Background(color, image, fit, card_opacity)` and `background_layer(bg, size)`
 (`background.py:23`, `:47`). Fit modes: `cover` (crop to fill), `contain`
 (letterbox on `color`), `stretch` (ignore aspect), `center` (native size).
 
@@ -100,6 +100,11 @@ Every call returns `cached.copy()` (`:83-84`) because the caller composites onto
 what it gets back. A missing or unreadable image warns **once per path** and
 falls back to the solid colour; the warning flag is cleared if the file becomes
 readable again.
+
+When an image is configured, `card_opacity` supplies the default opacity for
+tiles that do not set their own value. The legacy widget receives a special
+wallpaper composite that makes its fills translucent while leaving text and
+indicators opaque; with no image, the byte-identical fast path above is unchanged.
 
 ## Tests
 

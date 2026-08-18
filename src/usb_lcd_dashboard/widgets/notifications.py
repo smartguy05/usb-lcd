@@ -36,7 +36,7 @@ def _selected(ctx: TileContext, snapshot: NotificationSnapshot):
 
 def render_notifications(ctx: TileContext) -> Image.Image:
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, ctx.options)
+    image, draw = new_tile(ctx.size, ctx.options, ctx.card_opacity)
     snapshot = ctx.notifications or NotificationSnapshot()
     title = str(ctx.options.get("title") or "Notifications")
 

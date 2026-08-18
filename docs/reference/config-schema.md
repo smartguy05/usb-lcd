@@ -14,7 +14,7 @@ kind = "turing_rev_a"      # turing_rev_a | window | simulated | auto
 device = "AUTO"            # or "/dev/turing-lcd" on Linux
 width = 480
 height = 320
-orientation = "landscape"  # landscape | portrait
+orientation = "landscape"  # landscape | portrait | landscape_flipped | portrait_flipped
 brightness = 25            # 0-50, NOT 0-100
 refresh_hz = 2.0           # clamped to 0.25-10
 
@@ -22,6 +22,11 @@ refresh_hz = 2.0           # clamped to 0.25-10
 color = "#081018"
 # image = "C:/Users/you/Pictures/wallpaper.png"
 fit = "cover"              # cover | contain | stretch | center
+card_opacity = 0.82         # default tile opacity while an image is present
+
+[screensaver]
+enabled = true
+idle_seconds = 600          # 60-86400; wakes on dashboard activity
 
 [dashboard]
 active_ttl_seconds = 180
@@ -52,7 +57,7 @@ include_terms = []          # any case-insensitive literal may match
 exclude_terms = []          # any match vetoes the notification
 
 [[tile]]                   # repeat per tile; omit entirely for the legacy layout
-widget = "clock"           # clock | agent | crab | legacy | messages | notifications | todos
+widget = "clock"           # clock | agent | crab | legacy | messages | notifications | todos | claude_limits
 x = 12
 y = 12
 w = 404
@@ -74,6 +79,7 @@ Every widget built on `new_tile` honours:
 | --- | --- |
 | `agent` | the common two |
 | `clock` | `title`, `hour12`, `seconds`, `show_date` |
+| `claude_limits` | `title` plus the common options |
 | `crab` | `color`, `animate`, `show_project`, `show_activity`, `show_context`, `alarm` |
 | `legacy` | `title` only — it paints its own opaque background |
 | `messages` | `title` plus the common options |

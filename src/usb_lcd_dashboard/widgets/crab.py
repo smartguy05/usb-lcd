@@ -706,7 +706,7 @@ def render_crab(ctx: TileContext) -> Image.Image:
     state = ctx.session
     options = ctx.options
     width, height = ctx.size
-    image, draw = new_tile(ctx.size, options)
+    image, draw = new_tile(ctx.size, options, ctx.card_opacity)
 
     phase = state.phase if state is not None else None
     provider = state.provider if state is not None else ""

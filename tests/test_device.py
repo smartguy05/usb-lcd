@@ -57,6 +57,30 @@ def test_the_serial_panel_refuses_a_size_it_cannot_drive():
         make_device(config)
 
 
+def test_the_serial_panel_accepts_the_portrait_logical_canvas():
+    config = replace(LEGACY, width=320, height=480, orientation="portrait")
+    panel = make_device(config)
+    assert isinstance(panel, SerialPanel)
+    assert panel.size == (320, 480)
+
+
+def test_serial_partial_writes_are_mapped_for_a_flipped_mount():
+    panel = SerialPanel(replace(LEGACY, orientation="landscape_flipped"))
+    calls = []
+
+    class Lcd:
+        def paint(self, image, pos=(0, 0)):
+            calls.append((image.copy(), pos))
+
+    panel.lcd = Lcd()
+    crop = Image.new("RGB", (2, 1))
+    crop.putpixel((0, 0), (255, 0, 0))
+    crop.putpixel((1, 0), (0, 0, 255))
+    panel.write(crop, (10, 20))
+    assert calls[0][1] == (468, 299)
+    assert calls[0][0].getpixel((0, 0)) == (0, 0, 255)
+
+
 def test_the_window_kind_is_an_explicit_stub():
     config = replace(WIDE, display_kind="window")
     with pytest.raises(NotImplementedError, match="not implemented yet"):

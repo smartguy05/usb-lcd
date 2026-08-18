@@ -16,7 +16,7 @@ from .base import new_tile
 def render_clock(ctx: TileContext) -> Image.Image:
     width, height = ctx.size
     options = ctx.options
-    image, draw = new_tile(ctx.size, options)
+    image, draw = new_tile(ctx.size, options, ctx.card_opacity)
     pad = max(6, round(min(width, height) * 0.06))
     inner = max(1, width - 2 * pad)
 

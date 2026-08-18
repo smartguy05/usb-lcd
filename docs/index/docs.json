@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-17T20:21:32Z",
+ "generated": "2026-08-18T00:52:35Z",
  "documents": [
   {
    "path": "docs/admin/README.md",
@@ -36,7 +36,7 @@
     "admin.py:314",
     "admin.py:41"
    ],
-   "words": 722
+   "words": 806
   },
   {
    "path": "docs/admin/tray.md",
@@ -129,6 +129,16 @@
    "words": 183
   },
   {
+   "path": "docs/integration/claude-limits.md",
+   "title": "Claude usage limits",
+   "headings": [],
+   "covers": [
+    "src/usb_lcd_dashboard/claude_limits.py"
+   ],
+   "citations": [],
+   "words": 261
+  },
+  {
    "path": "docs/integration/cli.md",
    "title": "cli.py \u2014 every entry point",
    "headings": [
@@ -147,7 +157,7 @@
     "cli.py:26",
     "cli.py:53"
    ],
-   "words": 577
+   "words": 608
   },
   {
    "path": "docs/integration/install.md",
@@ -172,7 +182,7 @@
     "install.py:74",
     "install.py:98"
    ],
-   "words": 732
+   "words": 814
   },
   {
    "path": "docs/integration/messaging.md",
@@ -197,7 +207,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 218
+   "words": 229
   },
   {
    "path": "docs/integration/todos.md",
@@ -259,6 +269,7 @@
    "headings": [
     "The build",
     "What the installer does",
+    "Upgrade safety invariants",
     "The payload directory is generated",
     "Windows-specific runtime notes",
     "See also"
@@ -269,7 +280,7 @@
     "packaging/windows/config.example.toml"
    ],
    "citations": [],
-   "words": 574
+   "words": 775
   },
   {
    "path": "docs/README.md",
@@ -313,7 +324,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 560
+   "words": 600
   },
   {
    "path": "docs/reference/phases.md",
@@ -400,7 +411,7 @@
     "layout.py:68",
     "layout.py:98"
    ],
-   "words": 765
+   "words": 814
   },
   {
    "path": "docs/rendering/README.md",
@@ -412,7 +423,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 207
+   "words": 218
   },
   {
    "path": "docs/rendering/render.md",
@@ -436,6 +447,16 @@
    "words": 573
   },
   {
+   "path": "docs/rendering/screensaver.md",
+   "title": "screensaver.py \u2014 idle protection",
+   "headings": [],
+   "covers": [
+    "src/usb_lcd_dashboard/screensaver.py"
+   ],
+   "citations": [],
+   "words": 105
+  },
+  {
    "path": "docs/rendering/widgets.md",
    "title": "The widget registry",
    "headings": [
@@ -457,7 +478,8 @@
     "src/usb_lcd_dashboard/widgets/legacy.py",
     "src/usb_lcd_dashboard/widgets/messages.py",
     "src/usb_lcd_dashboard/widgets/notifications.py",
-    "src/usb_lcd_dashboard/widgets/todos.py"
+    "src/usb_lcd_dashboard/widgets/todos.py",
+    "src/usb_lcd_dashboard/widgets/claude_limits.py"
    ],
    "citations": [
     "agent.py:67",
@@ -468,7 +490,7 @@
     "legacy.py:18",
     "widgets/__init__.py:60"
    ],
-   "words": 791
+   "words": 808
   },
   {
    "path": "docs/runtime/config.md",
@@ -490,7 +512,7 @@
     "config.py:356",
     "config.py:55"
    ],
-   "words": 747
+   "words": 772
   },
   {
    "path": "docs/runtime/daemon.md",
@@ -519,7 +541,7 @@
     "daemon.py:64",
     "daemon.py:67"
    ],
-   "words": 1017
+   "words": 1048
   },
   {
    "path": "docs/runtime/device.md",
@@ -527,6 +549,7 @@
    "headings": [
     "The protocol",
     "SerialPanel",
+    "Four mounting orientations",
     "`health_check` exists because the driver lies",
     "SimulatedPanel",
     "WindowPanel",
@@ -535,7 +558,8 @@
    ],
    "covers": [
     "src/usb_lcd_dashboard/device.py",
-    "src/usb_lcd_dashboard/turing_usb.py"
+    "src/usb_lcd_dashboard/turing_usb.py",
+    "src/usb_lcd_dashboard/orientation.py"
    ],
    "citations": [
     "device.py:113",
@@ -546,7 +570,7 @@
     "device.py:42",
     "device.py:98"
    ],
-   "words": 565
+   "words": 629
   },
   {
    "path": "docs/runtime/display.md",

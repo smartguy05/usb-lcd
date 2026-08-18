@@ -1,6 +1,6 @@
 # device.py — the wire to a panel
 
-> **Covers:** `src/usb_lcd_dashboard/device.py`, `src/usb_lcd_dashboard/turing_usb.py`
+> **Covers:** `src/usb_lcd_dashboard/device.py`, `src/usb_lcd_dashboard/turing_usb.py`, `src/usb_lcd_dashboard/orientation.py`
 
 Defines the `PanelDevice` protocol and its three implementations: the real
 Turing serial panel, a file-writing simulator, and a deliberately unimplemented
@@ -39,6 +39,15 @@ fail at connect time.
   (`:65-66`). `self.device` is reassigned from `lcd.com_port` after open, which
   is how `AUTO` resolves to a real port.
 - `supports_partial()` is `True`.
+
+### Four mounting orientations
+
+The renderer and preview use logical, viewer-upright coordinates. The shared
+orientation helpers normalize portrait dimensions, rotate full images, and map
+partial crop origins into the panel's canonical landscape buffer. The serial
+driver therefore stays in hardware landscape while software supports
+`landscape`, `portrait`, and both flipped variants consistently. A portrait
+3.5-inch canvas is 320x480; its normalized hardware size remains 480x320.
 
 ### `health_check` exists because the driver lies
 

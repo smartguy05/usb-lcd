@@ -58,6 +58,32 @@ def test_the_store_takes_its_timings_from_the_config(tmp_path):
     assert daemon.store.switch_dwell == 9.5
 
 
+def test_screensaver_activates_at_the_configured_delay(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(tmp_path)
+    daemon.last_activity = 100.0
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 699.9)
+    assert daemon._screensaver_active() is False
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 700.0)
+    assert daemon._screensaver_active() is True
+
+
+def test_disabled_screensaver_never_activates(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(tmp_path)
+    daemon.config = replace(daemon.config, screensaver_enabled=False)
+    daemon.last_activity = 0.0
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 9999.0)
+    assert daemon._screensaver_active() is False
+
+
+def test_todo_content_wakes_the_screen_saver(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(tmp_path)
+    daemon.last_activity = 0.0
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 1000.0)
+    daemon.todos.create("Wake the panel")
+    daemon._notice_content_activity()
+    assert daemon.last_activity == 1000.0
+
+
 def test_an_edited_layout_is_picked_up_without_a_restart(tmp_path):
     daemon, path = daemon_for(tmp_path)
     tiles = daemon.config.tiles + (Tile("agent", 926, 12, 486, 438),)

@@ -8,10 +8,7 @@ import os
 import subprocess
 import sys
 
-from .config import NO_WINDOW, config_home, load_config
-from .daemon import DashboardDaemon
-from .doctor import paint_test, print_report
-from .install import install, uninstall
+from .config import NO_WINDOW, config_home, load_config, load_ipc_config
 from .transport import send_control, send_event
 
 
@@ -66,16 +63,27 @@ def main(argv: list[str] | None = None) -> int:
     # `doctor` is lenient too, and reports the bad layout as a failed check —
     # crashing would be a poor answer from the command you run to find out
     # what is wrong.
-    config = load_config(strict=args.command == "run")
+    config = None
+    if args.command == "run":
+        config = load_config()
+    elif args.command == "doctor":
+        config = load_config(strict=False)
+    elif args.command in {"emit", "statusline-proxy", "shutdown"}:
+        config = load_ipc_config()
 
     if args.command == "run":
+        from .daemon import DashboardDaemon
+
+        assert config is not None
         DashboardDaemon(config, simulate=args.simulate).run()
         return 0
     if args.command == "emit":
+        assert config is not None
         _raw, payload = _json_stdin()
         send_event(config, args.provider, payload)
         return 0
     if args.command == "statusline-proxy":
+        assert config is not None
         raw, payload = _json_stdin()
         send_event(config, "claude", payload)
         if args.downstream_b64:
@@ -96,18 +104,26 @@ def main(argv: list[str] | None = None) -> int:
                 return result.returncode
         return 0
     if args.command == "doctor":
+        from .doctor import paint_test, print_report
+
+        assert config is not None
         ok = print_report(config)
         if args.paint_test:
             paint_test(config)
             print("OK    paint test         frame sent to LCD")
         return 0 if ok else 1
     if args.command == "install":
+        from .install import install
+
         install()
         return 0
     if args.command == "uninstall":
+        from .install import uninstall
+
         uninstall()
         return 0
     if args.command == "shutdown":
+        assert config is not None
         return 0 if send_control(config, "shutdown") else 1
     return 2
 

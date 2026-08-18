@@ -142,7 +142,7 @@ class DiscordIntegration:
     def _json(self, path: str, *, token: str | None = None) -> Any:
         request = urllib.request.Request(API_ROOT + path, headers={
             "Authorization": "Bot " + (token or self.token_store.load()),
-            "Accept": "application/json", "User-Agent": "USB-LCD-Dashboard/0.8.0",
+            "Accept": "application/json", "User-Agent": "USB-LCD-Dashboard/0.10.0",
         })
         with self._urlopen(request, timeout=REQUEST_TIMEOUT) as response:
             return json.loads(response.read())

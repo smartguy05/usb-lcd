@@ -40,6 +40,7 @@ Set in `__init__` (`daemon.py:20-34`):
 | `config_signature` | Raw bytes of config.toml, for change detection. |
 | `next_config_check` | Monotonic gate throttling reload checks to 1 Hz. |
 | `last_frame` | Last composed image, for the editor's preview. |
+| `last_activity` | Monotonic timestamp used by the screen-saver deadline. |
 | `admin`, `tray` | Optional sub-services, `None` until started. |
 
 ## The loop, step by step
@@ -58,7 +59,9 @@ Set in `__init__` (`daemon.py:20-34`):
      envelope stops the loop and `continue`s, skipping a final frame. A
      `schema_version: 1` envelope goes through `normalize_event` into the store.
    - `:183-184` `store.assign(slot_count, now)` decides who gets screen time.
-   - `:185-201` `compose(...)` builds the frame, wrapped in a backstop except.
+   - The moving-clock screen saver replaces composition after the configured
+     inactivity delay; accepted events or changed visible content wake it.
+   - `compose(...)` otherwise builds the frame, wrapped in a backstop except.
    - `:202-205` Keep `last_frame` regardless of connection state.
    - `:206-212` `display.paint(frame)` if connected; on failure close and back
      off 2 s.

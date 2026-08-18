@@ -13,6 +13,8 @@ from usb_lcd_dashboard.widgets.clock import render_clock
 from usb_lcd_dashboard.widgets.messages import render_messages
 from usb_lcd_dashboard.widgets.notifications import render_notifications
 from usb_lcd_dashboard.widgets.todos import render_todos
+from usb_lcd_dashboard.widgets.claude_limits import render_claude_limits
+from usb_lcd_dashboard.claude_limits import ClaudeLimitsSnapshot, LimitWindow
 from usb_lcd_dashboard.notifications import NotificationItem, NotificationSnapshot
 from usb_lcd_dashboard.todos import TodoItem, TodoSnapshot
 
@@ -56,13 +58,35 @@ def full_session(**kwargs):
 # ------------------------------------------------------------------- registry
 
 def test_the_registry_exposes_the_expected_widgets():
-    assert set(WIDGETS) == {"agent", "clock", "crab", "legacy", "messages", "notifications", "todos"}
+    assert set(WIDGETS) == {"agent", "claude_limits", "clock", "crab", "legacy", "messages", "notifications", "todos"}
     assert WIDGETS["agent"].wants_session is True
     assert WIDGETS["crab"].wants_session is True
     assert WIDGETS["clock"].wants_session is False
     assert WIDGETS["messages"].wants_messages is True
     assert WIDGETS["notifications"].wants_notifications is True
     assert WIDGETS["todos"].wants_todos is True
+    assert WIDGETS["claude_limits"].wants_claude_limits is True
+
+
+# --------------------------------------------------------------- Claude limits
+
+@pytest.mark.parametrize("size", SIZES)
+def test_claude_limits_render_waiting_and_complete_at_every_size(size):
+    waiting = render_claude_limits(context(size, claude_limits=ClaudeLimitsSnapshot()))
+    window = LimitWindow(76, NOW + timedelta(days=2, hours=6), NOW, "test")
+    complete = render_claude_limits(context(
+        size, claude_limits=ClaudeLimitsSnapshot(window, window, window, "current")
+    ))
+    assert waiting.size == complete.size == size
+    assert waiting.mode == complete.mode == "RGBA"
+    assert differs(waiting, complete)
+
+
+def test_claude_limits_hide_expired_windows():
+    expired = LimitWindow(99, NOW - timedelta(seconds=1), NOW, "test")
+    image = render_claude_limits(context((300, 120), claude_limits=ClaudeLimitsSnapshot(five_hour=expired)))
+    waiting = render_claude_limits(context((300, 120), claude_limits=ClaudeLimitsSnapshot()))
+    assert not differs(image, waiting)
 
 
 # ---------------------------------------------------------------------- todos

@@ -10,7 +10,7 @@ one config file per machine:
 
 The 3.5" panel shows one session on one card. The ultra-wide is divided into
 **tiles**, each holding a widget — a clock, an agent card, an animated crab,
-selected-channel Discord messages, notifications, or a human todo list.
+selected-channel Discord messages, notifications, a human todo list, or Claude usage limits.
 
 **To install it, jump to [Installing](#installing)** — there is a prebuilt
 package for [Windows 11](#windows-11) and for [Ubuntu](#ubuntu).
@@ -34,7 +34,7 @@ its own `config.toml`.
 
 ```toml
 [[tile]]
-widget = "clock"          # clock | agent | crab | messages | notifications | todos | legacy
+widget = "clock"          # clock | agent | crab | messages | notifications | todos | claude_limits | legacy
 x = 12
 y = 12
 w = 404
@@ -70,6 +70,27 @@ existing install keeps working with no edits at all.
 `fit = "cover" | "contain" | "stretch" | "center"`. A background image that will
 not load falls back to the colour and warns once, so a config shared between two
 machines can name a wallpaper that only exists on one.
+
+The settings editor can upload PNG, JPEG, or WebP wallpaper files into managed
+storage. `card_opacity` controls the default translucency over an image; a
+tile's explicit `opacity` still wins. The legacy full-screen dashboard also
+reveals the wallpaper without changing its original no-wallpaper pixels.
+
+`display.orientation` supports `landscape`, `portrait`,
+`landscape_flipped`, and `portrait_flipped`. Choosing one in the editor rotates
+the existing tile rectangles and canvas together, so no tile is left off-screen.
+
+The moving-clock screen saver is enabled by default after ten minutes without
+new agent events, messages, notifications, or todo changes:
+
+```toml
+[screensaver]
+enabled = true
+idle_seconds = 600
+```
+
+It uses a black background, moves once per minute, and wakes on the next piece
+of dashboard activity.
 
 See [config.example.wide.toml](config.example.wide.toml) for the full ultra-wide
 layout.
@@ -148,6 +169,20 @@ Large lists rotate in deterministic pages. The MCP tools explicitly describe
 this as the human's list: agents may add concrete actions you need to take, but
 must never use it for their own implementation plan or scratch work. Permanent
 deletion requires an explicit request and confirmation.
+
+## Claude limits
+
+The `claude_limits` widget follows Claude's own usage display: a prominent
+five-hour session meter, then weekly and Fable bars, each showing percentage
+consumed and time until reset. Add it from the settings editor like any other
+tile. Session and weekly values come directly from Claude Code's status-line
+payload and the last known values survive dashboard restarts.
+
+Claude Code does not currently expose its separate Fable allowance to status
+lines, so that row uses a cached read-only request with Claude's existing OAuth
+credential. The token is never logged or copied into dashboard state. If the
+credential or endpoint is unavailable, only the Fable row disappears; hooks and
+the other meters continue normally.
 
 ### Windows notifications
 
@@ -361,10 +396,10 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.8.0.exe` | `usb-lcd-dashboard_0.8.0_all.deb` |
+| Package | `USB-LCD-Dashboard-Setup-0.10.0.exe` | `usb-lcd-dashboard_0.10.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
-| Size | 22.6 MB | 88.7 KB plus dependencies |
-| SHA-256 | `b55f741b8fe8dc8317534f9307eeaef4e66c0a22f632b5d4486f4cc9279456cf` | `0d03d52b8cbbfa18652b191e05c107f651a8d00df3384f7f56a80310c2fbae21` |
+| Size | 22.6 MB | 94.6 KB plus dependencies |
+| SHA-256 | `7e19312f846ecb7002f67a67945e72902339d9df474a79403e5ed8f3b473fea4` | `a7298b396b71af771f3d2c6094d8eb02a3f43e3a969706686242c5774ad87e0a` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
 | Hooks wired by | The installer, automatically | You, with one command |
 
@@ -378,10 +413,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.8.0.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.10.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.8.0.exe
+.\dist\USB-LCD-Dashboard-Setup-0.10.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -413,7 +448,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.8.0_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.10.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and

@@ -21,6 +21,11 @@ refresh_hz = 8.0
 color = "#081018"
 # image = "C:/Users/you/Pictures/panel-wallpaper.png"
 fit = "cover"          # cover | contain | stretch | center
+card_opacity = 0.82    # 0 to 1; tile-specific opacity wins
+
+[screensaver]
+enabled = true
+idle_seconds = 600
 
 [dashboard]
 active_ttl_seconds = 180

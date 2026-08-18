@@ -121,6 +121,7 @@ cp "$PROJECT_DIR/LICENSE" "$PAYLOAD_DIR/LICENSE-USB-LCD-Dashboard.txt"
 cp "$PROJECT_DIR/WINDOWS.md" "$PAYLOAD_DIR/README-Windows.txt"
 cp "$PROJECT_DIR/packaging/windows/register-identity.ps1" "$PAYLOAD_DIR/"
 cp "$PROJECT_DIR/packaging/windows/unregister-identity.ps1" "$PAYLOAD_DIR/"
+cp "$PROJECT_DIR/packaging/windows/stop-installed-processes.ps1" "$PAYLOAD_DIR/"
 
 PTH_FILE="$PAYLOAD_DIR/python312._pth"
 sed -i '/^\.$/a Lib/site-packages' "$PTH_FILE"

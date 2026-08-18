@@ -5,7 +5,7 @@ Unicode True
 !define APP_NAME "USB LCD Dashboard"
 ; build-installer.sh passes -DAPP_VERSION from pyproject.toml, the single source.
 !ifndef APP_VERSION
-    !define APP_VERSION "0.8.0"
+    !define APP_VERSION "0.10.0"
 !endif
 !define APP_PUBLISHER "USB LCD Dashboard"
 !define APP_KEY "Software\USB LCD Dashboard"
@@ -58,6 +58,33 @@ FunctionEnd
 Section "Install" SEC_MAIN
     SetShellVarContext current
 
+    ; Extract the entire new release beside the live installation first. NSIS
+    ; extraction is not transactional: writing directly over $INSTDIR can leave
+    ; a mixture of old and new files when one copy fails.
+    RMDir /r "$INSTDIR.__new"
+    SetOutPath "$INSTDIR.__new"
+    ClearErrors
+    File /r "${PAYLOAD}\*.*"
+    ${If} ${Errors}
+        SetOutPath "$TEMP"
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "The new application files could not be staged. Your existing installation was not changed." /SD IDOK
+        Abort
+    ${EndIf}
+    IfFileExists "$INSTDIR.__new\python.exe" 0 stage_incomplete
+    IfFileExists "$INSTDIR.__new\pythonw.exe" 0 stage_incomplete
+    IfFileExists "$INSTDIR.__new\python312._pth" 0 stage_incomplete
+    IfFileExists "$INSTDIR.__new\Lib\site-packages\usb_lcd_dashboard\__init__.py" stage_ready
+    stage_incomplete:
+        SetOutPath "$TEMP"
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "The staged application payload is incomplete. Your existing installation was not changed." /SD IDOK
+        Abort
+    stage_ready:
+    ; SetOutPath also changes setup's process working directory. Windows cannot
+    ; rename or remove a directory while setup itself has it as the CWD.
+    SetOutPath "$TEMP"
+
     IfFileExists "$INSTDIR\python.exe" 0 runtime_stopped
         ExecWait '"$INSTDIR\python.exe" -m usb_lcd_dashboard shutdown'
         ; Give the daemon time to close native Pillow/USB modules before their
@@ -66,29 +93,90 @@ Section "Install" SEC_MAIN
         Sleep 1500
     runtime_stopped:
 
-    SetOutPath "$INSTDIR"
-    ClearErrors
-    File /r "${PAYLOAD}\*.*"
-    ${If} ${Errors}
-        MessageBox MB_OK|MB_ICONSTOP "Application files could not be replaced. Quit USB LCD Dashboard and run the installer again." /SD IDOK
+    ; A persistent MCP server or a hook interpreter can outlive the display
+    ; daemon and keep embedded Python files locked. Stop only processes whose
+    ; executable lives under this exact application directory.
+    IfFileExists "$INSTDIR\*.*" 0 installed_processes_stopped
+    ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR.__new\stop-installed-processes.ps1" -InstallDir "$INSTDIR"' $0
+    ${If} $0 != 0
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "USB LCD Dashboard processes could not be stopped (exit code $0). The existing installation was not changed; close Codex and Claude Code, then run setup again." /SD IDOK
         Abort
     ${EndIf}
+    installed_processes_stopped:
+
+    ; Keep the previous tree intact until the staged release has successfully
+    ; taken its place. If either rename fails, restore the old tree.
+    RMDir /r "$INSTDIR.__old"
+    ClearErrors
+    IfFileExists "$INSTDIR\*.*" 0 old_moved
+    Rename "$INSTDIR" "$INSTDIR.__old"
+    ${If} ${Errors}
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "The existing application is still in use and could not be upgraded. It was not changed; quit USB LCD Dashboard and run setup again." /SD IDOK
+        Abort
+    ${EndIf}
+    old_moved:
+    ; Use robocopy rather than NSIS CopyFiles: CopyFiles delegates to the shell
+    ; and can report failure for a recursive directory tree even after copying
+    ; part of it. Robocopy codes 0-7 are successful outcomes; 8+ are failures.
+    ; The untouched old tree still provides rollback until validation passes.
+    CreateDirectory "$INSTDIR"
+    ExecWait 'robocopy.exe "$INSTDIR.__new" "$INSTDIR" /E /COPY:DAT /DCOPY:DAT /R:2 /W:1 /NFL /NDL /NJH /NJS /NP' $0
+    DetailPrint "Staged payload activation exit code: $0"
+    ${If} $0 >= 8
+        RMDir /r "$INSTDIR"
+        Rename "$INSTDIR.__old" "$INSTDIR"
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "The new application could not be activated (robocopy exit code $0). The previous installation was restored." /SD IDOK
+        Abort
+    ${EndIf}
+    IfFileExists "$INSTDIR\python.exe" 0 activation_incomplete
+    IfFileExists "$INSTDIR\pythonw.exe" 0 activation_incomplete
+    IfFileExists "$INSTDIR\python312._pth" 0 activation_incomplete
+    IfFileExists "$INSTDIR\Lib\site-packages\usb_lcd_dashboard\__init__.py" activation_ready
+    activation_incomplete:
+        RMDir /r "$INSTDIR"
+        Rename "$INSTDIR.__old" "$INSTDIR"
+        RMDir /r "$INSTDIR.__new"
+        MessageBox MB_OK|MB_ICONSTOP "The activated application payload is incomplete. The previous installation was restored." /SD IDOK
+        Abort
+    activation_ready:
+    RMDir /r "$INSTDIR.__new"
+
+    SetOutPath "$INSTDIR"
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 
     ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\register-identity.ps1" -ExternalLocation "$INSTDIR" -PackagePath "$INSTDIR\USB-LCD-Dashboard.Identity.msix" -CertificatePath "$INSTDIR\USB-LCD-Dashboard.Identity.cer"' $0
     DetailPrint "Package identity setup exit code: $0"
     ${If} $0 != 0
         ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\unregister-identity.ps1" -CertificatePath "$INSTDIR\USB-LCD-Dashboard.Identity.cer"'
-        MessageBox MB_OK|MB_ICONSTOP "Windows notification identity setup failed. The application was not installed." /SD IDOK
+        RMDir /r "$INSTDIR"
+        Rename "$INSTDIR.__old" "$INSTDIR"
+        IfFileExists "$INSTDIR\register-identity.ps1" 0 identity_rollback_done
+        ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\register-identity.ps1" -ExternalLocation "$INSTDIR" -PackagePath "$INSTDIR\USB-LCD-Dashboard.Identity.msix" -CertificatePath "$INSTDIR\USB-LCD-Dashboard.Identity.cer"'
+        identity_rollback_done:
+        MessageBox MB_OK|MB_ICONSTOP "Windows notification identity setup failed. The previous installation was restored." /SD IDOK
         Abort
     ${EndIf}
 
     ExecWait '"$INSTDIR\python.exe" -m usb_lcd_dashboard install' $0
     DetailPrint "Setup helper exit code: $0"
+    ${If} $0 != 0
+        ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\unregister-identity.ps1" -CertificatePath "$INSTDIR\USB-LCD-Dashboard.Identity.cer"'
+        RMDir /r "$INSTDIR"
+        Rename "$INSTDIR.__old" "$INSTDIR"
+        IfFileExists "$INSTDIR\register-identity.ps1" 0 setup_rollback_done
+        ExecWait 'powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\register-identity.ps1" -ExternalLocation "$INSTDIR" -PackagePath "$INSTDIR\USB-LCD-Dashboard.Identity.msix" -CertificatePath "$INSTDIR\USB-LCD-Dashboard.Identity.cer"'
+        setup_rollback_done:
+        MessageBox MB_OK|MB_ICONSTOP "Hook and configuration setup failed with exit code $0. The previous installation was restored." /SD IDOK
+        Abort
+    ${EndIf}
     IfFileExists "$LOCALAPPDATA\usb-lcd-dashboard\install-state.json" setup_ready
         MessageBox MB_OK|MB_ICONSTOP "Hook and configuration setup did not complete. The application files were installed, but setup could not be completed." /SD IDOK
         Abort
     setup_ready:
+    RMDir /r "$INSTDIR.__old"
 
     CreateDirectory "$SMPROGRAMS\USB LCD Dashboard"
     SetOutPath "$INSTDIR"
