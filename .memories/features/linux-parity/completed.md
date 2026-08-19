@@ -50,3 +50,29 @@ missing was every path *to* it on Linux.
 ## Tests
 538 pre-existing pass. Added: auto-detect (3), USB disconnect (3), doctor
 transport/vendor (3), tray host availability + PNG icons (4).
+
+
+## Verified on real hardware, 2026-08-19
+Running from the packaged build (/usr/bin/usb-lcd-dashboard, system python3):
+
+    OK  device             USB 1CBE:0092 (1920x462)
+    OK  read/write access  /dev/bus/usb/005/074
+    OK  layout             turing_usb 1920x462
+    OK  service            active
+
+Tray SNI registered at :1.NNNN@/org/ayatana/NotificationItem/usb_lcd_dashboard,
+connection mapped back to the daemon's MainPID. Both menu items confirmed by
+the user: settings editor opens a browser tab, log folder opens a Files window.
+The user then rearranged tiles in that editor and the daemon reloaded live.
+
+### Three wrong turns, for the record
+1. A private thread-default GMainContext for the tray loop. Not a fix — a
+   regression that broke every menu item. See notes.md.
+2. "The sandbox blocks the browser" asserted without measuring, then
+   `systemd-run --user` shipped as the fix. It opens nothing.
+3. Trusting exit codes throughout. xdg-open, systemd-run and portal-OpenURI-
+   with-a-file://-URI all report success while doing nothing.
+
+What broke the loop: marker URLs (?probe=A/C/D) plus asking the human which
+tab appeared, and firing com.canonical.dbusmenu Event directly instead of
+relying on clicks. Both are written up in notes.md as the diagnostic recipe.

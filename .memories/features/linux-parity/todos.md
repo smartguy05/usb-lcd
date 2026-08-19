@@ -1,26 +1,29 @@
 # Todos — Linux parity
 
-## Blocked on the user (needs sudo)
-- [ ] Run scratchpad/setup-linux-parity.sh: apt deps + udev rule
+## Done (verified on hardware 2026-08-19)
+- [x] apt deps + udev rule installed
+- [x] Panel drawing at 1920x462 over native USB
+- [x] Tray icon appears; menu opens settings and log folder
+- [x] .deb rebuilt at 0.11.0, smoke test passes
+- [x] systemd unit re-pointed at /usr/bin; verified running from the package
+      with NO venv gi symlink involved (system python resolves gi, pyusb
+      1.2.1 and Cryptodome)
+- [x] Committed on branch feat/linux-tray-and-turzx-panel (f4f1287)
 
-## After that
-- [ ] Restart the daemon against the venv, confirm the panel draws
-- [ ] Confirm the tray icon appears on GNOME and its menu opens the editor
-- [ ] Re-point the systemd unit: it still says
-      ExecStart=/home/anthony/Code/usb-lcd/.venv/bin/usb-lcd-dashboard
-      (written Jul 29). Phase 2 = /usr/bin after the .deb rebuild.
-
-## Release artifacts (decision needed)
-- [ ] Version bump? Still 0.10.0. Runtime code changed on BOTH platforms
-      (tray.py, device.py, doctor.py, config.py), so dist/*.exe is stale too.
-- [ ] Rebuild dist/usb-lcd-dashboard_<v>_all.deb (container build, can do here)
-- [ ] Rebuild dist/USB-LCD-Dashboard-Setup-<v>.exe -- CANNOT do from Linux;
-      CLAUDE.md requires Windows Git Bash + Windows SDK for the identity build.
-- [ ] packaging/linux/changelog entry
-- [ ] Update the sha256s quoted in README.md
-
-## Deferred / worth considering
-- [ ] `packaging/linux/smoke-test-inner.sh` only asserts the udev rule is gone
-      after removal; nothing asserts the 1cbe line is present. Cheap to add.
-- [ ] The tray's left-click-opens-settings is a request GNOME ignores (it opens
-      the menu instead). Fine, but README now documents the difference.
+## Outstanding
+- [ ] dist/USB-LCD-Dashboard-Setup-0.11.0.exe does NOT exist. Runtime code
+      changed on both platforms, so the Windows artifact is stale. Must be
+      built from Windows Git Bash + Windows SDK (identity/MSIX signing);
+      cannot be done from Linux. README's Windows SHA-256 cell is a
+      placeholder until then.
+- [ ] Four pre-existing doctor FAILs, unrelated to this work:
+        Claude/Codex hook timeout (< 10s), Claude/Codex todo tools
+      `usb-lcd-dashboard install` should repair all four. NOT run yet because
+      it rewrites ~/.claude/settings.json, and the hooks fire on every tool
+      use in a live Claude Code session.
+- [ ] dist/usb-lcd-dashboard_0.10.0_all.deb is dirty in git from BEFORE this
+      work (same size, different bytes). Left uncommitted deliberately.
+      Superseded by 0.11.0 — user's call whether to delete or restore.
+- [ ] The dev .venv still has the `gi` symlink and pip-installed
+      pyusb/pycryptodome. Harmless, but a fresh venv wants
+      `--system-site-packages` for the tray.
