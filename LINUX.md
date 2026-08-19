@@ -16,7 +16,7 @@ Built 2026-08-17 from the current source tree and smoke-tested on Ubuntu 24.04:
 
 ```text
 dist/usb-lcd-dashboard_0.10.0_all.deb
-sha256 d915ac28d1f2766fcd168965ab064f59ea092bca5d8844add240917fb461020d
+sha256 aa964c6d2beab6f4943b46aa55b3da75741f1178469e53be089b89c5e7696005
 ```
 
 ## Install

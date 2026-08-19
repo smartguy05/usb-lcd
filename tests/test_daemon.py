@@ -179,6 +179,30 @@ def test_a_missing_config_file_does_not_trigger_a_reload(tmp_path):
     assert daemon.config is before
 
 
+def test_a_long_runtime_pause_drops_the_stale_display(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(tmp_path)
+    daemon.display.opened = True
+    daemon.last_loop_tick = 100.0
+    daemon.next_connect = 999.0
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 111.0)
+
+    daemon._recover_after_pause()
+
+    assert daemon.display.connected is False
+    assert daemon.next_connect == 0.0
+
+
+def test_a_normal_frame_does_not_reconnect_the_display(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(tmp_path)
+    daemon.display.opened = True
+    daemon.last_loop_tick = 100.0
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.time.monotonic", lambda: 100.5)
+
+    daemon._recover_after_pause()
+
+    assert daemon.display.connected is True
+
+
 # --------------------------------------------------------------- the editor
 
 def test_the_editor_is_not_started_when_disabled(tmp_path):

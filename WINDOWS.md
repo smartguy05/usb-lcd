@@ -10,7 +10,7 @@ filterable Windows notifications, shared human todos, and Claude limit meters:
 
 ```text
 dist/USB-LCD-Dashboard-Setup-0.10.0.exe
-sha256 133c98e1e97c5d40745cb9b7852ae3134b97330b26d36b7ff06fbda7c62ca8f5
+sha256 32536024687d093146efc2209a6714c29418755b61f7c5d7314af95f7c3f9dde
 ```
 
 Older installers in `dist/` predate the current notification-capable package.
@@ -93,6 +93,15 @@ LCD write failed: serial port was reopened by the driver
 LCD connected at COM10
 LCD full frame written: 480x320
 ```
+
+### After Windows sleep
+
+Windows sleep invalidates the open LCD connection on some USB controllers. When
+the dashboard notices the long runtime pause on resume, it discards that handle,
+reopens the display, and repaints a full frame. You can also launch **USB LCD
+Dashboard** again from the Start menu: when the background process is already
+running, the shortcut requests the same reconnect instead of silently exiting
+because the dashboard port is in use.
 
 ## Remove
 

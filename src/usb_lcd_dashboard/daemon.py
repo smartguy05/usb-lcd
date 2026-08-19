@@ -20,6 +20,11 @@ from .screensaver import render_screensaver
 
 LOG = logging.getLogger(__name__)
 
+# A normal loop takes at most one frame interval plus the display write.  A gap
+# this large means the machine was suspended (or the USB stack stalled long
+# enough that its handle should no longer be trusted).
+RESUME_GAP_SECONDS = 10.0
+
 
 class DashboardDaemon:
     def __init__(self, config: Config, simulate: bool = False, config_path=None):
@@ -37,6 +42,7 @@ class DashboardDaemon:
         self.next_connect = 0.0
         self.config_signature = self._config_signature()
         self.next_config_check = 0.0
+        self.last_loop_tick = time.monotonic()
         # The last composed frame, for the settings editor's preview.
         self.last_frame = None
         self.last_activity = time.monotonic()
@@ -195,6 +201,17 @@ class DashboardDaemon:
             self.display.close()
             self.next_connect = time.monotonic() + 3
 
+    def _recover_after_pause(self) -> None:
+        """Drop USB state that may have gone stale while Windows was asleep."""
+        now = time.monotonic()
+        elapsed = now - self.last_loop_tick
+        self.last_loop_tick = now
+        if elapsed < RESUME_GAP_SECONDS:
+            return
+        LOG.info("Long runtime pause detected (%.1fs); reconnecting LCD", elapsed)
+        self.display.close()
+        self.next_connect = 0.0
+
     def run(self) -> None:
         signal.signal(signal.SIGINT, self.stop)
         signal.signal(signal.SIGTERM, self.stop)
@@ -206,6 +223,7 @@ class DashboardDaemon:
         self._start_tray()
         try:
             while self.running:
+                self._recover_after_pause()
                 self._connect()
                 if self.tray is not None:
                     self.tray.set_connected(self.display.connected)
@@ -216,6 +234,11 @@ class DashboardDaemon:
                     if envelope.get("control") == "shutdown":
                         LOG.info("Shutdown requested")
                         self.running = False
+                        continue
+                    if envelope.get("control") == "reconnect":
+                        LOG.info("LCD reconnect requested")
+                        self.display.close()
+                        self.next_connect = 0.0
                         continue
                     if envelope.get("schema_version") == 1:
                         self.last_activity = time.monotonic()

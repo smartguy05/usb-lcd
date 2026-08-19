@@ -2,6 +2,7 @@ usb-lcd-dashboard (0.10.0) noble; urgency=medium
 
   * Add four-way display mounting orientation with automatic layout rotation.
   * Add an inactivity screen saver and managed wallpaper uploads.
+  * Reconnect stale LCD handles after system suspend and resume.
 
  -- USB LCD Dashboard <noreply@users.noreply.github.com>  Mon, 17 Aug 2026 23:30:00 +0000
 
