@@ -3,6 +3,14 @@
 A single self-contained document: no build step, no CDN, and it works on both
 machines with nothing installed. Everything it knows about widgets comes from
 /api/widgets, so a newly registered widget appears here with working inputs.
+
+The page is three stacked regions: the tile stage, which is always visible
+because every other control is relative to it; a collapsible panel of settings
+that belong to the whole screen; and a tabstrip choosing between the live frame
+and the selected widget's settings. Blocks that configure a *source* (Discord,
+Windows notifications, human todos) live in the widget tab and appear only when
+a widget that consumes that source is selected — the `wants_*` flags on
+/api/widgets decide, so a new source-backed widget wires itself up.
 """
 
 PAGE = r"""<!doctype html>
@@ -44,8 +52,7 @@ PAGE = r"""<!doctype html>
   #status { font-size: 13px; min-height: 1.5em; }
   #status.ok { color: var(--ok); } #status.err { color: var(--err); }
   #status.busy { color: var(--muted); }
-  main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; padding: 20px; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  main { max-width: 1180px; margin: 0 auto; padding: 20px; }
   section { background: var(--panel); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
   #stageWrap { overflow-x: auto; }
   #stage {
@@ -89,6 +96,67 @@ PAGE = r"""<!doctype html>
   .todo:first-child { border-top: 0; }
   .todo.done input { color: var(--muted); text-decoration: line-through; }
   .todo-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+
+  /* Collapsible screen-wide settings. <details> does the work; no JS state. */
+  details.panel { background: var(--panel); border-radius: 12px; margin-bottom: 20px; }
+  details.panel > summary, details.sub > summary {
+    cursor: pointer; list-style: none; color: var(--muted);
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  }
+  details.panel > summary::-webkit-details-marker,
+  details.sub > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::before, details.sub > summary::before {
+    content: "\25B8"; display: inline-block; width: 14px;
+    transition: transform .12s ease;
+  }
+  details.panel[open] > summary::before, details.sub[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  details.panel[open] > summary, details.sub[open] > summary { color: var(--text); }
+  details.panel > summary { padding: 15px 16px; }
+  .panel-body {
+    padding: 0 16px 6px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0 22px; align-items: start;
+  }
+  details.sub > summary { padding: 11px 0; border-top: 1px solid var(--edge); }
+  .sub-body { padding-bottom: 14px; }
+
+  /* Tabstrip: live frame vs the selected widget's settings. */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--edge); margin-bottom: 20px; }
+  .tab {
+    background: transparent; border: 1px solid transparent; border-bottom-width: 2px;
+    border-radius: 8px 8px 0 0; padding: 9px 16px; color: var(--muted);
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  }
+  .tab:hover { color: var(--text); border-color: transparent; }
+  .tab[aria-selected="true"] {
+    color: var(--text); background: var(--panel);
+    border-color: transparent; border-bottom-color: var(--accent);
+  }
+  .editing { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .editing span { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--muted); }
+
+  /* A swatch beside the text box; the text box stays authoritative. The chip
+     carries the colour itself and the native picker sits invisibly on top of
+     it, because a bare <input type=color> paints as an empty box on some
+     renderers — including headless Chromium, where this page is tested. */
+  .swatch { display: flex; gap: 8px; align-items: center; }
+  .chip {
+    position: relative; flex: none; width: 40px; height: 34px;
+    border: 1px solid var(--edge); border-radius: 6px; overflow: hidden;
+    background-color: transparent;
+    background-image:
+      linear-gradient(45deg, var(--edge) 25%, transparent 25%, transparent 75%, var(--edge) 75%),
+      linear-gradient(45deg, var(--edge) 25%, transparent 25%, transparent 75%, var(--edge) 75%);
+    background-size: 12px 12px; background-position: 0 0, 6px 6px;
+  }
+  .chip input[type=color] {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; padding: 0; border: 0; cursor: pointer;
+  }
+  .chip.off { opacity: .35; }
+  .chip.off input[type=color] { cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -101,75 +169,83 @@ PAGE = r"""<!doctype html>
 </header>
 
 <main>
-  <div>
-    <section>
-      <h2>Layout</h2>
-      <div id="stageWrap"><div id="stage"></div></div>
-      <div id="warn"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center">
-        <select id="newWidget" style="width:auto"></select>
-        <button id="add">Add tile</button>
-        <label style="margin:0 0 0 10px">Snap</label>
-        <select id="snap" style="width:auto">
-          <option value="1">1 px</option>
-          <option value="2">2 px</option>
-          <option value="4" selected>4 px</option>
-          <option value="12">12 px</option>
-        </select>
-      </div>
-    </section>
+  <section>
+    <h2>Layout</h2>
+    <div id="stageWrap"><div id="stage"></div></div>
+    <div id="warn"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center">
+      <select id="newWidget" style="width:auto"></select>
+      <button id="add">Add tile</button>
+      <label style="margin:0 0 0 10px">Snap</label>
+      <select id="snap" style="width:auto">
+        <option value="1">1 px</option>
+        <option value="2">2 px</option>
+        <option value="4" selected>4 px</option>
+        <option value="12">12 px</option>
+      </select>
+    </div>
+  </section>
 
+  <details class="panel" id="settingsPanel">
+    <summary>Settings</summary>
+    <div class="panel-body">
+      <details class="sub" id="secBackground">
+        <summary>Background</summary>
+        <div class="sub-body" id="bgForm"></div>
+      </details>
+      <details class="sub" id="secScreensaver">
+        <summary>Screen saver</summary>
+        <div class="sub-body" id="screensaverForm"></div>
+      </details>
+      <details class="sub" id="secDisplay">
+        <summary>Display</summary>
+        <div class="sub-body" id="displayForm"></div>
+      </details>
+    </div>
+  </details>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabBtnLive" role="tab"
+            aria-selected="true" aria-controls="tabLive">Live panel</button>
+    <button class="tab" id="tabBtnWidget" role="tab"
+            aria-selected="false" aria-controls="tabWidget">Widget settings</button>
+  </div>
+
+  <div id="tabLive" role="tabpanel" aria-labelledby="tabBtnLive">
     <section>
-      <h2>Live panel</h2>
       <img id="preview" alt="the frame currently on the panel">
       <div class="hint" id="previewNote">What the panel is showing now. Saved changes appear within a frame or two.</div>
     </section>
   </div>
 
-  <div>
-    <section>
-      <h2>Selected tile</h2>
+  <div id="tabWidget" role="tabpanel" aria-labelledby="tabBtnWidget" hidden>
+    <section id="secTile">
       <div id="tileForm"><p class="empty">Click a tile to edit it.</p></div>
     </section>
 
-    <section>
-      <h2>Display</h2>
-      <div id="displayForm"></div>
-    </section>
-
-    <section>
-      <h2>Background</h2>
-      <div id="bgForm"></div>
-    </section>
-
-    <section>
-      <h2>Screen saver</h2>
-      <div id="screensaverForm"></div>
-    </section>
-
-    <section>
+    <section id="secDash" hidden>
       <h2>Dashboard</h2>
       <div id="dashForm"></div>
     </section>
 
-    <section>
-      <h2>Human todos</h2>
-      <div id="todoCreate"></div>
-      <div class="connection"><button id="todoHistory">Show completed</button></div>
-      <div id="todoList"><p class="empty">Loading todosâ€¦</p></div>
-    </section>
-
-    <section>
+    <section id="secDiscord" hidden>
       <h2>Discord messages</h2>
       <div id="discordConnection"><p class="empty">Loading Discord status…</p></div>
     </section>
 
-    <section>
+    <section id="secWindows" hidden>
       <h2>Windows notifications</h2>
       <div id="windowsNotifications"><p class="empty">Loading notification access…</p></div>
     </section>
 
-    <section>
+    <section id="secTodos" hidden>
+      <h2>Human todos</h2>
+      <div id="todoCreate"></div>
+      <div class="connection"><button id="todoHistory">Show completed</button></div>
+      <div id="todoList"><p class="empty">Loading todos…</p></div>
+    </section>
+
+    <section id="secReadonly">
       <h2>Not editable here</h2>
       <div class="ro" id="roInfo"></div>
     </section>
@@ -190,6 +266,38 @@ const scale = () => Math.min(1, STAGE_MAX / Math.max(1, cfg.display.width));
 const snap = () => parseInt($("snap").value, 10) || 1;
 const spec = (name) => widgets.find((w) => w.name === name);
 
+// Presentation-only naming. The registry has no label field, and giving it one
+// would ripple into every test that pins the /api/widgets shape, so the prettier
+// wording lives here and falls back to the raw option name.
+const LABELS = {
+  hour12: "12-hour clock",
+  show_date: "Show the date",
+  show_project: "Show the project",
+  show_activity: "Show the activity line",
+  show_context: "Show the context bar",
+  rotation_seconds: "Rotate every (seconds)",
+  card_opacity: "Card opacity",
+  opacity: "Card opacity",
+  background: "Card colour",
+  color: "Colour",
+  claude_limits: "Claude limits",
+};
+
+function humanize(name) {
+  const words = String(name).replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+const labelFor = (name) => LABELS[name] || humanize(name);
+
+// Ranges the loader already enforces, mirrored onto the inputs so the spinner
+// steps sensibly and the browser flags a bad value before Save does.
+const RANGES = {
+  opacity: {min: 0, max: 1, step: 0.05},
+  card_opacity: {min: 0, max: 1, step: 0.05},
+  rotation_seconds: {min: 1, max: 300, step: 1},
+};
+
 function setStatus(text, cls) {
   const el = $("status");
   el.textContent = text;
@@ -200,6 +308,19 @@ function markDirty() {
   dirty = true;
   setStatus("Unsaved changes", "busy");
 }
+
+// ---------------------------------------------------------------------- tabs
+function showTab(name) {
+  const live = name === "live";
+  $("tabLive").hidden = !live;
+  $("tabWidget").hidden = live;
+  $("tabBtnLive").setAttribute("aria-selected", String(live));
+  $("tabBtnWidget").setAttribute("aria-selected", String(!live));
+  // Unhide first: refreshPreview() declines to fetch while the tab is hidden.
+  if (live) refreshPreview();
+}
+
+const liveTabShowing = () => !$("tabLive").hidden;
 
 async function discordAction(action, payload) {
   setStatus("Updating Discord…", "busy");
@@ -322,7 +443,7 @@ async function refreshWindowsNotifications() {
 
 // --------------------------------------------------------------- human todos
 async function todoRequest(path, method, payload) {
-  setStatus("Updating todosâ€¦", "busy");
+  setStatus("Updating todos…", "busy");
   const response = await fetch("api/todos" + path, {
     method, headers:{"Content-Type":"application/json"},
     body: JSON.stringify(payload || {})
@@ -367,7 +488,7 @@ function drawTodos() {
     complete.addEventListener("click",()=>todoRequest("/"+item.id+"/"+(item.status === "open" ? "complete" : "reopen"),"POST",{}).catch((e)=>setStatus(String(e),"err")));
     actions.appendChild(complete);
     if(item.status === "open") {
-      [["â†‘",-1],["â†“",1]].forEach(([label,delta])=>{ const b=document.createElement("button"); b.textContent=label; b.title=delta<0?"Move up":"Move down";
+      [["↑",-1],["↓",1]].forEach(([label,delta])=>{ const b=document.createElement("button"); b.textContent=label; b.title=delta<0?"Move up":"Move down";
         b.addEventListener("click",()=>{ const index=open.findIndex((x)=>x.id===item.id), target=index+delta; if(target<0||target>=open.length)return; [open[index],open[target]]=[open[target],open[index]]; todoRequest("/reorder","POST",{ordered_ids:open.map((x)=>x.id)}).catch((e)=>setStatus(String(e),"err")); }); actions.appendChild(b); });
     }
     const remove=document.createElement("button"); remove.className="danger"; remove.textContent="Delete";
@@ -432,6 +553,9 @@ function drawStage() {
       Array.from(stage.children).forEach((node, i) =>
         node.classList.toggle("sel", i === index));
       drawTileForm();
+      // Picking a tile is the way into its settings, so go there. The stage sits
+      // above the tabstrip and is unaffected by the swap.
+      showTab("widget");
       const start = { px: ev.clientX, py: ev.clientY, ...tile };
       const target = el;
       target.setPointerCapture(ev.pointerId);
@@ -482,7 +606,7 @@ function showWarnings() {
 }
 
 // -------------------------------------------------------------------- forms
-function field(parent, label, value, type, onChange, hint) {
+function field(parent, label, value, type, onChange, hint, attrs) {
   const wrap = document.createElement("div");
   if (type === "bool") {
     wrap.className = "check";
@@ -504,7 +628,45 @@ function field(parent, label, value, type, onChange, hint) {
       onChange(type === "number" ? parseFloat(input.value) : input.value);
       markDirty();
     });
-    wrap.append(tag, input);
+    if (attrs) Object.keys(attrs).forEach((key) => { input[key] = attrs[key]; });
+    if (type === "color") {
+      // The swatch is a convenience over the text box, which stays the value of
+      // record: "transparent" and "" (meaning "fall back to the widget default")
+      // are both legal here and neither can be spelled by <input type=color>.
+      const pair = document.createElement("div");
+      pair.className = "swatch";
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      const dot = document.createElement("input");
+      dot.type = "color";
+      chip.appendChild(dot);
+      const sync = () => {
+        const hex = /^#[0-9a-f]{6}$/i.test(input.value) ? input.value : null;
+        dot.value = hex || "#101c28";
+        // A named or blank value has no swatch to show, so the chequerboard is
+        // left visible; picking one is still allowed so blank can become a
+        // colour. A real colour has to cover the chequerboard, which is painted
+        // as a background-image and would otherwise sit on top of it.
+        chip.style.backgroundColor = hex || "";
+        chip.style.backgroundImage = hex ? "none" : "";
+        chip.title = hex ? hex : (input.value || "no colour set");
+        const named = !hex && input.value !== "";
+        dot.disabled = named;
+        chip.classList.toggle("off", named);
+      };
+      dot.addEventListener("input", () => {
+        input.value = dot.value;
+        onChange(dot.value);
+        sync();
+        markDirty();
+      });
+      input.addEventListener("input", sync);
+      sync();
+      pair.append(chip, input);
+      wrap.append(tag, pair);
+    } else {
+      wrap.append(tag, input);
+    }
   }
   if (hint) {
     const note = document.createElement("div");
@@ -516,13 +678,13 @@ function field(parent, label, value, type, onChange, hint) {
   return wrap;
 }
 
-function choice(parent, label, value, options, onChange) {
+function choice(parent, label, value, options, onChange, textOf) {
   const tag = document.createElement("label");
   tag.textContent = label;
   const select = document.createElement("select");
   options.forEach((opt) => {
     const o = document.createElement("option");
-    o.value = opt; o.textContent = opt;
+    o.value = opt; o.textContent = textOf ? textOf(opt) : opt;
     if (opt === value) o.selected = true;
     select.appendChild(o);
   });
@@ -534,10 +696,23 @@ function choice(parent, label, value, options, onChange) {
 function syncTileNumbers() {
   const tile = cfg.tiles[sel];
   if (!tile) return;
+  // Scoped to the form: a second copy of these inputs anywhere on the page would
+  // otherwise silently swallow the drag sync.
+  const host = $("tileForm");
   ["x", "y", "w", "h"].forEach((k) => {
-    const el = document.querySelector('[data-rect="' + k + '"]');
+    const el = host.querySelector('[data-rect="' + k + '"]');
     if (el) el.value = tile[k];
   });
+}
+
+// Source-backed blocks belong to the widget that consumes them, so the registry
+// flags decide what is on screen rather than a hardcoded list of widget names.
+function showContextSections(info) {
+  const toggle = (id, wanted) => { $(id).hidden = !wanted; };
+  toggle("secDash", !!(info && info.wants_session));
+  toggle("secDiscord", !!(info && info.wants_messages));
+  toggle("secWindows", !!(info && info.wants_notifications));
+  toggle("secTodos", !!(info && info.wants_todos));
 }
 
 function drawTileForm() {
@@ -545,14 +720,26 @@ function drawTileForm() {
   host.innerHTML = "";
   const tile = cfg.tiles[sel];
   if (!tile) {
-    host.innerHTML = '<p class="empty">Click a tile to edit it.</p>';
+    host.innerHTML = cfg.tiles.length
+      ? '<p class="empty">Click a tile above to edit it.</p>'
+      : '<p class="empty">No widgets yet. Pick one above and press Add tile.</p>';
+    showContextSections(null);
+    drawReadonly();
     return;
   }
+  const heading = document.createElement("p");
+  heading.className = "editing";
+  heading.textContent = labelFor(tile.widget);
+  const which = document.createElement("span");
+  which.textContent = "tile " + (sel + 1) + " of " + cfg.tiles.length;
+  heading.appendChild(which);
+  host.appendChild(heading);
+
   choice(host, "Widget", tile.widget, widgets.map((w) => w.name), (v) => {
     tile.widget = v;
     drawStage();
     drawTileForm();
-  });
+  }, labelFor);
   const info = spec(tile.widget);
   if (info && info.help) {
     const note = document.createElement("div");
@@ -570,23 +757,23 @@ function drawTileForm() {
     const el = field(cell, label, tile[key], "number", (v) => {
       tile[key] = Math.round(v) || 0;
       drawStage();
-    });
+    }, "", {step: 1});
     el.querySelector("input").dataset.rect = key;
   });
 
   if (info && info.options.length) {
-    const heading = document.createElement("h2");
-    heading.textContent = "Options";
-    heading.style.marginTop = "18px";
-    host.appendChild(heading);
+    const title = document.createElement("h2");
+    title.textContent = "Options";
+    title.style.marginTop = "18px";
+    host.appendChild(title);
     info.options.forEach((opt) => {
       const present = Object.prototype.hasOwnProperty.call(tile.options, opt.name);
       const value = present ? tile.options[opt.name] : opt.default;
-      field(host, opt.name, value, opt.type, (v) => {
+      field(host, labelFor(opt.name), value, opt.type, (v) => {
         if (v === "" || v === null || (typeof v === "number" && isNaN(v)))
           delete tile.options[opt.name];
         else tile.options[opt.name] = v;
-      }, opt.help);
+      }, opt.help, RANGES[opt.name]);
     });
   }
 
@@ -596,15 +783,20 @@ function drawTileForm() {
   remove.style.marginTop = "16px";
   remove.addEventListener("click", () => {
     cfg.tiles.splice(sel, 1);
-    sel = -1;
+    sel = Math.min(sel, cfg.tiles.length - 1);
     markDirty();
     drawStage();
     drawTileForm();
   });
   host.appendChild(remove);
+
+  showContextSections(info);
+  // The agent-slot count is derived from the tiles, so it goes stale the moment
+  // one is added, retyped or deleted.
+  drawReadonly();
 }
 
-function drawSideForms() {
+function drawDisplayForm() {
   const d = $("displayForm");
   d.innerHTML = "";
   choice(d, "Kind", cfg.display.kind,
@@ -618,18 +810,22 @@ function drawSideForms() {
   size.append(wCell, hCell);
   field(wCell, "Width", cfg.display.width, "number", (v) => {
     cfg.display.width = Math.round(v) || 1; drawStage();
-  });
+  }, "", {min: 1, max: 4096, step: 1});
   field(hCell, "Height", cfg.display.height, "number", (v) => {
     cfg.display.height = Math.round(v) || 1; drawStage();
-  });
+  }, "", {min: 1, max: 4096, step: 1});
   choice(d, "Orientation", cfg.display.orientation,
     ["landscape", "portrait", "landscape_flipped", "portrait_flipped"],
-    (v) => rotateLayout(v));
+    (v) => rotateLayout(v), labelFor);
   field(d, "Brightness", cfg.display.brightness, "number",
-    (v) => { cfg.display.brightness = Math.round(v) || 0; }, "0 to 50");
+    (v) => { cfg.display.brightness = Math.round(v) || 0; }, "0 to 50",
+    {min: 0, max: 50, step: 1});
   field(d, "Refresh (Hz)", cfg.display.refresh_hz, "number",
-    (v) => { cfg.display.refresh_hz = v; }, "0.25 to 10");
+    (v) => { cfg.display.refresh_hz = v; }, "0.25 to 10",
+    {min: 0.25, max: 10, step: 0.25});
+}
 
+function drawBackgroundForm() {
   const b = $("bgForm");
   b.innerHTML = "";
   const on = document.createElement("div");
@@ -644,10 +840,10 @@ function drawSideForms() {
   box.addEventListener("change", () => {
     cfg.background = box.checked ? { color: "#081018", image: "", fit: "cover", card_opacity: 0.82 } : null;
     markDirty();
-    drawSideForms();
+    drawBackgroundForm();
   });
   if (cfg.background) {
-    field(b, "Colour", cfg.background.color, "text",
+    field(b, "Colour", cfg.background.color, "color",
       (v) => { cfg.background.color = v; });
     field(b, "Image", cfg.background.image || "", "text",
       (v) => { cfg.background.image = v; }, "External path, or upload a managed copy below");
@@ -656,7 +852,7 @@ function drawSideForms() {
     upload.addEventListener("change", async () => {
       const file = upload.files && upload.files[0];
       if (!file) return;
-      setStatus("Uploading backgroundâ€¦", "busy");
+      setStatus("Uploading background…", "busy");
       try {
         const response = await fetch("api/background-image", {
           method: "POST", headers: {"Content-Type": "application/octet-stream"}, body: file
@@ -664,7 +860,7 @@ function drawSideForms() {
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "upload failed");
         cfg.background.image = body.image;
-        markDirty(); drawSideForms();
+        markDirty(); drawBackgroundForm();
         setStatus("Background uploaded; Save to apply", "busy");
       } catch (error) { setStatus(String(error), "err"); }
     });
@@ -675,16 +871,19 @@ function drawSideForms() {
       const clear = document.createElement("button"); clear.textContent = "Clear picture";
       clear.style.marginTop = "8px";
       clear.addEventListener("click", () => {
-        cfg.background.image = ""; markDirty(); drawSideForms();
+        cfg.background.image = ""; markDirty(); drawBackgroundForm();
       });
       b.append(current, clear);
     }
     choice(b, "Fit", cfg.background.fit, ["cover", "contain", "stretch", "center"],
-      (v) => { cfg.background.fit = v; });
+      (v) => { cfg.background.fit = v; }, labelFor);
     field(b, "Card opacity", cfg.background.card_opacity ?? 0.82, "number",
-      (v) => { cfg.background.card_opacity = v; }, "0 to 1; tile-specific opacity wins");
+      (v) => { cfg.background.card_opacity = v; }, "0 to 1; tile-specific opacity wins",
+      RANGES.card_opacity);
   }
+}
 
+function drawScreensaverForm() {
   const saver = $("screensaverForm");
   saver.innerHTML = "";
   cfg.screensaver ||= {enabled: true, idle_seconds: 600};
@@ -692,23 +891,28 @@ function drawSideForms() {
     (v) => { cfg.screensaver.enabled = v; });
   field(saver, "Idle delay (minutes)", cfg.screensaver.idle_seconds / 60, "number",
     (v) => { cfg.screensaver.idle_seconds = Math.round(v * 60); },
-    "Shows a moving clock on black; new dashboard activity wakes it");
+    "Shows a moving clock on black; new dashboard activity wakes it",
+    {min: 1, max: 1440, step: 1});
+}
 
+function drawDashForm() {
   const k = $("dashForm");
   k.innerHTML = "";
   field(k, "Idle title", cfg.dashboard.idle_title, "text",
     (v) => { cfg.dashboard.idle_title = v; });
   field(k, "Switch dwell (s)", cfg.dashboard.switch_dwell_seconds, "number",
     (v) => { cfg.dashboard.switch_dwell_seconds = v; },
-    "How long a tile holds a session before it can be taken");
+    "How long a tile holds a session before it can be taken", {min: 0, step: 1});
   field(k, "Active TTL (s)", cfg.dashboard.active_ttl_seconds, "number",
-    (v) => { cfg.dashboard.active_ttl_seconds = Math.round(v) || 0; });
+    (v) => { cfg.dashboard.active_ttl_seconds = Math.round(v) || 0; }, "", {min: 0, step: 1});
   field(k, "Approval TTL (s)", cfg.dashboard.approval_ttl_seconds, "number",
-    (v) => { cfg.dashboard.approval_ttl_seconds = Math.round(v) || 0; });
+    (v) => { cfg.dashboard.approval_ttl_seconds = Math.round(v) || 0; }, "", {min: 0, step: 1});
   field(k, "Tool TTL (s)", cfg.dashboard.tool_ttl_seconds, "number",
     (v) => { cfg.dashboard.tool_ttl_seconds = Math.round(v) || 0; },
-    "Work in flight emits nothing, so it outlives the idle timeout");
+    "Work in flight emits nothing, so it outlives the idle timeout", {min: 0, step: 1});
+}
 
+function drawReadonly() {
   const slots = cfg.tiles.filter((t) => (spec(t.widget) || {}).wants_session).length;
   const ro = cfg.readonly;
   $("roInfo").innerHTML =
@@ -717,6 +921,14 @@ function drawSideForms() {
     ro.ipc_port + "</code><br>Editor port: <code>" + ro.admin_port + "</code></p>" +
     "<p>Changing the IPC transport would orphan the installed hooks, and changing " +
     "the editor port would cut off this page — edit config.toml for those.</p>";
+}
+
+function drawPanels() {
+  drawDisplayForm();
+  drawBackgroundForm();
+  drawScreensaverForm();
+  drawDashForm();
+  drawReadonly();
 }
 
 function changeDisplayKind(kind) {
@@ -745,11 +957,11 @@ function changeDisplayKind(kind) {
     }
     drawStage();
     drawTileForm();
-    drawSideForms();
+    drawPanels();
     return;
   }
   if (kind !== "turing_rev_a" && kind !== "auto") {
-    drawSideForms();
+    drawPanels();
     return;
   }
 
@@ -767,13 +979,13 @@ function changeDisplayKind(kind) {
   sel = 0;
   drawStage();
   drawTileForm();
-  drawSideForms();
+  drawPanels();
 }
 
 async function rotateLayout(target) {
   const source = cfg.display.orientation;
   if (target === source) return;
-  setStatus("Rotating layoutâ€¦", "busy");
+  setStatus("Rotating layout…", "busy");
   try {
     const response = await fetch("api/layout/rotate", {
       method: "POST", headers: {"Content-Type": "application/json"},
@@ -785,9 +997,9 @@ async function rotateLayout(target) {
     cfg.display.orientation = target;
     cfg.display.width = body.width; cfg.display.height = body.height;
     cfg.tiles = body.tiles;
-    markDirty(); drawStage(); drawTileForm(); drawSideForms();
+    markDirty(); drawStage(); drawTileForm(); drawPanels();
   } catch (error) {
-    setStatus(String(error), "err"); drawSideForms();
+    setStatus(String(error), "err"); drawPanels();
   }
 }
 
@@ -800,18 +1012,19 @@ async function load() {
   ]);
   cfg = c;
   widgets = w.widgets;
-  sel = -1;
+  // The widget tab always has something to show when there is anything to show.
+  sel = cfg.tiles.length ? 0 : -1;
   dirty = false;
   const picker = $("newWidget");
   picker.innerHTML = "";
   widgets.forEach((x) => {
     const o = document.createElement("option");
-    o.value = x.name; o.textContent = x.name;
+    o.value = x.name; o.textContent = labelFor(x.name);
     picker.appendChild(o);
   });
   drawStage();
   drawTileForm();
-  drawSideForms();
+  drawPanels();
   await refreshDiscord();
   await refreshWindowsNotifications();
   drawTodoCreate();
@@ -845,14 +1058,18 @@ async function save() {
   }
   cfg = body.config;
   dirty = false;
+  if (sel >= cfg.tiles.length) sel = cfg.tiles.length - 1;
   drawStage();
   drawTileForm();
-  drawSideForms();
+  drawPanels();
   setStatus("Saved", "ok");
   refreshPreview();
 }
 
 function refreshPreview() {
+  // Polling a PNG the user cannot see is pure waste, and the panel is on the
+  // other tab most of the time. showTab() re-arms this when it comes back.
+  if (document.hidden || !liveTabShowing()) return;
   const img = $("preview");
   img.onerror = () => {
     $("previewNote").textContent =
@@ -865,6 +1082,8 @@ $("save").addEventListener("click", save);
 $("reload").addEventListener("click", () => {
   if (!dirty || confirm("Discard unsaved changes?")) load();
 });
+$("tabBtnLive").addEventListener("click", () => showTab("live"));
+$("tabBtnWidget").addEventListener("click", () => showTab("widget"));
 $("add").addEventListener("click", () => {
   const name = $("newWidget").value;
   const size = Math.min(cfg.display.height - 24, 300);
@@ -873,6 +1092,7 @@ $("add").addEventListener("click", () => {
   markDirty();
   drawStage();
   drawTileForm();
+  showTab("widget");
 });
 $("snap").addEventListener("change", () => {});
 $("todoHistory").addEventListener("click", () => {
@@ -880,6 +1100,7 @@ $("todoHistory").addEventListener("click", () => {
   $("todoHistory").textContent=showTodoHistory ? "Hide completed" : "Show completed";
   drawTodos();
 });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshPreview(); });
 window.addEventListener("beforeunload", (e) => {
   if (dirty) { e.preventDefault(); e.returnValue = ""; }
 });

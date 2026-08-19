@@ -11,11 +11,11 @@ has.
 
 | Symbol | Line | Purpose |
 | --- | --- | --- |
-| `AdminState` | `admin.py:194` | The daemon's side: config path, `get_config`, `get_preview`. |
-| `AdminState.save(payload)` | `admin.py:207` | Validate and write. Raises `ValueError`. |
-| `make_handler(state)` | `admin.py:217` | Builds the request handler. |
-| `start(state, port)` | `admin.py:314` | A `ThreadingHTTPServer`, returned to the daemon. |
-| `config_to_json(cfg)` / `config_from_json(data)` | `:57` / `:106` | The wire shape. |
+| `AdminState` | `admin.py:243` | The daemon's side: config path, `get_config`, `get_preview`. |
+| `AdminState.save(payload)` | `admin.py:278` | Validate and write. Raises `ValueError`. |
+| `make_handler(state)` | `admin.py:360` | Builds the request handler. |
+| `start(state, port)` | `admin.py:676` | A `ThreadingHTTPServer`, returned to the daemon. |
+| `config_to_json(cfg)` / `config_from_json(data)` | `:63` / `:124` | The wire shape. |
 | `PAGE` | `admin_page.py` | The whole UI as one self-contained string. |
 
 ## Routes
@@ -44,6 +44,48 @@ exact frame on the panel right now, with no hardware needed.
 curl -s -o frame.png http://127.0.0.1:45723/api/preview.png
 ```
 
+## The shape of the page
+
+Three stacked regions, in this order:
+
+1. **The stage** — the drag-a-rectangle canvas, always visible, because
+   everything else on the page is relative to a tile on it. `drawStage`
+   (`admin_page.py:525`) sizes it from explicit `cfg` pixels rather than from a
+   measured container, so it does not care what is hidden below it.
+2. **Settings** — a collapsed `<details>` holding Background, Screen saver and
+   Display: the settings that belong to the whole screen rather than to a tile.
+   `<details>` does the collapsing; there is no JS state behind it.
+3. **A tabstrip** — *Live panel* (the frame currently on the panel) and *Widget
+   settings* (everything about the selected tile).
+
+Selecting a tile, or adding one, switches to the widget tab: picking a tile is
+the way into its settings. The live preview stops polling `/api/preview.png`
+while its tab is hidden or the browser tab is in the background, and re-arms on
+the way back (`refreshPreview`, `admin_page.py:1069`).
+
+### Source-backed blocks follow their widget
+
+Discord, Windows notifications and human todos each configure a *source* that
+exactly one widget consumes, so they live in the widget tab and are shown only
+while a widget that consumes them is selected. `showContextSections`
+(`admin_page.py:710`) reads the `wants_*` flags straight off `/api/widgets`:
+
+| Registry flag | Block shown |
+| --- | --- |
+| `wants_session` | Dashboard — idle title, switch dwell, the three TTLs |
+| `wants_messages` | Discord messages |
+| `wants_notifications` | Windows notifications |
+| `wants_todos` | Human todos |
+
+There is no list of widget names anywhere in that mapping, so a new
+source-backed widget wires itself up by declaring the flag.
+
+Every one of those blocks stays in the DOM at all times and is toggled with
+`hidden`, never created or destroyed. Listeners are bound at parse time, the
+5-second `refreshDiscord`/`refreshTodos` polls write into their mounts
+regardless of what is on screen, and `drawTodoCreate` clears `#todoCreate`
+without a null guard — removing a mount would break all three.
+
 ## Security model
 
 Two independent defences, both deliberate:
@@ -51,19 +93,19 @@ Two independent defences, both deliberate:
 1. **Bound to loopback only.** `ADMIN_HOST` is a hardcoded constant in
    [config.py](../runtime/config.md) and is not configurable. The editor
    rewrites `config.toml` and has no authentication.
-2. **The `Host` header must be loopback** (`_host_is_loopback`, `admin.py:41-54`;
-   enforced by `_guard`, `:238-242`). This is the DNS-rebinding defence: a
+2. **The `Host` header must be loopback** (`_host_is_loopback`, `admin.py:47-60`;
+   enforced by `_guard`, `:381-385`). This is the DNS-rebinding defence: a
    malicious page cannot make a browser POST a new config by resolving a
    hostname to 127.0.0.1, because the `Host` header would carry that hostname.
 
-An oversized POST body is drained before the `413` is sent (`:279-286`) —
+An oversized POST body is drained before the `413` is sent (`:594-607`) —
 otherwise the reply races the request and the client sees a connection reset
 instead of the status. Beyond a drain cap, the connection is closed rather than
 reading an unbounded body.
 
 ## Saving
 
-`AdminState.save` (`admin.py:207-214`) round-trips the candidate through
+`AdminState.save` (`admin.py:278-288`) round-trips the candidate through
 `parse_config_text(dump_config_toml(candidate))` — **the same loader the daemon
 uses**. The editor therefore cannot accept a config the daemon would then refuse
 to start on, and there is no second copy of the validation rules. A rejection
@@ -103,6 +145,23 @@ declares. Register a widget and it appears in the editor with working inputs and
 its own help text, with no change here — see
 [../rendering/widgets.md](../rendering/widgets.md#adding-a-widget).
 
+`field()` (`admin_page.py:609`) maps each declared type to a control: `bool` to
+a checkbox, `number` to a spinner, `text` to a text box, and `color` to a
+colour chip beside a text box. **The text box stays the value of record for a
+colour**, because `"transparent"` and `""` (meaning "fall back to the widget
+default") are both legal and neither can be spelled by `<input type=color>`; the
+chip greys out for a named colour and shows a chequerboard for none.
+
+Two presentation-only lookups sit above the registry rather than in it, so that
+`Option` keeps its three fields and the tests that pin the `/api/widgets` shape
+keep passing:
+
+- `LABELS` (`:272`) turns `show_project` into "Show the project" and overrides
+  the handful that do not humanise well (`hour12` → "12-hour clock").
+- `RANGES` (`:295`) puts `min`/`max`/`step` on the inputs, mirroring limits the
+  loader already enforces. The loader stays the enforcer; these only make the
+  spinner behave and let the browser flag a bad value before Save does.
+
 ### Switching back to the legacy LCD
 
 Choosing `turing_rev_a` or `auto` in the display-kind picker restores the
@@ -114,7 +173,10 @@ display kinds retain their editable dimensions and tiles.
 ## Tests
 
 `tests/test_admin.py` — every route and status code, the loopback guard, the
-save round-trip rejecting each loader rule, and the preview lifecycle.
+save round-trip rejecting each loader rule, and the preview lifecycle. It also
+pins the page's structure: that the stage sits outside the tabs, that every
+source-backed section exists in the DOM but starts hidden, and that the preview
+poll is gated.
 
 ## See also
 

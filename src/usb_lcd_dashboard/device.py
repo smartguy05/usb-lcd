@@ -182,18 +182,46 @@ class TuringUsbPanel:
             raise ConnectionError("display is not connected")
         if pos != (0, 0) or image.size != self.size:
             raise ValueError("TURZX USB panels require full-frame writes")
+        import usb.core
+
         from .turing_usb import send_image
 
         image, _ = native_write(image, pos, self.size, self.config.orientation)
         # The USB protocol always consumes the panel's native portrait buffer.
         image = image.transpose(Image.Transpose.ROTATE_270)
-        send_image(self.usb, image)
+        try:
+            send_image(self.usb, image)
+        except usb.core.USBError as exc:
+            # A panel that went away mid-frame is a disconnection, not a bug:
+            # Display only reconnects on ConnectionError, and a USBError
+            # escaping here would kill the frame loop instead.
+            raise ConnectionError(f"TURZX USB write failed: {exc}") from exc
 
     def supports_partial(self) -> bool:
         return False
 
     def health_check(self) -> None:
-        return None
+        """Is the panel we opened still on the bus?
+
+        A KVM handing the desk to another machine unplugs this panel as far as
+        the kernel is concerned, and it comes back at a new bus address. Unlike
+        SerialPanel there is no stale-offset hazard to guard — supports_partial
+        is False, so every write is a full frame — but this is still the only
+        detector when the frame is unchanged and write() is never reached, and
+        the daemon's connected state drives the tray icon.
+
+        An 18-byte GET_DESCRIPTOR is the cheapest thing that actually reaches
+        the device; get_active_configuration is cached by pyusb after open() and
+        would keep answering happily for a panel that is long gone.
+        """
+        if self.usb is None:
+            return
+        import usb.core
+
+        try:
+            self.usb.ctrl_transfer(0x80, 0x06, 0x0100, 0, 18, timeout=250)
+        except usb.core.USBError as exc:
+            raise ConnectionError(f"TURZX USB panel is gone: {exc}") from exc
 
 
 class WindowPanel:
@@ -214,10 +242,35 @@ class WindowPanel:
         )
 
 
+def _autodetect(config: Config) -> PanelDevice:
+    """Pick a transport from the size the config asks for.
+
+    Deliberately decided on the configured size rather than by probing the bus:
+    the panel may be absent at startup — a KVM on the other machine, or simply
+    not plugged in yet — and probing would then pick the wrong transport and
+    stay wrong for the life of the process. The size is unambiguous, because the
+    3.5" serial panel is the only 480x320 device here and every other supported
+    size belongs to a TURZX USB panel.
+    """
+    if native_size(config.size, config.orientation) == LEGACY_SIZE:
+        return SerialPanel(config)
+    from .turing_usb import PRODUCT_SIZES
+
+    if native_size(config.size, config.orientation) in set(PRODUCT_SIZES.values()):
+        return TuringUsbPanel(config)
+    raise ValueError(
+        f'display.kind="auto" cannot place a {config.width}x{config.height} panel '
+        f"in {config.orientation}: no supported panel is that size. Set "
+        f"display.kind explicitly, or correct display.width/height."
+    )
+
+
 def make_device(config: Config, simulate: bool = False) -> PanelDevice:
     if simulate or config.display_kind == "simulated":
         return SimulatedPanel(config)
-    if config.display_kind in ("turing_rev_a", "auto"):
+    if config.display_kind == "auto":
+        return _autodetect(config)
+    if config.display_kind == "turing_rev_a":
         return SerialPanel(config)
     if config.display_kind == "turing_usb":
         return TuringUsbPanel(config)

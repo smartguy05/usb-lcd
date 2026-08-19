@@ -21,6 +21,7 @@ from __future__ import annotations
 import ctypes
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -54,6 +55,9 @@ GLOW_LIVE = "#7defc0"
 GLOW_DARK = "#3d4a56"
 
 ICON_SIZES = (16, 20, 24, 32, 48, 64)
+
+# The icon-theme basename the Linux tray resolves against its own state dir.
+ICON_THEME_NAME = "usb-lcd-dashboard-tray"
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,8 +154,133 @@ def icon_path(connected: bool, directory: Path) -> Path:
     return target
 
 
+def icon_png_path(connected: bool, directory: Path) -> Path:
+    """Write the PNG for one state, and return where it landed.
+
+    The Linux counterpart of icon_path. StatusNotifierItem hosts take an icon
+    *name* resolved against a theme directory rather than a file handle, so the
+    name has to be stable and the file has to sit in a directory of its own —
+    hence one PNG per state rather than the multi-size .ico Win32 wants.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    target = directory / f"{ICON_THEME_NAME}-{'live' if connected else 'idle'}.png"
+    icon_image(connected, max(ICON_SIZES)).save(target, format="PNG")
+    return target
+
+
 def open_settings(config: Config) -> None:
-    webbrowser.open(f"http://{ADMIN_HOST}:{config.admin_port}/")
+    """Open the settings editor in a browser.
+
+    `webbrowser.open` returning False is a silent failure — it means no handler
+    could be started, and the menu item then does nothing with nothing logged,
+    which is indistinguishable from a broken menu. Raise instead, so the caller
+    logs it: this is the one menu item people actually use.
+
+    On Linux it goes through the desktop portal, because the daemon's own
+    sandbox stops it launching a browser directly. See _open_in_desktop.
+    """
+    url = f"http://{ADMIN_HOST}:{config.admin_port}/"
+    if os.name != "nt":
+        _open_in_desktop(url)
+        return
+    if not webbrowser.open(url):
+        raise RuntimeError(f"no browser could be started for {url}")
+
+
+def _open_via_portal(uri: str) -> None:
+    """Ask the desktop portal to open a URI. Raises if it cannot.
+
+    org.freedesktop.portal.OpenURI exists precisely for a process that cannot
+    launch a desktop application itself, which is this daemon: it is a systemd
+    user unit with ProtectHome=read-only and PrivateTmp=true, and everything it
+    forks inherits that. The portal runs in the session instead, so nothing of
+    ours constrains the browser it starts.
+
+    This is measured, not assumed. Inside a replica of the unit's sandbox, with
+    the same session bus:
+
+        plain xdg-open           exit 0, nothing opens
+        systemd-run -- xdg-open  exit 0, nothing opens
+        portal OpenURI           opens the tab
+
+    Both losers *report success*, which is what made this expensive to find.
+    """
+    from gi.repository import Gio, GLib
+
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    bus.call_sync(
+        "org.freedesktop.portal.Desktop",
+        "/org/freedesktop/portal/desktop",
+        "org.freedesktop.portal.OpenURI",
+        "OpenURI",
+        # Empty parent window handle: we have no window to be transient for.
+        GLib.Variant("(ssa{sv})", ("", uri, {})),
+        None,
+        Gio.DBusCallFlags.NONE,
+        5000,
+        None,
+    )
+
+
+def _open_directory_via_portal(folder: Path) -> None:
+    """Ask the portal to show a local directory. Raises if it cannot.
+
+    A separate call from _open_via_portal because OpenURI does not reliably
+    handle `file://`: the portal cannot tell from a URI alone whether the asking
+    process may see that path, so it wants a file descriptor it can check
+    instead. Passing the folder as a URI is accepted and then quietly does
+    nothing — the same silent-success failure as xdg-open.
+    """
+    import os as _os
+
+    from gi.repository import Gio, GLib
+
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    handle = _os.open(str(folder), _os.O_RDONLY)
+    try:
+        fd_list = Gio.UnixFDList.new()
+        index = fd_list.append(handle)
+        bus.call_with_unix_fd_list_sync(
+            "org.freedesktop.portal.Desktop",
+            "/org/freedesktop/portal/desktop",
+            "org.freedesktop.portal.OpenURI",
+            "OpenDirectory",
+            GLib.Variant("(sha{sv})", ("", index, {})),
+            None,
+            Gio.DBusCallFlags.NONE,
+            5000,
+            fd_list,
+            None,
+        )
+    finally:
+        _os.close(handle)
+
+
+def _open_in_desktop(uri: str) -> None:
+    """Open a URI in the user's session, however this machine can manage it.
+
+    Portal first because it is the only route proven to work from inside the
+    unit's sandbox; xdg-open and webbrowser after it, for a daemon run from a
+    shell, a desktop with no portal, or a unit someone has loosened.
+    """
+    LOG.info("Opening %s", uri)
+    try:
+        _open_via_portal(uri)
+        return
+    except Exception as exc:  # noqa: BLE001 - any portal failure is a fallback
+        LOG.warning("Desktop portal could not open %s: %s", uri, exc)
+
+    opener = shutil.which("xdg-open")
+    if opener:
+        result = subprocess.run([opener, uri], capture_output=True, text=True)
+        if result.returncode == 0:
+            return
+        LOG.warning(
+            "xdg-open could not open %s (exit %s): %s",
+            uri, result.returncode, result.stderr.strip(),
+        )
+    if not webbrowser.open(uri):
+        raise RuntimeError(f"nothing could open {uri}")
 
 
 def open_logs() -> None:
@@ -161,7 +290,15 @@ def open_logs() -> None:
     if os.name == "nt":
         os.startfile(folder)  # noqa: S606 - a directory, opened in Explorer
     else:
-        subprocess.Popen(["xdg-open", str(folder)])
+        # Same sandbox problem as the settings editor, but a directory needs
+        # OpenDirectory and a file descriptor rather than a file:// URI.
+        LOG.info("Opening %s", folder)
+        try:
+            _open_directory_via_portal(folder)
+            return
+        except Exception as exc:  # noqa: BLE001 - fall back like the URI path
+            LOG.warning("Desktop portal could not open %s: %s", folder, exc)
+        _open_in_desktop(folder.as_uri())
 
 
 # --------------------------------------------------------------------- Win32
@@ -522,13 +659,30 @@ class TrayIcon:
 def start(config: Config, on_quit: Callable[[], None], state_dir: Path | None = None):
     """Start the tray icon, or return None where there is no tray to start.
 
-    Returns None on anything but Windows: the Linux install is a systemd user
-    unit, where `systemctl --user stop` is the stop button and no desktop
-    environment is assumed to be present at all.
+    Returns None where there is no tray to put an icon in — a headless box, or
+    a desktop with no StatusNotifierItem host. The Linux install is a systemd
+    user unit, so `systemctl --user stop` remains the stop button of last
+    resort; the icon is an addition to that, not a replacement for it.
     """
+    directory = state_dir or (config_home() / "usb-lcd-dashboard")
     if os.name != "nt":
-        LOG.debug("No tray icon on %s", sys.platform)
-        return None
-    icon = TrayIcon(config, on_quit, state_dir or (config_home() / "usb-lcd-dashboard"))
+        if not sys.platform.startswith("linux"):
+            LOG.debug("No tray icon on %s", sys.platform)
+            return None
+        from .tray_linux import LinuxTrayIcon, tray_host_available
+
+        available, reason = tray_host_available()
+        if not available:
+            # Not an error: a daemon with no icon is still a working daemon, and
+            # `systemctl --user stop` is still the stop button.
+            if reason:
+                LOG.warning("Tray icon unavailable: %s", reason)
+            else:
+                LOG.debug("No graphical session; skipping the tray icon")
+            return None
+        icon = LinuxTrayIcon(config, on_quit, directory)
+        icon.start()
+        return icon
+    icon = TrayIcon(config, on_quit, directory)
     icon.start()
     return icon

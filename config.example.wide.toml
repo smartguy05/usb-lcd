@@ -1,12 +1,16 @@
 # The 9.2" 1920x462 ultra-wide panel: clock, agent, Discord messages and crab.
 #
-# kind = "window" is the path for a panel the OS enumerates as a monitor, and it
-# is NOT IMPLEMENTED yet — the panel's transport cannot be settled from its
-# manual, which carries no protocol, driver or USB id. Use "simulated" until the
-# hardware is in hand: it renders the real frame to screencap.png, so the whole
-# layout can be built and previewed without it.
+# This panel is a TURZX unit (USB 1CBE:0092) and it speaks native USB, not the
+# 3.5" panel's serial protocol — so kind = "turing_usb". "auto" reaches it too,
+# by matching the size below against turing_usb.py:PRODUCT_SIZES.
+#
+# On Linux the raw USB node is root-only until the packaged udev rule tags it;
+# `usb-lcd-dashboard doctor` names the exact node when access is the problem.
+#
+# kind = "simulated" still renders the real frame to screencap.png, which is the
+# way to build and preview a layout with the panel unplugged.
 [display]
-kind = "simulated"
+kind = "turing_usb"
 device = "AUTO"
 width = 1920
 height = 462

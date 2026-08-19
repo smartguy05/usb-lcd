@@ -6,7 +6,14 @@ import io
 import struct
 import time
 
-from Crypto.Cipher import DES
+try:
+    from Crypto.Cipher import DES
+except ImportError:  # pragma: no cover - exercised by the Debian smoke test
+    # Debian and Ubuntu ship pycryptodome under the `Cryptodome` namespace
+    # (the package is pycryptodomex underneath), while the PyPI wheel this
+    # project pins installs as `Crypto`. The .deb depends on the archive
+    # package, so both spellings have to work from one source tree.
+    from Cryptodome.Cipher import DES
 from PIL import Image
 import usb.core
 import usb.util

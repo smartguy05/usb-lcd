@@ -42,7 +42,8 @@ the command to write into hooks and the systemd unit.
 
 ```
 Depends: python3 (>= 3.12), python3-pil (>= 10.1), python3-serial (>= 3.5),
- python3-numpy, fonts-dejavu-core
+ python3-usb (>= 1.2.1), python3-pycryptodome (>= 3.20), python3-gi,
+ gir1.2-ayatanaappindicator3-0.1, python3-numpy, fonts-dejavu-core
 Recommends: systemd, git, fonts-ubuntu
 ```
 
@@ -50,6 +51,17 @@ Recommends: systemd, git, fonts-ubuntu
   Ubuntu ships **no TrueType font at all**, and `render._font` would silently
   fall back to a bitmap face on a device whose whole purpose is legible text.
   The smoke test asserts a real TrueType path is resolved.
+- **`python3-usb` and `python3-pycryptodome` drive the TURZX panels.** Their
+  versions here are the ones Ubuntu ships, which sit *below* the floors in
+  `pyproject.toml` (`pyusb>=1.3`, `pycryptodome>=3.23`). That divergence is
+  deliberate: those floors arrived with a bulk dependency bump in `c9257d8`, not
+  for any API, and everything `turing_usb.py` calls — `usb.util.find_descriptor`,
+  endpoint `read`/`write`, `DES` in CBC mode — long predates both. Pinning the
+  archive versions is what lets the package install on a stock Ubuntu at all.
+- **`python3-gi` and `gir1.2-ayatanaappindicator3-0.1` are the tray icon**, which
+  is how the settings editor is reached on a desktop. Hard dependencies so a
+  default Linux install matches Windows; on a headless box they cost a few
+  megabytes and the daemon logs that it found no tray and carries on.
 - **`git` is only a recommendation** — without it the branch beside the project
   name is simply absent.
 - **smartscreen-driver is vendored, not depended on**: it is not in the archive.
@@ -76,17 +88,52 @@ The user's half is `usb-lcd-dashboard install` — see
 
 ## The udev rule
 
+One file, two panels, because the two transports need different grants.
+
 ```udev
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="5722", GROUP="plugdev", MODE="0660", TAG+="uaccess", SYMLINK+="turing-lcd"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", GROUP="plugdev", MODE="0660", TAG+="uaccess"
 ```
 
-It does two things: creates the stable `/dev/turing-lcd` symlink that the
-default Linux config points at, and grants the logged-in user access via
-`uaccess` and `plugdev`.
+The first line does two things for the 3.5" serial panel: creates the stable
+`/dev/turing-lcd` symlink that the default Linux config points at, and grants
+the logged-in user access via `uaccess` and `plugdev`.
 
 Without it there is only an unpredictable `/dev/ttyUSB*`, root-owned, that the
 config does not name — `doctor` reports `FAIL device`, or `FAIL read/write
 access` if the rule landed after the session started (log out and back in).
+
+The second line covers TURZX panels. They expose a single vendor-class (`ff`)
+interface with **no kernel driver bound**, so there is no tty to grant and no
+symlink to create: libusb opens `/dev/bus/usb/<bus>/<dev>` directly, and that
+node is `crw-rw-r-- root root` by default — readable, so enumeration works and
+the panel is *found*, but not writable, so every frame fails. `doctor` names the
+exact node in that case.
+
+It matches on the vendor alone, not on product ids. The supported set lives in
+`turing_usb.py:PRODUCT_SIZES` and grows as panels are added; a stale list here
+would fail as an unwritable device rather than a missing one, which is much
+harder to read.
+
+### `/etc` shadows the packaged rule
+
+The package installs to `/lib/udev/rules.d/`. udev skips a `/usr/lib` rules file
+entirely when `/etc/udev/rules.d/` holds one of the **same name** — not merged,
+skipped — so a hand-installed copy there masks every later update to the
+packaged rule, silently and forever.
+
+`README.md`'s run-from-source instructions install to `/etc/udev/rules.d/`,
+which makes this collision easy to reach: install from source first, then the
+`.deb`, and the package's rule never applies. It has already happened once — a
+copy predating TURZX support kept a 1920x462 panel's raw node root-only while
+`doctor` cheerfully reported the panel as found, because the node is *readable*
+by default and only writes fail.
+
+Diagnosing it takes one command, which names the skipped file outright:
+
+```bash
+udevadm test /sys/bus/usb/devices/<port> 2>&1 | grep -i skipping
+```
 
 ## Build notes worth knowing
 

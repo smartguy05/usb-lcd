@@ -126,15 +126,18 @@ DMs, forums and threads are excluded in this first version.
 5. Copy the generated install link, open it, select the server, and authorize
    the bot. Repeat this for every server containing channels you want on the
    LCD. You must have permission to add applications to each server.
-6. Open the dashboard editor at <http://127.0.0.1:45723>. Under **Discord
-   messages**, paste the bot token and choose **Save and verify**.
-7. The editor discovers the server text channels visible to the bot. Check the
+6. Open the dashboard editor at <http://127.0.0.1:45723>. Add a `messages` tile
+   from the layout picker if the layout does not already contain one, then click
+   that tile. Discord settings live with the widget that shows them, so they
+   appear on the **Widget settings** tab only while a `messages` tile is
+   selected.
+7. Under **Discord messages**, paste the bot token and choose **Save and
+   verify**.
+8. The editor discovers the server text channels visible to the bot. Check the
    channels to monitor, then choose the main **Save** button at the top of the
    page. Use **Refresh channels** after adding the bot to another server or
-   changing channel permissions.
-8. Add a `messages` tile from the layout picker if the layout does not already
-   contain one. The default title is `Discord`; the tile title can be changed in
-   its options.
+   changing channel permissions. The default tile title is `Discord`; that can be
+   changed in the tile's options.
 
 The count is local to the dashboard, not Discord's personal unread count. A
 newly selected channel starts at its current newest message, so installing the
@@ -159,9 +162,10 @@ accounts (self-bots), and this integration rejects non-bot credentials.
 ## Human todos
 
 The `todos` widget shows one global personal action list shared by the LCD,
-settings editor, Claude Code, and Codex. Add a `todos` tile from the editor,
-then manage items under **Human todos** or ask either agent to list, add, edit,
-complete, or reopen them. Completed items leave the LCD but remain in history.
+settings editor, Claude Code, and Codex. Add a `todos` tile from the editor and
+select it, then manage items under **Human todos** on the **Widget settings**
+tab, or ask either agent to list, add, edit, complete, or reopen them. Completed
+items leave the LCD but remain in history.
 
 Items support details, priority, a date-only deadline, and manual ordering.
 Overdue, today, and next-seven-day items lead; remaining items follow priority.
@@ -187,10 +191,12 @@ the other meters continue normally.
 ### Windows notifications
 
 The Windows-only `notifications` widget reads the notifications currently held
-by Windows, without an app-specific bot or API. In the settings editor, choose
-**Enable access**, approve the Windows prompt, select the applications to show,
-and optionally enter comma-separated include or exclude terms. Exclusion wins;
-otherwise any include term may match the app name, title, or body.
+by Windows, without an app-specific bot or API. In the settings editor, add a
+`notifications` tile and select it — its access controls appear on the **Widget
+settings** tab with the widget they belong to. Choose **Enable access**, approve
+the Windows prompt, select the applications to show, and optionally enter
+comma-separated include or exclude terms. Exclusion wins; otherwise any include
+term may match the app name, title, or body.
 
 Matching notifications rotate newest-first. The dashboard never dismisses them
 and does not store their text on disk. Applications only appear in the picker
@@ -291,8 +297,17 @@ corner handle to resize, snap to a grid, pick each tile's widget, and edit its
 options — the form is generated from the widget registry, so a newly registered
 widget appears there with working inputs and its own help text.
 
-Alongside the canvas is a live view of the frame **actually on the panel**, which
-is why the editor runs inside the daemon rather than as a separate tool.
+The canvas is always on screen because everything else is relative to a tile on
+it. Below it sit a collapsed **Settings** panel for the things that belong to the
+whole screen — background, screen saver, display — and two tabs: **Live panel**,
+a view of the frame **actually on the panel**, which is why the editor runs
+inside the daemon rather than as a separate tool; and **Widget settings** for
+whichever tile is selected. Clicking a tile takes you there.
+
+Settings for a *source* travel with the widget that shows it, so the Discord
+connection appears only while a `messages` tile is selected, Windows notification
+access only with a `notifications` tile, the human todo list only with a `todos`
+tile, and the session timings only with a tile that takes a session.
 
 Saving validates by round-tripping the candidate through the same loader the
 daemon uses, so the editor cannot accept a config the daemon would then refuse to
@@ -316,12 +331,13 @@ which drops any comments you added by hand. And `[ipc]` and `[admin]` are shown
 but not editable there: changing the IPC transport would orphan the installed
 hooks, and changing the editor's own port would cut off the page you are using.
 
-## The tray icon (Windows)
+## The tray icon
 
-On Windows the daemon runs under console-less `pythonw.exe`, so without an icon
-there is nothing to say it is alive and nothing to click to stop it. It puts one
-in the notification area: **green when the LCD is attached, grey while it is
-still looking**, with the resolved port in the hover text.
+The daemon has no window on either platform — console-less `pythonw.exe` on
+Windows, a systemd user unit on Linux — so without an icon there is nothing to
+say it is alive and nothing to click to stop it. It puts one in the notification
+area: **green when the LCD is attached, grey while it is still looking**, with
+the resolved device in the hover text.
 
 - **Left click** opens the settings editor.
 - **Right click** gives a menu: the current state, the settings editor, the log
@@ -336,8 +352,15 @@ the taskbar to keep it visible. Turn the icon off with:
 enabled = true
 ```
 
-There is no tray icon on Linux, where the install is a systemd user unit and
-`systemctl --user stop usb-lcd-dashboard` is the stop button.
+On Linux the icon is a StatusNotifierItem, drawn through
+`gir1.2-ayatanaappindicator3-0.1`, which the `.deb` depends on. GNOME needs an
+extension to show one at all — Ubuntu ships that enabled by default. Where no
+tray host is running the daemon logs it and carries on, and
+`systemctl --user stop usb-lcd-dashboard` remains the stop button.
+
+One difference from Windows: the host owns the click gesture, so GNOME opens the
+menu on left click rather than going straight to the settings editor. **Open
+settings** is the first item either way.
 
 ## Several sessions at once
 
@@ -396,11 +419,11 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.10.0.exe` | `usb-lcd-dashboard_0.10.0_all.deb` |
-| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
-| Size | 22.6 MB | 94.6 KB plus dependencies |
-| SHA-256 | `32536024687d093146efc2209a6714c29418755b61f7c5d7314af95f7c3f9dde` | `aa964c6d2beab6f4943b46aa55b3da75741f1178469e53be089b89c5e7696005` |
-| Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
+| Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
+| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
+| Size | 22.6 MB | 101.5 KB plus dependencies |
+| SHA-256 | _(rebuild on Windows for 0.11.0)_ | `8095f612235ad82133a80281166693efb850014d06b503202235f923c56fa3e2` |
+| Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 
 Both are reversible, both preserve an existing Claude status line, and neither
@@ -413,10 +436,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.10.0.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.11.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.10.0.exe
+.\dist\USB-LCD-Dashboard-Setup-0.11.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -448,7 +471,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.10.0_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.11.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and
@@ -499,8 +522,32 @@ need the udev rule, which the `.deb` would have shipped for you:
 ```bash
 sudo install -m 0644 packaging/99-turing-lcd.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
+sudo udevadm trigger --action=add --subsystem-match=usb --attr-match=idVendor=1cbe
 sudo udevadm trigger --subsystem-match=tty --attr-match=idVendor=1a86
 ```
+
+The tray icon needs PyGObject, which is a compiled extension bound to the system
+Python and not practically `pip`-installable. A virtualenv cannot see it unless
+you ask for it:
+
+```bash
+sudo apt install python3-gi gir1.2-ayatanaappindicator3-0.1
+python3 -m venv --system-site-packages .venv     # note the flag
+```
+
+Without it the daemon starts fine and draws fine, and logs
+`Tray icon unavailable: No module named 'gi'` — the panel is the job, and a
+daemon with no icon is still a working daemon. On an existing venv, symlinking
+`/usr/lib/python3/dist-packages/gi` into its `site-packages` works too. The
+`.deb` runs on the system Python and has neither problem.
+
+> **If you later install the `.deb`, remove this file.** The package ships the
+> same filename under `/lib/udev/rules.d/`, and udev skips a `/usr/lib` rules
+> file whenever `/etc` holds one of the same name — so a copy left here silently
+> masks every future update to the packaged rule. `udevadm test /sys/... | head`
+> says `Skipping overridden file` when that is happening. This bit a real
+> install: a rule copied here predated TURZX support and kept the panel's raw
+> USB node root-only long after the package knew better.
 
 `usb-lcd-dashboard uninstall` reverses all of it. The system udev rule is
 intentionally left for explicit removal.

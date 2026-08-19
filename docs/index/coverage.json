@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-18T00:52:35Z",
+ "generated": "2026-08-19T20:52:42Z",
  "by_source": {
   "src/usb_lcd_dashboard/admin.py": [
    "docs/admin/settings-editor.md"
@@ -8,6 +8,9 @@
    "docs/admin/settings-editor.md"
   ],
   "src/usb_lcd_dashboard/tray.py": [
+   "docs/admin/tray.md"
+  ],
+  "src/usb_lcd_dashboard/tray_linux.py": [
    "docs/admin/tray.md"
   ],
   "src/usb_lcd_dashboard/__init__.py": [

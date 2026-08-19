@@ -84,8 +84,11 @@ class Config:
     # deliberately not bindable to anything routable.
     admin_enabled: bool = True
     admin_port: int = DEFAULT_ADMIN_PORT
-    # The system tray icon: proof the daemon is running, and the way to stop it.
-    # Windows only; there is no tray to put it in under a systemd user unit.
+    # The system tray icon: proof the daemon is running, the way into the
+    # settings editor, and the way to stop it. Windows uses Shell_NotifyIcon;
+    # Linux uses StatusNotifierItem via AppIndicator. Where there is no tray to
+    # put it in — a headless box, or a desktop with no SNI host — the daemon
+    # logs that and carries on, so this stays True by default on both.
     tray_enabled: bool = True
     # Discord channel snowflakes are configuration, not credentials. The bot
     # token lives in a separate protected secret store.
@@ -151,7 +154,7 @@ port = {ipc_port}
 enabled = {admin_enabled}
 port = {admin_port}
 
-# The system tray icon (Windows only).
+# The system tray icon. Windows and Linux; ignored where there is no tray.
 [tray]
 enabled = {tray_enabled}
 """

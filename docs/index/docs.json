@@ -1,6 +1,19 @@
 {
- "generated": "2026-08-18T00:52:35Z",
+ "generated": "2026-08-19T20:52:42Z",
  "documents": [
+  {
+   "path": "docs/README.md",
+   "title": "Documentation",
+   "headings": [
+    "The map",
+    "Common tasks",
+    "How this documentation is kept honest",
+    "What is not here"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 452
+  },
   {
    "path": "docs/admin/README.md",
    "title": "Admin surfaces",
@@ -18,10 +31,13 @@
    "headings": [
     "API",
     "Routes",
+    "The shape of the page",
+    "Source-backed blocks follow their widget",
     "Security model",
     "Saving",
     "How the daemon notices",
     "The form builds itself",
+    "Switching back to the legacy LCD",
     "Tests",
     "See also"
    ],
@@ -30,39 +46,60 @@
     "src/usb_lcd_dashboard/admin_page.py"
    ],
    "citations": [
-    "admin.py:194",
-    "admin.py:207",
-    "admin.py:217",
-    "admin.py:314",
-    "admin.py:41"
+    "admin.py:243",
+    "admin.py:278",
+    "admin.py:360",
+    "admin.py:47",
+    "admin.py:676",
+    "admin_page.py:1069",
+    "admin_page.py:525",
+    "admin_page.py:609",
+    "admin_page.py:710"
    ],
-   "words": 806
+   "words": 1394
   },
   {
    "path": "docs/admin/tray.md",
-   "title": "tray.py \u2014 the Windows notification-area icon",
+   "title": "tray.py / tray_linux.py \u2014 the notification-area icon",
    "headings": [
     "API",
     "States",
     "Behaviour",
     "Why Win32 rather than pystray",
+    "Why AppIndicator rather than raw D-Bus on Linux",
+    "Opening things from inside the sandbox",
     "Failure is never fatal",
     "Tests",
     "See also"
    ],
    "covers": [
-    "src/usb_lcd_dashboard/tray.py"
+    "src/usb_lcd_dashboard/tray.py",
+    "src/usb_lcd_dashboard/tray_linux.py"
    ],
    "citations": [
     "daemon.py:121",
     "tray.py:139",
+    "tray.py:152",
     "tray.py:321",
     "tray.py:69",
     "tray.py:76",
     "tray.py:8",
-    "tray.py:97"
+    "tray.py:97",
+    "tray_linux.py:44",
+    "tray_linux.py:88"
    ],
-   "words": 461
+   "words": 1003
+  },
+  {
+   "path": "docs/architecture/README.md",
+   "title": "Architecture",
+   "headings": [
+    "The one-paragraph version",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 183
   },
   {
    "path": "docs/architecture/frame-budget.md",
@@ -118,15 +155,16 @@
    "words": 458
   },
   {
-   "path": "docs/architecture/README.md",
-   "title": "Architecture",
+   "path": "docs/integration/README.md",
+   "title": "Integration",
    "headings": [
-    "The one-paragraph version",
+    "Where to start",
+    "The rule that governs this whole area",
     "See also"
    ],
    "covers": [],
    "citations": [],
-   "words": 183
+   "words": 229
   },
   {
    "path": "docs/integration/claude-limits.md",
@@ -182,7 +220,7 @@
     "install.py:74",
     "install.py:98"
    ],
-   "words": 814
+   "words": 831
   },
   {
    "path": "docs/integration/messaging.md",
@@ -198,18 +236,6 @@
    "words": 160
   },
   {
-   "path": "docs/integration/README.md",
-   "title": "Integration",
-   "headings": [
-    "Where to start",
-    "The rule that governs this whole area",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 229
-  },
-  {
    "path": "docs/integration/todos.md",
    "title": "Human todos",
    "headings": [],
@@ -221,6 +247,19 @@
    "words": 147
   },
   {
+   "path": "docs/packaging/README.md",
+   "title": "Packaging",
+   "headings": [
+    "Why they differ",
+    "Build",
+    "Two traps",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 245
+  },
+  {
    "path": "docs/packaging/linux.md",
    "title": "The Ubuntu package",
    "headings": [
@@ -229,6 +268,7 @@
     "Dependencies, and why",
     "The system / per-user split",
     "The udev rule",
+    "`/etc` shadows the packaged rule",
     "Build notes worth knowing",
     "The smoke test",
     "Versioning",
@@ -248,20 +288,7 @@
     "packaging/99-turing-lcd.rules"
    ],
    "citations": [],
-   "words": 774
-  },
-  {
-   "path": "docs/packaging/README.md",
-   "title": "Packaging",
-   "headings": [
-    "Why they differ",
-    "Build",
-    "Two traps",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 245
+   "words": 1171
   },
   {
    "path": "docs/packaging/windows.md",
@@ -283,17 +310,14 @@
    "words": 775
   },
   {
-   "path": "docs/README.md",
-   "title": "Documentation",
+   "path": "docs/reference/README.md",
+   "title": "Reference",
    "headings": [
-    "The map",
-    "Common tasks",
-    "How this documentation is kept honest",
-    "What is not here"
+    "See also"
    ],
    "covers": [],
    "citations": [],
-   "words": 452
+   "words": 90
   },
   {
    "path": "docs/reference/commands.md",
@@ -344,14 +368,16 @@
    "words": 409
   },
   {
-   "path": "docs/reference/README.md",
-   "title": "Reference",
+   "path": "docs/rendering/README.md",
+   "title": "Rendering",
    "headings": [
+    "Where to start",
+    "Two things that look like bugs and are not",
     "See also"
    ],
    "covers": [],
    "citations": [],
-   "words": 90
+   "words": 218
   },
   {
    "path": "docs/rendering/crab.md",
@@ -412,18 +438,6 @@
     "layout.py:98"
    ],
    "words": 814
-  },
-  {
-   "path": "docs/rendering/README.md",
-   "title": "Rendering",
-   "headings": [
-    "Where to start",
-    "Two things that look like bugs and are not",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 218
   },
   {
    "path": "docs/rendering/render.md",
@@ -493,6 +507,17 @@
    "words": 808
   },
   {
+   "path": "docs/runtime/README.md",
+   "title": "Runtime",
+   "headings": [
+    "Where to start",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 173
+  },
+  {
    "path": "docs/runtime/config.md",
    "title": "config.py \u2014 the single source of config truth",
    "headings": [
@@ -523,6 +548,7 @@
     "The loop, step by step",
     "One event per tick",
     "Config hot-reload",
+    "Sleep/resume recovery",
     "Invariants",
     "Failure modes",
     "Tests",
@@ -541,17 +567,19 @@
     "daemon.py:64",
     "daemon.py:67"
    ],
-   "words": 1048
+   "words": 1121
   },
   {
    "path": "docs/runtime/device.md",
    "title": "device.py \u2014 the wire to a panel",
    "headings": [
     "The protocol",
+    "`auto` decides on size, not by probing",
     "SerialPanel",
     "Four mounting orientations",
     "`health_check` exists because the driver lies",
     "SimulatedPanel",
+    "TuringUsbPanel",
     "WindowPanel",
     "Tests",
     "See also"
@@ -564,13 +592,15 @@
    "citations": [
     "device.py:113",
     "device.py:143",
-    "device.py:161",
+    "device.py:227",
     "device.py:23",
+    "device.py:245",
+    "device.py:268",
     "device.py:27",
     "device.py:42",
     "device.py:98"
    ],
-   "words": 629
+   "words": 969
   },
   {
    "path": "docs/runtime/display.md",
@@ -596,17 +626,6 @@
     "display.py:88"
    ],
    "words": 505
-  },
-  {
-   "path": "docs/runtime/README.md",
-   "title": "Runtime",
-   "headings": [
-    "Where to start",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 173
   },
   {
    "path": "docs/runtime/transport.md",
@@ -639,6 +658,18 @@
     "transport.py:92"
    ],
    "words": 525
+  },
+  {
+   "path": "docs/sessions/README.md",
+   "title": "Sessions",
+   "headings": [
+    "Where to start",
+    "The subtlest code in the repository",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 193
   },
   {
    "path": "docs/sessions/model.md",
@@ -690,18 +721,6 @@
     "normalize.py:75"
    ],
    "words": 661
-  },
-  {
-   "path": "docs/sessions/README.md",
-   "title": "Sessions",
-   "headings": [
-    "Where to start",
-    "The subtlest code in the repository",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 193
   },
   {
    "path": "docs/testing/README.md",

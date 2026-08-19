@@ -1,3 +1,19 @@
+usb-lcd-dashboard (0.11.0) noble; urgency=medium
+
+  * Add a Linux notification-area icon, matching the Windows tray.
+  * Drive current-generation TURZX USB panels on Linux: ship the raw-USB udev
+    rule and depend on python3-usb and python3-pycryptodome.
+  * Make display.kind="auto" pick the transport from the configured size
+    instead of always choosing the serial panel.
+  * Reconnect TURZX panels that leave the bus, as a KVM switch does.
+  * Report the attached panel and its /dev/bus/usb node in doctor.
+  * Rework the settings editor: the tile canvas stays on screen, the live
+    panel and per-widget settings move into tabs, screen-wide settings
+    collapse into one panel, and Discord, notification and todo settings
+    now appear with the widget that uses them.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Wed, 19 Aug 2026 18:40:00 +0000
+
 usb-lcd-dashboard (0.10.0) noble; urgency=medium
 
   * Add four-way display mounting orientation with automatic layout rotation.
