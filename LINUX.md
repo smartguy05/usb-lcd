@@ -54,8 +54,9 @@ emit anything.
 
 Open `http://127.0.0.1:45723` while the service is running to configure four-way
 panel mounting, upload a managed PNG/JPEG/WebP wallpaper, and change the enabled
-ten-minute moving-clock screen saver. Portrait changes rotate the canvas and
-all tile rectangles together.
+ten-minute moving-clock screen saver — all three live under the editor's
+collapsible **Settings** panel. Portrait changes rotate the canvas and all tile
+rectangles together.
 
 ## What went where
 

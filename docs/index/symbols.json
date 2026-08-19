@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-19T19:16:24Z",
+ "generated": "2026-08-19T20:52:42Z",
  "symbols": [
   {
    "name": "__init__",
@@ -266,7 +266,7 @@
    "name": "PAGE",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin_page.py",
-   "line": 8,
+   "line": 16,
    "signature": "PAGE = ...",
    "summary": "",
    "parent": ""
@@ -5387,7 +5387,7 @@
    "name": "VENDOR_ID",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 14,
+   "line": 21,
    "signature": "VENDOR_ID = ...",
    "summary": "",
    "parent": ""
@@ -5396,7 +5396,7 @@
    "name": "PRODUCT_SIZES",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 15,
+   "line": 22,
    "signature": "PRODUCT_SIZES = ...",
    "summary": "",
    "parent": ""
@@ -5405,7 +5405,7 @@
    "name": "_backend",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 26,
+   "line": 33,
    "signature": "def _backend()",
    "summary": "Use the bundled libusb DLL on Windows, falling back to system libusb.",
    "parent": ""
@@ -5414,7 +5414,7 @@
    "name": "find_device",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 36,
+   "line": 43,
    "signature": "def find_device()",
    "summary": "",
    "parent": ""
@@ -5423,7 +5423,7 @@
    "name": "_command",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 51,
+   "line": 58,
    "signature": "def _command(command: int, payload: bytes=b'') -> bytes",
    "summary": "",
    "parent": ""
@@ -5432,7 +5432,7 @@
    "name": "_transfer",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 63,
+   "line": 70,
    "signature": "def _transfer(device, data: bytes, timeout: int=5000) -> bytes",
    "summary": "",
    "parent": ""
@@ -5441,7 +5441,7 @@
    "name": "send_command",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 96,
+   "line": 103,
    "signature": "def send_command(device, command: int, payload: bytes=b'') -> bytes",
    "summary": "",
    "parent": ""
@@ -5450,7 +5450,7 @@
    "name": "send_image",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/turing_usb.py",
-   "line": 100,
+   "line": 107,
    "signature": "def send_image(device, image: Image.Image) -> bytes",
    "summary": "Replace the screen with an opaque JPEG frame.",
    "parent": ""
@@ -6509,10 +6509,37 @@
    "parent": ""
   },
   {
-   "name": "test_switching_to_the_turzx_panel_restores_its_wide_profile",
+   "name": "test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs",
    "kind": "test",
    "file": "tests/test_admin.py",
    "line": 55,
+   "signature": "def test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs(...)",
+   "summary": "The stage stays put; everything else is a tab or collapses away.",
+   "parent": ""
+  },
+  {
+   "name": "test_source_backed_sections_live_in_the_widget_tab",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 66,
+   "signature": "def test_source_backed_sections_live_in_the_widget_tab(...)",
+   "summary": "Discord, notifications and todos configure a widget, so they follow it.",
+   "parent": ""
+  },
+  {
+   "name": "test_the_preview_poll_stops_while_its_tab_is_hidden",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 83,
+   "signature": "def test_the_preview_poll_stops_while_its_tab_is_hidden(...)",
+   "summary": "A PNG fetched every two seconds for a tab nobody is looking at.",
+   "parent": ""
+  },
+  {
+   "name": "test_switching_to_the_turzx_panel_restores_its_wide_profile",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 88,
    "signature": "def test_switching_to_the_turzx_panel_restores_its_wide_profile(...)",
    "summary": "The USB transport cannot retain the legacy 480x320 canvas.",
    "parent": ""
@@ -6521,7 +6548,7 @@
    "name": "test_config_to_json_carries_the_layout_and_marks_ipc_readonly",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 122,
+   "line": 155,
    "signature": "def test_config_to_json_carries_the_layout_and_marks_ipc_readonly(...)",
    "summary": "",
    "parent": ""
@@ -6530,7 +6557,7 @@
    "name": "test_json_round_trips_a_config",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 134,
+   "line": 167,
    "signature": "def test_json_round_trips_a_config(...)",
    "summary": "",
    "parent": ""
@@ -6539,7 +6566,7 @@
    "name": "test_config_from_json_applies_edits",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 141,
+   "line": 174,
    "signature": "def test_config_from_json_applies_edits(...)",
    "summary": "",
    "parent": ""
@@ -6548,7 +6575,7 @@
    "name": "test_layout_rotation_payload_rotates_every_tile",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 155,
+   "line": 188,
    "signature": "def test_layout_rotation_payload_rotates_every_tile(...)",
    "summary": "",
    "parent": ""
@@ -6557,7 +6584,7 @@
    "name": "test_config_from_json_rejects_bad_shapes",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 185,
+   "line": 218,
    "signature": "def test_config_from_json_rejects_bad_shapes(...)",
    "summary": "",
    "parent": ""
@@ -6566,7 +6593,7 @@
    "name": "test_the_page_is_served",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 193,
+   "line": 226,
    "signature": "def test_the_page_is_served(...)",
    "summary": "",
    "parent": ""
@@ -6575,7 +6602,7 @@
    "name": "test_layout_rotation_route",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 202,
+   "line": 235,
    "signature": "def test_layout_rotation_route(...)",
    "summary": "",
    "parent": ""
@@ -6584,7 +6611,7 @@
    "name": "test_background_upload_stores_a_managed_png",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 214,
+   "line": 247,
    "signature": "def test_background_upload_stores_a_managed_png(...)",
    "summary": "",
    "parent": ""
@@ -6593,7 +6620,7 @@
    "name": "test_background_upload_rejects_non_images",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 227,
+   "line": 260,
    "signature": "def test_background_upload_rejects_non_images(...)",
    "summary": "",
    "parent": ""
@@ -6602,7 +6629,7 @@
    "name": "test_the_config_endpoint_returns_the_layout",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 234,
+   "line": 267,
    "signature": "def test_the_config_endpoint_returns_the_layout(...)",
    "summary": "",
    "parent": ""
@@ -6611,7 +6638,7 @@
    "name": "test_the_widgets_endpoint_describes_the_registry",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 243,
+   "line": 276,
    "signature": "def test_the_widgets_endpoint_describes_the_registry(...)",
    "summary": "",
    "parent": ""
@@ -6620,7 +6647,7 @@
    "name": "test_todo_routes_cover_crud_history_reopen_and_delete",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 256,
+   "line": 289,
    "signature": "def test_todo_routes_cover_crud_history_reopen_and_delete(...)",
    "summary": "",
    "parent": ""
@@ -6629,7 +6656,7 @@
    "name": "test_todo_delete_requires_confirmation",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 280,
+   "line": 313,
    "signature": "def test_todo_delete_requires_confirmation(...)",
    "summary": "",
    "parent": ""
@@ -6638,7 +6665,7 @@
    "name": "test_the_discord_status_endpoint_contains_no_token",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 290,
+   "line": 323,
    "signature": "def test_the_discord_status_endpoint_contains_no_token(...)",
    "summary": "",
    "parent": ""
@@ -6647,7 +6674,7 @@
    "name": "test_discord_actions_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 299,
+   "line": 332,
    "signature": "def test_discord_actions_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -6656,7 +6683,7 @@
    "name": "test_windows_notification_status_and_access_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 327,
+   "line": 360,
    "signature": "def test_windows_notification_status_and_access_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -6665,7 +6692,7 @@
    "name": "test_a_cross_site_form_cannot_trigger_a_discord_action",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 350,
+   "line": 383,
    "signature": "def test_a_cross_site_form_cannot_trigger_a_discord_action(...)",
    "summary": "",
    "parent": ""
@@ -6674,7 +6701,7 @@
    "name": "test_the_preview_says_so_when_no_frame_exists_yet",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 363,
+   "line": 396,
    "signature": "def test_the_preview_says_so_when_no_frame_exists_yet(...)",
    "summary": "",
    "parent": ""
@@ -6683,7 +6710,7 @@
    "name": "test_the_preview_serves_the_daemons_frame",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 370,
+   "line": 403,
    "signature": "def test_the_preview_serves_the_daemons_frame(...)",
    "summary": "",
    "parent": ""
@@ -6692,7 +6719,7 @@
    "name": "test_an_unknown_route_is_a_404",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 379,
+   "line": 412,
    "signature": "def test_an_unknown_route_is_a_404(...)",
    "summary": "",
    "parent": ""
@@ -6701,7 +6728,7 @@
    "name": "test_saving_writes_the_config_file",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 388,
+   "line": 421,
    "signature": "def test_saving_writes_the_config_file(...)",
    "summary": "",
    "parent": ""
@@ -6710,7 +6737,7 @@
    "name": "test_saving_an_overlapping_layout_is_refused_with_the_reason",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 402,
+   "line": 435,
    "signature": "def test_saving_an_overlapping_layout_is_refused_with_the_reason(...)",
    "summary": "",
    "parent": ""
@@ -6719,7 +6746,7 @@
    "name": "test_every_loader_rule_is_enforced_on_save",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 424,
+   "line": 457,
    "signature": "def test_every_loader_rule_is_enforced_on_save(...)",
    "summary": "The editor validates by round-tripping through the real loader, so it",
    "parent": ""
@@ -6728,7 +6755,7 @@
    "name": "test_invalid_json_is_reported",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 435,
+   "line": 468,
    "signature": "def test_invalid_json_is_reported(...)",
    "summary": "",
    "parent": ""
@@ -6737,7 +6764,7 @@
    "name": "test_an_implausibly_large_body_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 447,
+   "line": 480,
    "signature": "def test_an_implausibly_large_body_is_refused(...)",
    "summary": "",
    "parent": ""
@@ -6746,7 +6773,7 @@
    "name": "test_only_loopback_hosts_are_accepted",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 475,
+   "line": 508,
    "signature": "def test_only_loopback_hosts_are_accepted(...)",
    "summary": "",
    "parent": ""
@@ -6755,7 +6782,7 @@
    "name": "test_a_foreign_host_header_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 479,
+   "line": 512,
    "signature": "def test_a_foreign_host_header_is_refused(...)",
    "summary": "Blunts DNS rebinding: a page on the web resolving its own name to",
    "parent": ""
@@ -6764,7 +6791,7 @@
    "name": "test_the_server_binds_loopback_only",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 490,
+   "line": 523,
    "signature": "def test_the_server_binds_loopback_only(...)",
    "summary": "",
    "parent": ""

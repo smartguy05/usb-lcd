@@ -126,15 +126,18 @@ DMs, forums and threads are excluded in this first version.
 5. Copy the generated install link, open it, select the server, and authorize
    the bot. Repeat this for every server containing channels you want on the
    LCD. You must have permission to add applications to each server.
-6. Open the dashboard editor at <http://127.0.0.1:45723>. Under **Discord
-   messages**, paste the bot token and choose **Save and verify**.
-7. The editor discovers the server text channels visible to the bot. Check the
+6. Open the dashboard editor at <http://127.0.0.1:45723>. Add a `messages` tile
+   from the layout picker if the layout does not already contain one, then click
+   that tile. Discord settings live with the widget that shows them, so they
+   appear on the **Widget settings** tab only while a `messages` tile is
+   selected.
+7. Under **Discord messages**, paste the bot token and choose **Save and
+   verify**.
+8. The editor discovers the server text channels visible to the bot. Check the
    channels to monitor, then choose the main **Save** button at the top of the
    page. Use **Refresh channels** after adding the bot to another server or
-   changing channel permissions.
-8. Add a `messages` tile from the layout picker if the layout does not already
-   contain one. The default title is `Discord`; the tile title can be changed in
-   its options.
+   changing channel permissions. The default tile title is `Discord`; that can be
+   changed in the tile's options.
 
 The count is local to the dashboard, not Discord's personal unread count. A
 newly selected channel starts at its current newest message, so installing the
@@ -159,9 +162,10 @@ accounts (self-bots), and this integration rejects non-bot credentials.
 ## Human todos
 
 The `todos` widget shows one global personal action list shared by the LCD,
-settings editor, Claude Code, and Codex. Add a `todos` tile from the editor,
-then manage items under **Human todos** or ask either agent to list, add, edit,
-complete, or reopen them. Completed items leave the LCD but remain in history.
+settings editor, Claude Code, and Codex. Add a `todos` tile from the editor and
+select it, then manage items under **Human todos** on the **Widget settings**
+tab, or ask either agent to list, add, edit, complete, or reopen them. Completed
+items leave the LCD but remain in history.
 
 Items support details, priority, a date-only deadline, and manual ordering.
 Overdue, today, and next-seven-day items lead; remaining items follow priority.
@@ -187,10 +191,12 @@ the other meters continue normally.
 ### Windows notifications
 
 The Windows-only `notifications` widget reads the notifications currently held
-by Windows, without an app-specific bot or API. In the settings editor, choose
-**Enable access**, approve the Windows prompt, select the applications to show,
-and optionally enter comma-separated include or exclude terms. Exclusion wins;
-otherwise any include term may match the app name, title, or body.
+by Windows, without an app-specific bot or API. In the settings editor, add a
+`notifications` tile and select it — its access controls appear on the **Widget
+settings** tab with the widget they belong to. Choose **Enable access**, approve
+the Windows prompt, select the applications to show, and optionally enter
+comma-separated include or exclude terms. Exclusion wins; otherwise any include
+term may match the app name, title, or body.
 
 Matching notifications rotate newest-first. The dashboard never dismisses them
 and does not store their text on disk. Applications only appear in the picker
@@ -291,8 +297,17 @@ corner handle to resize, snap to a grid, pick each tile's widget, and edit its
 options — the form is generated from the widget registry, so a newly registered
 widget appears there with working inputs and its own help text.
 
-Alongside the canvas is a live view of the frame **actually on the panel**, which
-is why the editor runs inside the daemon rather than as a separate tool.
+The canvas is always on screen because everything else is relative to a tile on
+it. Below it sit a collapsed **Settings** panel for the things that belong to the
+whole screen — background, screen saver, display — and two tabs: **Live panel**,
+a view of the frame **actually on the panel**, which is why the editor runs
+inside the daemon rather than as a separate tool; and **Widget settings** for
+whichever tile is selected. Clicking a tile takes you there.
+
+Settings for a *source* travel with the widget that shows it, so the Discord
+connection appears only while a `messages` tile is selected, Windows notification
+access only with a `notifications` tile, the human todo list only with a `todos`
+tile, and the session timings only with a tile that takes a session.
 
 Saving validates by round-tripping the candidate through the same loader the
 daemon uses, so the editor cannot accept a config the daemon would then refuse to
@@ -407,7 +422,7 @@ sessions — but they are packaged differently, because the platforms differ:
 | Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
 | Size | 22.6 MB | 101.5 KB plus dependencies |
-| SHA-256 | _(rebuild on Windows for 0.11.0)_ | `72b9107da682e54e21a34116f14c655e5052152db39c3c1c84f20a98d8e2e681` |
+| SHA-256 | _(rebuild on Windows for 0.11.0)_ | `8095f612235ad82133a80281166693efb850014d06b503202235f923c56fa3e2` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 

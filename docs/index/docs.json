@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-19T19:16:24Z",
+ "generated": "2026-08-19T20:52:42Z",
  "documents": [
   {
    "path": "docs/README.md",
@@ -31,6 +31,8 @@
    "headings": [
     "API",
     "Routes",
+    "The shape of the page",
+    "Source-backed blocks follow their widget",
     "Security model",
     "Saving",
     "How the daemon notices",
@@ -44,13 +46,17 @@
     "src/usb_lcd_dashboard/admin_page.py"
    ],
    "citations": [
-    "admin.py:194",
-    "admin.py:207",
-    "admin.py:217",
-    "admin.py:314",
-    "admin.py:41"
+    "admin.py:243",
+    "admin.py:278",
+    "admin.py:360",
+    "admin.py:47",
+    "admin.py:676",
+    "admin_page.py:1069",
+    "admin_page.py:525",
+    "admin_page.py:609",
+    "admin_page.py:710"
    ],
-   "words": 865
+   "words": 1394
   },
   {
    "path": "docs/admin/tray.md",

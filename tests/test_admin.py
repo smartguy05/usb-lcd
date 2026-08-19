@@ -52,6 +52,39 @@ def test_switching_to_the_legacy_panel_restores_its_fixed_profile():
     assert 'widget: "legacy", x: 0, y: 0' in PAGE
 
 
+def test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs():
+    """The stage stays put; everything else is a tab or collapses away."""
+    assert 'id="stage"' in PAGE and 'id="settingsPanel"' in PAGE
+    for mount in ("bgForm", "screensaverForm", "displayForm"):
+        assert 'id="%s"' % mount in PAGE
+    assert 'id="tabBtnLive"' in PAGE and 'id="tabBtnWidget"' in PAGE
+    assert 'id="tabLive"' in PAGE and 'id="tabWidget"' in PAGE
+    # The live frame is the only thing in its tab; the stage is not inside one.
+    assert PAGE.index('id="stage"') < PAGE.index('id="tabLive"')
+
+
+def test_source_backed_sections_live_in_the_widget_tab():
+    """Discord, notifications and todos configure a widget, so they follow it."""
+    for section in ("secDash", "secDiscord", "secWindows", "secTodos", "secReadonly"):
+        assert 'id="%s"' % section in PAGE
+    # Present but hidden at parse time: module-level listeners and the unguarded
+    # $("todoCreate") in drawTodoCreate both need these ids to exist.
+    for section in ("secDash", "secDiscord", "secWindows", "secTodos"):
+        start = PAGE.index('id="%s"' % section)
+        assert "hidden" in PAGE[start:PAGE.index(">", start)]
+    for mount in ("todoCreate", "todoHistory", "todoList", "discordConnection",
+                  "windowsNotifications", "roInfo"):
+        assert 'id="%s"' % mount in PAGE
+    # Driven by the registry flags rather than a hardcoded list of widget names.
+    assert "wants_session" in PAGE and "wants_messages" in PAGE
+    assert "wants_notifications" in PAGE and "wants_todos" in PAGE
+
+
+def test_the_preview_poll_stops_while_its_tab_is_hidden():
+    """A PNG fetched every two seconds for a tab nobody is looking at."""
+    assert "if (document.hidden || !liveTabShowing()) return;" in PAGE
+
+
 def test_switching_to_the_turzx_panel_restores_its_wide_profile():
     """The USB transport cannot retain the legacy 480x320 canvas."""
     assert 'if (kind === "turing_usb")' in PAGE

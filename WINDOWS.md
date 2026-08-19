@@ -71,7 +71,8 @@ and change `device = "AUTO"` to a value such as `device = "COM4"`.
 
 The tray's settings editor also provides four mounting orientations, a managed
 PNG/JPEG/WebP wallpaper upload with translucent cards, and the screen-saver
-enable/delay controls. Portrait selections rotate the canvas and every tile;
+enable/delay controls, all under its collapsible **Settings** panel. Portrait
+selections rotate the canvas and every tile;
 the default screen saver shows a moving clock after ten minutes and wakes on
 new dashboard activity.
 
