@@ -316,12 +316,13 @@ which drops any comments you added by hand. And `[ipc]` and `[admin]` are shown
 but not editable there: changing the IPC transport would orphan the installed
 hooks, and changing the editor's own port would cut off the page you are using.
 
-## The tray icon (Windows)
+## The tray icon
 
-On Windows the daemon runs under console-less `pythonw.exe`, so without an icon
-there is nothing to say it is alive and nothing to click to stop it. It puts one
-in the notification area: **green when the LCD is attached, grey while it is
-still looking**, with the resolved port in the hover text.
+The daemon has no window on either platform — console-less `pythonw.exe` on
+Windows, a systemd user unit on Linux — so without an icon there is nothing to
+say it is alive and nothing to click to stop it. It puts one in the notification
+area: **green when the LCD is attached, grey while it is still looking**, with
+the resolved device in the hover text.
 
 - **Left click** opens the settings editor.
 - **Right click** gives a menu: the current state, the settings editor, the log
@@ -336,8 +337,15 @@ the taskbar to keep it visible. Turn the icon off with:
 enabled = true
 ```
 
-There is no tray icon on Linux, where the install is a systemd user unit and
-`systemctl --user stop usb-lcd-dashboard` is the stop button.
+On Linux the icon is a StatusNotifierItem, drawn through
+`gir1.2-ayatanaappindicator3-0.1`, which the `.deb` depends on. GNOME needs an
+extension to show one at all — Ubuntu ships that enabled by default. Where no
+tray host is running the daemon logs it and carries on, and
+`systemctl --user stop usb-lcd-dashboard` remains the stop button.
+
+One difference from Windows: the host owns the click gesture, so GNOME opens the
+menu on left click rather than going straight to the settings editor. **Open
+settings** is the first item either way.
 
 ## Several sessions at once
 
@@ -396,11 +404,11 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.10.0.exe` | `usb-lcd-dashboard_0.10.0_all.deb` |
-| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy |
-| Size | 22.6 MB | 94.6 KB plus dependencies |
-| SHA-256 | `32536024687d093146efc2209a6714c29418755b61f7c5d7314af95f7c3f9dde` | `aa964c6d2beab6f4943b46aa55b3da75741f1178469e53be089b89c5e7696005` |
-| Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, no tray |
+| Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
+| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
+| Size | 22.6 MB | 101.5 KB plus dependencies |
+| SHA-256 | _(rebuild on Windows for 0.11.0)_ | `72b9107da682e54e21a34116f14c655e5052152db39c3c1c84f20a98d8e2e681` |
+| Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 
 Both are reversible, both preserve an existing Claude status line, and neither
@@ -413,10 +421,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.10.0.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.11.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.10.0.exe
+.\dist\USB-LCD-Dashboard-Setup-0.11.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -448,7 +456,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.10.0_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.11.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and
@@ -499,8 +507,32 @@ need the udev rule, which the `.deb` would have shipped for you:
 ```bash
 sudo install -m 0644 packaging/99-turing-lcd.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
+sudo udevadm trigger --action=add --subsystem-match=usb --attr-match=idVendor=1cbe
 sudo udevadm trigger --subsystem-match=tty --attr-match=idVendor=1a86
 ```
+
+The tray icon needs PyGObject, which is a compiled extension bound to the system
+Python and not practically `pip`-installable. A virtualenv cannot see it unless
+you ask for it:
+
+```bash
+sudo apt install python3-gi gir1.2-ayatanaappindicator3-0.1
+python3 -m venv --system-site-packages .venv     # note the flag
+```
+
+Without it the daemon starts fine and draws fine, and logs
+`Tray icon unavailable: No module named 'gi'` — the panel is the job, and a
+daemon with no icon is still a working daemon. On an existing venv, symlinking
+`/usr/lib/python3/dist-packages/gi` into its `site-packages` works too. The
+`.deb` runs on the system Python and has neither problem.
+
+> **If you later install the `.deb`, remove this file.** The package ships the
+> same filename under `/lib/udev/rules.d/`, and udev skips a `/usr/lib` rules
+> file whenever `/etc` holds one of the same name — so a copy left here silently
+> masks every future update to the packaged rule. `udevadm test /sys/... | head`
+> says `Skipping overridden file` when that is happening. This bit a real
+> install: a rule copied here predated TURZX support and kept the panel's raw
+> USB node root-only long after the package knew better.
 
 `usb-lcd-dashboard uninstall` reverses all of it. The system udev rule is
 intentionally left for explicit removal.

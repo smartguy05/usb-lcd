@@ -22,6 +22,12 @@ TARGET_VID = 0x1A86
 TARGET_PID = 0x5722
 TARGET_SERIAL = "USB35INCHIPSV2"
 
+# Repeated here rather than imported from turing_usb, which pulls in pyusb and
+# pycryptodome at module scope: doctor is the command you run *because* a
+# dependency is missing, so it must import on a broken install. Pinned to
+# turing_usb.VENDOR_ID by test_doctor.py.
+TURZX_VID = 0x1CBE
+
 
 def _hook_present(path: Path) -> bool:
     try:
@@ -79,7 +85,77 @@ def _todo_mcp_present(path: Path) -> bool:
         return False
 
 
+def _uses_usb_transport(config: Config) -> bool:
+    """Would this config be driven over native USB rather than a serial port?
+
+    Mirrors device.make_device, including its "auto" rule, so doctor reports the
+    panel the daemon would actually open. Reporting "waiting for 1a86:5722" at a
+    USB panel sent a real user hunting for a serial port that was never coming.
+    """
+    if config.display_kind == "turing_usb":
+        return True
+    if config.display_kind != "auto":
+        return False
+    from .device import LEGACY_SIZE
+    from .orientation import native_size
+
+    try:
+        from .turing_usb import PRODUCT_SIZES
+    except ImportError:
+        # turing_usb needs pyusb and pycryptodome. Without them no USB panel can
+        # be driven at all, so "auto" can only mean the serial one.
+        return False
+    native = native_size(config.size, config.orientation)
+    return native != LEGACY_SIZE and native in set(PRODUCT_SIZES.values())
+
+
+def usb_panel_node(config: Config) -> Path | None:
+    """The /dev/bus/usb node backing the attached TURZX panel, if any.
+
+    Its own function because the access check needs the node, not the label:
+    libusb writes to that character device, and it is root-only until the
+    packaged udev rule tags it.
+    """
+    try:
+        import usb.core
+
+        from .turing_usb import PRODUCT_SIZES, VENDOR_ID
+    except ImportError:
+        return None
+    try:
+        devices = usb.core.find(idVendor=VENDOR_ID, find_all=True) or ()
+        for device in devices:
+            if int(device.idProduct) in PRODUCT_SIZES:
+                return Path(f"/dev/bus/usb/{device.bus:03d}/{device.address:03d}")
+    except Exception:
+        # Enumeration can fail outright where libusb is missing. That is a
+        # "no panel found", which is what this command exists to report.
+        return None
+    return None
+
+
+def detected_usb_device(config: Config) -> str | None:
+    try:
+        import usb.core
+
+        from .turing_usb import PRODUCT_SIZES, VENDOR_ID
+    except ImportError:
+        return None
+    try:
+        devices = usb.core.find(idVendor=VENDOR_ID, find_all=True) or ()
+        for device in devices:
+            product_id = int(device.idProduct)
+            if product_id in PRODUCT_SIZES:
+                width, height = PRODUCT_SIZES[product_id]
+                return f"USB {VENDOR_ID:04X}:{product_id:04X} ({width}x{height})"
+    except Exception:
+        return None
+    return None
+
+
 def detected_device(config: Config) -> str | None:
+    if _uses_usb_transport(config):
+        return detected_usb_device(config)
     configured = config.device
     if configured.upper() != "AUTO":
         if os.name == "nt":
@@ -112,7 +188,12 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
         (
             "device",
             resolved is not None,
-            resolved or f"waiting for {TARGET_VID:04x}:{TARGET_PID:04x}",
+            resolved
+            or (
+                f"waiting for {TURZX_VID:04x}:*"
+                if _uses_usb_transport(config)
+                else f"waiting for {TARGET_VID:04x}:{TARGET_PID:04x}"
+            ),
         ),
         (
             "layout",
@@ -196,15 +277,29 @@ def checks(config: Config) -> list[tuple[str, bool, str]]:
         ))
         return items
 
-    device = Path(resolved or config.device)
-    items.insert(
-        1,
-        (
-            "read/write access",
-            resolved is not None and os.access(device, os.R_OK | os.W_OK),
-            str(device),
-        ),
-    )
+    if _uses_usb_transport(config):
+        # libusb writes to the raw bus node, which udev leaves root-only until
+        # the packaged rule tags it. Naming the node is the point: the fix is a
+        # udev rule for that device, not a permission on config.device.
+        node = usb_panel_node(config)
+        items.insert(
+            1,
+            (
+                "read/write access",
+                node is not None and os.access(node, os.R_OK | os.W_OK),
+                str(node) if node else f"no {TURZX_VID:04x}:* node on the bus",
+            ),
+        )
+    else:
+        device = Path(resolved or config.device)
+        items.insert(
+            1,
+            (
+                "read/write access",
+                resolved is not None and os.access(device, os.R_OK | os.W_OK),
+                str(device),
+            ),
+        )
     items.append(
         ("systemd", shutil.which("systemctl") is not None, "systemctl --user")
     )

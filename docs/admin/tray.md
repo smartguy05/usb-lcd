@@ -1,14 +1,17 @@
-# tray.py — the Windows notification-area icon
+# tray.py / tray_linux.py — the notification-area icon
 
-> **Covers:** `src/usb_lcd_dashboard/tray.py`
+> **Covers:** `src/usb_lcd_dashboard/tray.py`, `src/usb_lcd_dashboard/tray_linux.py`
 
-On Windows the daemon runs under console-less `pythonw.exe`, so without an icon
-there is nothing to say it is alive and nothing to click to stop it. That is the
-whole justification for this module.
+The daemon has no window on either platform — console-less `pythonw.exe` on
+Windows, a systemd user unit on Linux — so without an icon there is nothing to
+say it is alive and nothing to click to stop it. That is the whole justification
+for these modules.
 
-There is no tray on Linux, where the install is a systemd user unit and
-`systemctl --user stop usb-lcd-dashboard` is the stop button. `start()` returns
-`None` on non-Windows by design.
+`tray.py` holds the portable half and the Win32 backend; `tray_linux.py` holds
+the StatusNotifierItem backend. `start()` dispatches on the platform and returns
+`None` where there is no tray host to talk to — a headless box, or a desktop
+without one. `systemctl --user stop usb-lcd-dashboard` remains the stop button
+of last resort on Linux.
 
 ## API
 
@@ -22,8 +25,18 @@ There is no tray on Linux, where the install is a systemd user unit and
 | `TrayIcon(config, on_quit, state_dir)` | `tray.py:321` | The icon itself. |
 | `.start()` / `.stop()` / `.set_connected(bool)` / `.update_config(cfg)` | `:336`-`:355` | Lifecycle, called from the daemon loop. |
 
+| `icon_png_path(connected, directory)` | `tray.py:152` | Cached `.png`, for SNI. |
+| `LinuxTrayIcon(config, on_quit, state_dir)` | `tray_linux.py:88` | The Linux icon. |
+| `tray_host_available()` | `tray_linux.py:44` | Can this session host one, and is the "no" worth logging. |
+
 `tooltip`, `menu_items`, `icon_image` and `icon_path` are deliberately pure
-functions of their arguments, which is what makes them testable off Windows.
+functions of their arguments, which is what makes them testable off Windows —
+and what keeps the two backends from drifting apart in what the menu says. Both
+build their menu from the same `menu_items()`.
+
+The two backends want different image formats: Win32's `LoadImage` takes a
+multi-size `.ico` file, while an SNI host resolves an icon *name* against a
+theme directory, so Linux writes one `.png` per state named for it.
 
 ## States
 
@@ -52,6 +65,55 @@ an embeddable CPython, and adding a tray library would mean adding it and its
 dependencies to that payload. The icon is drawn with Pillow (already a
 dependency) and registered through `ctypes` against the Win32 API.
 
+## Why AppIndicator rather than raw D-Bus on Linux
+
+The mirror image of the Win32 argument: the `.deb` depends only on Ubuntu
+archive packages, and `python3-gi` plus `gir1.2-ayatanaappindicator3-0.1` are
+both in the archive. Speaking StatusNotifierItem directly would mean
+implementing `com.canonical.dbusmenu` in this repo to get a menu at all.
+
+GTK is not thread-safe and a tray icon belongs to the thread pumping its loop,
+so `tray_linux.py` builds everything inside `_run` and marshals every call from
+the daemon thread through `GLib.idle_add` — the same shape as the Win32 backend,
+which posts window messages rather than touching Win32 off its own thread.
+
+One behavioural difference worth knowing: the host owns the click gesture, so
+GNOME opens the menu on left click instead of activating the default item.
+`set_secondary_activate_target` is a request, not a guarantee.
+
+## Opening things from inside the sandbox
+
+The Linux daemon is a systemd user unit with `ProtectHome=read-only` and
+`PrivateTmp=true`, and every process it forks inherits that. It therefore
+cannot start a browser or a file manager itself, and must ask the desktop
+portal to do it.
+
+Measured inside a replica of the unit's sandbox, on the same session bus, with
+marker URLs so the tab that appeared could be identified:
+
+| Route | Exit code | Opens anything? |
+| --- | --- | --- |
+| plain `xdg-open` | 0 | **no** |
+| `systemd-run --user -- xdg-open` | 0 | **no** |
+| portal `OpenURI` | success | **yes** |
+
+Both losers report success, which is what makes this expensive to diagnose:
+there is no error anywhere, the menu item simply does nothing. `systemd-run`
+without `--wait` reports only that the *job was queued*; adding `--wait` still
+yields 0, because `xdg-open` itself exits 0 having achieved nothing.
+
+Two portal calls, not one:
+
+- `_open_via_portal` → `OpenURI`, for the settings editor's `http://` URL.
+- `_open_directory_via_portal` → `OpenDirectory`, for the log folder. A
+  directory needs a **file descriptor**, not a `file://` URI — the portal
+  cannot tell from a URI alone whether the caller may see that path, so it
+  accepts the URI and quietly does nothing.
+
+`xdg-open` and `webbrowser` remain as fallbacks for a daemon run from a shell
+or a desktop with no portal. `tests/test_tray.py` pins the ordering, because
+reordering it breaks the menu silently on a normal install.
+
 ## Failure is never fatal
 
 `_start_tray` in the daemon (`daemon.py:121-131`) catches everything and warns:
@@ -61,8 +123,10 @@ Turn it off with `[tray] enabled = false`.
 ## Tests
 
 `tests/test_tray.py` — tooltip and menu contents for both states, the icon
-differing between states, and the cached `.ico` path. The Win32 message loop
-itself is marked `pragma: no cover` and exercised only on Windows.
+differing between states, the cached `.ico` and `.png` paths, and the two ways a
+Linux session can lack a tray (no graphical session — quiet; no typelib —
+reported with the package names to install). Neither message loop is exercised:
+both need a real shell to talk to.
 
 ## See also
 

@@ -6,8 +6,9 @@ Architecture: all
 Maintainer: USB LCD Dashboard <noreply@users.noreply.github.com>
 Installed-Size: @INSTALLED_SIZE@
 Depends: python3 (>= 3.12), python3-pil (>= 10.1), python3-serial (>= 3.5),
- python3-numpy, fonts-dejavu-core
-Recommends: systemd, git, fonts-ubuntu
+ python3-usb (>= 1.2.1), python3-pycryptodome (>= 3.20), python3-gi,
+ gir1.2-ayatanaappindicator3-0.1, python3-numpy, fonts-dejavu-core
+Recommends: systemd, git, fonts-ubuntu, xdg-desktop-portal
 Homepage: https://github.com/smartguy05/usb-lcd
 Description: Live Claude Code and Codex dashboard for a USB LCD panel
  Drives a Turing/UsbMonitor 3.5-inch USB LCD as a status display for Claude
@@ -28,3 +29,23 @@ Description: Live Claude Code and Codex dashboard for a USB LCD panel
  fonts-dejavu-core is a hard dependency rather than a recommendation: a minimal
  Ubuntu ships no TrueType font at all, and the panel would silently fall back to
  a bitmap face on a device whose whole purpose is legible text.
+ .
+ python3-usb and python3-pycryptodome drive the current-generation TURZX panels,
+ which speak native USB with encrypted commands rather than the 3.5-inch panel's
+ serial protocol. The versions asked for here are the ones Ubuntu ships, which
+ sit below the floors in pyproject.toml: those floors came in with a bulk
+ dependency bump, and every call this package makes -- usb.util.find_descriptor,
+ endpoint read/write, and DES in CBC mode -- long predates both.
+ .
+ python3-gi and gir1.2-ayatanaappindicator3-0.1 provide the notification-area
+ icon, which is how the settings editor is reached on a desktop. Both are
+ listed as hard dependencies to keep a default install identical to Windows;
+ on a headless box they cost a few megabytes and the daemon logs that it found
+ no tray and carries on.
+ .
+ xdg-desktop-portal is only a recommendation because a headless install needs
+ nothing of it, but on a desktop it is what makes the tray menu work: the
+ daemon runs as a sandboxed systemd user unit, so it cannot start a browser or
+ a file manager itself, and the portal opens them in the session instead.
+ Without it the menu items fall back to xdg-open, which under that sandbox
+ exits successfully and opens nothing.

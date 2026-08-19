@@ -1,3 +1,11 @@
 # Turing/UsbMonitor 3.5-inch LCD, serial USB35INCHIPSV2
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="5722", GROUP="plugdev", MODE="0660", TAG+="uaccess", SYMLINK+="turing-lcd"
 
+# Current-generation TURZX panels (1CBE:*), including the 9.2-inch 1920x462.
+# These enumerate as a single vendor-class (ff) interface with no kernel driver,
+# so there is no tty to grant: libusb talks to /dev/bus/usb/* directly, and that
+# node is root-only by default. Matched on the vendor alone because the set of
+# product ids is a property of turing_usb.py:PRODUCT_SIZES, which grows as
+# panels are added, and a stale rule here would fail as an unwritable device
+# rather than as a missing one.
+SUBSYSTEM=="usb", ATTR{idVendor}=="1cbe", GROUP="plugdev", MODE="0660", TAG+="uaccess"

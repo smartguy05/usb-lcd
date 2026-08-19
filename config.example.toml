@@ -28,6 +28,6 @@ port = 45722
 enabled = true
 port = 45723
 
-# The system tray icon (Windows only).
+# The system tray icon. Windows and Linux; ignored where there is no tray.
 [tray]
 enabled = true

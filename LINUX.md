@@ -1,6 +1,6 @@
 # Ubuntu package
 
-`usb-lcd-dashboard_0.10.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
+`usb-lcd-dashboard_0.11.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
 (noble) and later.
 
 Unlike the Windows installer it does **not** bundle a Python runtime. Ubuntu
@@ -15,18 +15,20 @@ The package is architecture-independent: nothing in it is compiled.
 Built 2026-08-17 from the current source tree and smoke-tested on Ubuntu 24.04:
 
 ```text
-dist/usb-lcd-dashboard_0.10.0_all.deb
+dist/usb-lcd-dashboard_0.11.0_all.deb
 sha256 aa964c6d2beab6f4943b46aa55b3da75741f1178469e53be089b89c5e7696005
 ```
 
 ## Install
 
 ```bash
-sudo apt install ./usb-lcd-dashboard_0.10.0_all.deb
+sudo apt install ./usb-lcd-dashboard_0.11.0_all.deb
 ```
 
-That is the system-wide half: the program, and the udev rule that creates
-`/dev/turing-lcd` and grants you access to it.
+That is the system-wide half: the program, and the udev rule that grants you
+access to the panel — either `/dev/turing-lcd` for the 3.5" serial panel, or the
+raw `/dev/bus/usb` node for a current-generation TURZX panel (`1cbe:*`), which
+has no tty of its own.
 
 The other half is per-user, because the hooks and the service live in your home
 directory. Run it **as yourself, not with sudo**:
@@ -61,7 +63,7 @@ all tile rectangles together.
 /usr/bin/usb-lcd-dashboard                     the command
 /usr/lib/python3/dist-packages/usb_lcd_dashboard/    the dashboard
 /usr/lib/python3/dist-packages/smartscreen_driver/   the vendored panel driver
-/lib/udev/rules.d/99-turing-lcd.rules          creates /dev/turing-lcd
+/lib/udev/rules.d/99-turing-lcd.rules          panel access (both transports)
 /usr/share/doc/usb-lcd-dashboard/              this file, an example config
 ```
 
@@ -87,8 +89,15 @@ systemctl --user restart usb-lcd-dashboard
 journalctl --user -u usb-lcd-dashboard -f
 ```
 
-There is no log file on Linux and no tray icon: the daemon logs to the journal,
-and `systemctl --user` is the stop button.
+There is no log file on Linux — the daemon logs to the journal. There *is* a
+tray icon, in the notification area, the same as on Windows: green when the
+panel is attached, grey while it is still looking, and its menu opens the
+settings editor. `systemctl --user` remains the stop button, and is the only one
+where no tray host is running.
+
+GNOME shows StatusNotifierItem icons only through an extension; Ubuntu enables
+that by default. On a desktop that has none, or on a headless box, the daemon
+logs that it found no tray and carries on.
 
 To keep the panel alive when you are not logged in graphically:
 
@@ -109,8 +118,10 @@ it will correctly report the device as missing.
 
 | Symptom | Cause |
 | --- | --- |
-| `FAIL device` | Panel not plugged in, or the udev rule has not applied — replug it |
-| `FAIL read/write access` | Rule applied but your session predates it; log out and back in |
+| `FAIL device` | Panel not plugged in, or the udev rule has not applied — replug it. The detail line names which panel is being waited for |
+| `FAIL read/write access` | Rule applied but your session predates it; log out and back in. For a TURZX panel the detail line names the exact `/dev/bus/usb` node |
+| No tray icon | Missing `gir1.2-ayatanaappindicator3-0.1`, or a desktop with no StatusNotifierItem host. `journalctl --user -u usb-lcd-dashboard \| grep -i tray` says which |
+| Tray menu items do nothing | Missing `xdg-desktop-portal`. The daemon is a sandboxed unit and cannot launch a browser itself; the log says `Desktop portal could not open ...` |
 | `FAIL service` | Not started: `systemctl --user enable --now usb-lcd-dashboard` |
 | `FAIL layout` | `config.toml` names an unknown widget or an overlapping tile; the message names the offending one |
 | Hooks fire but the panel never updates | The daemon is not running, or `[ipc]` in `config.toml` disagrees with the installed hooks |
