@@ -75,7 +75,19 @@ def main(argv: list[str] | None = None) -> int:
         from .daemon import DashboardDaemon
 
         assert config is not None
-        DashboardDaemon(config, simulate=args.simulate).run()
+        try:
+            DashboardDaemon(config, simulate=args.simulate).run()
+        except OSError as exc:
+            # The Start-menu and Startup shortcuts are intentionally the same.
+            # If the existing console-less daemon owns the IPC endpoint, make a
+            # second launch useful by asking it to discard its USB handle.  This
+            # is also the manual recovery path after a troublesome sleep/wake.
+            if send_control(config, "reconnect"):
+                logging.getLogger(__name__).info(
+                    "Dashboard already running; requested an LCD reconnect"
+                )
+                return 0
+            raise exc
         return 0
     if args.command == "emit":
         assert config is not None

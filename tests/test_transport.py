@@ -14,6 +14,25 @@ from usb_lcd_dashboard.transport import (
 )
 
 
+def test_relaunch_requests_reconnect_from_the_existing_daemon(monkeypatch):
+    class ExistingDaemon:
+        def __init__(self, config, simulate=False):
+            pass
+
+        def run(self):
+            raise OSError("address already in use")
+
+    controls = []
+    monkeypatch.setattr("usb_lcd_dashboard.daemon.DashboardDaemon", ExistingDaemon)
+    monkeypatch.setattr(
+        "usb_lcd_dashboard.cli.send_control",
+        lambda config, control: controls.append(control) or True,
+    )
+
+    assert main(["run"]) == 0
+    assert controls == ["reconnect"]
+
+
 def test_missing_daemon_is_nonblocking(tmp_path, monkeypatch):
     # Point at an endpoint nothing is listening on, for whichever IPC mode this
     # platform defaults to; on Windows that is TCP, where a live dashboard
@@ -55,7 +74,7 @@ def test_missing_tcp_daemon_is_nonblocking():
 
 def test_statusline_proxy_preserves_output(monkeypatch, capfd):
     payload = json.dumps({"session_id": "test"}).encode()
-    encoded = base64.urlsafe_b64encode(b"cat").decode()
+    encoded = base64.urlsafe_b64encode(b"downstream-command").decode()
 
     class FakeStdin:
         class Buffer:
@@ -65,6 +84,13 @@ def test_statusline_proxy_preserves_output(monkeypatch, capfd):
         buffer = Buffer()
 
     monkeypatch.setattr("sys.stdin", FakeStdin())
+
+    def downstream(command, *, shell, input, stdout, stderr, check, creationflags):
+        assert command == "downstream-command"
+        stdout.write(input)
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr("usb_lcd_dashboard.cli.subprocess.run", downstream)
     assert main(["statusline-proxy", "--downstream-b64", encoded]) == 0
     assert capfd.readouterr().out == payload.decode()
 

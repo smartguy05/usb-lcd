@@ -57,6 +57,8 @@ class Display:
                 self.panel.close()
             finally:
                 self.opened = False
+        else:
+            self.opened = False
 
     def paint(self, image: Image.Image, force: bool = False) -> bool:
         if self.panel is None or not self.opened:

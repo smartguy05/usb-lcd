@@ -52,6 +52,15 @@ def test_switching_to_the_legacy_panel_restores_its_fixed_profile():
     assert 'widget: "legacy", x: 0, y: 0' in PAGE
 
 
+def test_switching_to_the_turzx_panel_restores_its_wide_profile():
+    """The USB transport cannot retain the legacy 480x320 canvas."""
+    assert 'if (kind === "turing_usb")' in PAGE
+    assert 'cfg.display.width = 1920;' in PAGE
+    assert 'cfg.display.height = 462;' in PAGE
+    assert '{widget:"clock", x:12, y:12, w:404, h:438' in PAGE
+    assert '{widget:"crab", x:1424, y:12, w:484, h:438' in PAGE
+
+
 @pytest.fixture
 def state(tmp_path):
     path = tmp_path / "config.toml"

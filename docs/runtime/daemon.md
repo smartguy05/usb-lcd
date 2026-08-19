@@ -37,6 +37,7 @@ Set in `__init__` (`daemon.py:20-34`):
 | `slot_count` | How many sessions can be on screen — derived *from the layout*, not configured. |
 | `running` | Loop flag. |
 | `next_connect` | Monotonic gate for reconnect backoff. |
+| `last_loop_tick` | Detects a suspend/resume-sized pause so the stale display handle can be replaced. |
 | `config_signature` | Raw bytes of config.toml, for change detection. |
 | `next_config_check` | Monotonic gate throttling reload checks to 1 Hz. |
 | `last_frame` | Last composed image, for the editor's preview. |
@@ -90,6 +91,14 @@ rapid sequence of hook events appears on the panel slightly behind the terminal.
 6. `_apply_config(fresh)` swaps config, updates store TTLs, recomputes
    `slot_count`, updates the tray.
 7. If the display settings changed, rebuild `Display` and force a reconnect.
+
+## Sleep/resume recovery
+
+If consecutive loop ticks are separated by ten seconds or more, the daemon
+treats the gap as suspend/resume (or a stalled USB stack), closes the old display
+handle, and reconnects before painting again. A `reconnect` control envelope
+provides the same recovery path when the Start-menu shortcut is launched while
+the daemon is already running.
 
 **Contents, not mtime** — quoted from `_config_signature` (`daemon.py:51-58`):
 

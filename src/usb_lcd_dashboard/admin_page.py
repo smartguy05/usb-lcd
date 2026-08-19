@@ -720,8 +720,38 @@ function drawSideForms() {
 }
 
 function changeDisplayKind(kind) {
+  const previous = cfg.display.kind;
   cfg.display.kind = kind;
-  if (kind !== "turing_rev_a" && kind !== "auto") return;
+  if (kind === "turing_usb") {
+    // The shipped wide-panel profile is the TURZX 1CBE:0092. Switching only
+    // the transport used to retain the Rev A 480x320 canvas, so every reconnect
+    // was rejected even though the USB device had been found successfully.
+    cfg.display.width = 1920;
+    cfg.display.height = 462;
+    const legacyProfile = cfg.tiles.length === 1 &&
+      cfg.tiles[0].widget === "legacy" && cfg.tiles[0].x === 0 &&
+      cfg.tiles[0].y === 0 && cfg.tiles[0].w <= 480 && cfg.tiles[0].h <= 480;
+    if (legacyProfile || previous === "turing_rev_a" || previous === "auto") {
+      cfg.tiles = [
+        {widget:"clock", x:12, y:12, w:404, h:438,
+          options:{title:"HOME", hour12:true, seconds:true, show_date:true}},
+        {widget:"agent", x:428, y:12, w:486, h:438, options:{}},
+        {widget:"messages", x:926, y:12, w:486, h:438,
+          options:{title:"DISCORD"}},
+        {widget:"crab", x:1424, y:12, w:484, h:438,
+          options:{animate:true, alarm:true}}
+      ];
+      sel = 0;
+    }
+    drawStage();
+    drawTileForm();
+    drawSideForms();
+    return;
+  }
+  if (kind !== "turing_rev_a" && kind !== "auto") {
+    drawSideForms();
+    return;
+  }
 
   // The serial Rev A panel has one fixed native size. Keeping a wide panel's
   // dimensions and tiles when its transport is changed strands the daemon at
