@@ -422,7 +422,7 @@ sessions — but they are packaged differently, because the platforms differ:
 | Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
 | Size | 22.6 MB | 101.5 KB plus dependencies |
-| SHA-256 | _(rebuild on Windows for 0.11.0)_ | `8095f612235ad82133a80281166693efb850014d06b503202235f923c56fa3e2` |
+| SHA-256 | `54fea4bb80d18bc9bfd1fd842a79afc8f8ce5549f7ef3db381c102c392471722` | `8095f612235ad82133a80281166693efb850014d06b503202235f923c56fa3e2` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 

@@ -11,11 +11,9 @@
 - [x] Committed on branch feat/linux-tray-and-turzx-panel (f4f1287)
 
 ## Outstanding
-- [ ] dist/USB-LCD-Dashboard-Setup-0.11.0.exe does NOT exist. Runtime code
-      changed on both platforms, so the Windows artifact is stale. Must be
-      built from Windows Git Bash + Windows SDK (identity/MSIX signing);
-      cannot be done from Linux. README's Windows SHA-256 cell is a
-      placeholder until then.
+- [x] Built `dist/USB-LCD-Dashboard-Setup-0.11.0.exe` from Windows Git Bash
+      with the Windows SDK and signed identity MSIX; recorded its SHA-256 in
+      README.md.
 - [ ] Four pre-existing doctor FAILs, unrelated to this work:
         Claude/Codex hook timeout (< 10s), Claude/Codex todo tools
       `usb-lcd-dashboard install` should repair all four. NOT run yet because

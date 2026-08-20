@@ -76,3 +76,12 @@ The user then rearranged tiles in that editor and the daemon reloaded live.
 What broke the loop: marker URLs (?probe=A/C/D) plus asking the human which
 tab appeared, and firing com.canonical.dbusmenu Event directly instead of
 relying on clicks. Both are written up in notes.md as the diagnostic recipe.
+
+## Windows installer, 2026-08-20
+
+- Fast-forwarded local `master` to `origin/master` at `64295ce` after the
+  merged feature branch was deleted remotely.
+- Built and signed `dist/USB-LCD-Dashboard-Setup-0.11.0.exe` from the updated
+  tree: 22,647,849 bytes, SHA-256
+  `54FEA4BB80D18BC9BFD1FD842A79AFC8F8CE5549F7EF3DB381C102C392471722`.
+- Replaced the README Windows hash placeholder with the verified digest.
