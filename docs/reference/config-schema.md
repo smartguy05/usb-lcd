@@ -68,6 +68,11 @@ h = 438
 
 ## Tile options
 
+With `display.kind = "auto"`, the daemon detects the attached legacy serial or
+TURZX USB panel and keeps its full settings in `profiles/<device-key>.toml`.
+The active profile is mirrored to `config.toml`; configure each panel once and
+later hardware switches restore it automatically.
+
 Every widget built on `new_tile` honours:
 
 | Option | Type | Default | Meaning |

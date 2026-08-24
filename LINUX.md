@@ -12,11 +12,11 @@ step that would need network access at install time.
 
 The package is architecture-independent: nothing in it is compiled.
 
-Built 2026-08-17 from the current source tree and smoke-tested on Ubuntu 24.04:
+Built 2026-08-24 from the current source tree and smoke-tested on Ubuntu 24.04:
 
 ```text
 dist/usb-lcd-dashboard_0.11.0_all.deb
-sha256 aa964c6d2beab6f4943b46aa55b3da75741f1178469e53be089b89c5e7696005
+sha256 405ed85483fc57139bb0777fdbd460cc30c1c4e1990f51ddbff0736b860d3cbe
 ```
 
 ## Install
@@ -72,6 +72,7 @@ Per-user, created by `usb-lcd-dashboard install`:
 
 ```text
 ~/.config/usb-lcd-dashboard/config.toml        your layout
+~/.config/usb-lcd-dashboard/profiles/           per-panel layouts in auto mode
 ~/.config/usb-lcd-dashboard/todos.sqlite3      human todo history
 ~/.config/usb-lcd-dashboard/install-state.json what to undo on uninstall
 ~/.config/systemd/user/usb-lcd-dashboard.service

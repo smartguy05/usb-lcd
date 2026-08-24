@@ -1,5 +1,9 @@
 usb-lcd-dashboard (0.11.0) noble; urgency=medium
 
+  * Auto-detect the attached panel and restore a separately saved layout for
+    each serial or TURZX device, for laptops moving between desks and KVMs.
+  * Keep Claude session and weekly limit meters synchronized with the OAuth
+    usage endpoint when status-line updates are quiet.
   * Add a Linux notification-area icon, matching the Windows tray.
   * Drive current-generation TURZX USB panels on Linux: ship the raw-USB udev
     rule and depend on python3-usb and python3-pycryptodome.

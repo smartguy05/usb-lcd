@@ -5,6 +5,7 @@ import logging
 import signal
 import socket
 import time
+from dataclasses import replace
 
 from .config import Config, default_path, load_config
 from .display import Display
@@ -17,6 +18,7 @@ from .transport import bind_socket, poll_timeout, receive_event
 from .todos import TodoStore
 from .claude_limits import ClaudeLimitsIntegration
 from .screensaver import render_screensaver
+from .profiles import ProfileStore, detect_panel
 
 LOG = logging.getLogger(__name__)
 
@@ -31,6 +33,7 @@ class DashboardDaemon:
         self.config = config
         self.simulate = simulate
         self.config_path = config_path or default_path()
+        self.profiles = ProfileStore(self.config_path)
         self.display = Display(config, simulate=simulate)
         self.store = StateStore()
         self.discord = DiscordIntegration()
@@ -138,6 +141,7 @@ class DashboardDaemon:
             or fresh.brightness != self.config.brightness
         )
         self._apply_config(fresh)
+        self.profiles.save_active(fresh)
         self.last_activity = time.monotonic()
         LOG.info(
             "Config reloaded: %s tiles, %s agent slots", len(fresh.tiles), self.slot_count
@@ -194,6 +198,23 @@ class DashboardDaemon:
         if self.display.connected or time.monotonic() < self.next_connect:
             return
         try:
+            if self.config.display_kind == "auto" and not self.simulate:
+                panel = detect_panel()
+                if panel is None:
+                    raise ConnectionError("No supported LCD detected")
+                selected = self.profiles.activate(panel, self.config)
+                if selected != self.config:
+                    self._apply_config(selected)
+                    self.config_signature = self._config_signature()
+                # Auto profiles have variable sizes, so transport selection
+                # cannot use the active profile's dimensions as its detector.
+                effective = replace(
+                    self.config,
+                    display_kind=panel.kind,
+                    device=panel.device,
+                )
+                self.display.close()
+                self.display = Display(effective)
             self.display.connect()
             LOG.info("LCD connected at %s", self.display.device)
         except Exception as exc:

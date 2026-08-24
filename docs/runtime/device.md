@@ -1,6 +1,6 @@
 # device.py — the wire to a panel
 
-> **Covers:** `src/usb_lcd_dashboard/device.py`, `src/usb_lcd_dashboard/turing_usb.py`, `src/usb_lcd_dashboard/orientation.py`
+> **Covers:** `src/usb_lcd_dashboard/device.py`, `src/usb_lcd_dashboard/turing_usb.py`, `src/usb_lcd_dashboard/orientation.py`, `src/usb_lcd_dashboard/profiles.py`
 
 Defines the `PanelDevice` protocol and its four implementations: the 3.5" Turing
 serial panel, current-generation TURZX panels over native USB, a file-writing
@@ -26,7 +26,20 @@ from `display.kind` to a class. A new kind must be added **both** here and to
 `DISPLAY_KINDS` in [config.md](config.md), or the config will validate and then
 fail at connect time.
 
-### `auto` decides on size, not by probing
+### `auto` selects a hardware profile
+
+At daemon runtime, `profiles.py` probes the bus on every disconnected
+reconnect. A legacy `USB35INCHIPSV2` serial panel maps to
+`legacy-480x320`; each TURZX USB product maps to `turzx-<pid>` (for example
+`turzx-0092`). The selected profile supplies the size and layout before the
+explicit transport is constructed.
+
+Profiles are full TOML files under `profiles/`. The active profile is mirrored
+to `config.toml`, keeping the settings editor and existing tooling compatible.
+On first use, a matching existing config is seeded without changing its layout.
+
+The size-based `_autodetect` below remains for standalone callers and
+simulation; the daemon no longer relies on it to choose between desks.
 
 `_autodetect` (`device.py:245`) maps the configured size to a transport:
 `LEGACY_SIZE` is the serial panel, anything in `turing_usb.py:PRODUCT_SIZES` is

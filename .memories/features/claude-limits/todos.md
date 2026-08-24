@@ -5,3 +5,4 @@
 - [x] Hook startup and timeout hardening
 - [x] Tests and documentation
 - [x] Version, installers, smoke tests, metadata, and hashes
+- [x] Refresh session and weekly buckets from OAuth usage and rebuild installers

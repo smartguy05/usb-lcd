@@ -6,6 +6,10 @@ Owns the `Config` dataclass, TOML load/parse/dump/write, and path resolution.
 Every default lives here exactly once; the example TOML files are *generated*
 from it and a test asserts they have not drifted.
 
+When `display.kind = "auto"`, `profiles.py` stores one complete configuration
+per detected panel under the sibling `profiles/` directory. `config.toml`
+remains the active copy, so hand edits and the settings editor work unchanged.
+
 ## API
 
 | Symbol | Line | Purpose |

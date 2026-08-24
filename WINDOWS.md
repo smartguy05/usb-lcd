@@ -5,12 +5,12 @@
 pinned SmartScreen driver, and the dashboard application. Python does not need
 to be installed separately.
 
-Built 2026-08-17 with tile support, the tray icon, the crab, direct USB,
+Built 2026-08-24 with tile support, the tray icon, the crab, direct USB,
 filterable Windows notifications, shared human todos, and Claude limit meters:
 
 ```text
 dist/USB-LCD-Dashboard-Setup-0.11.0.exe
-sha256 32536024687d093146efc2209a6714c29418755b61f7c5d7314af95f7c3f9dde
+sha256 1e00f92cc6a895bded17b694188e0310d36d670638b7b43bd215fc5b39108746
 ```
 
 Older installers in `dist/` predate the current notification-capable package.
@@ -68,6 +68,13 @@ VID/PID `1A86:5722`. To force a particular port, edit:
 ```
 
 and change `device = "AUTO"` to a value such as `device = "COM4"`.
+
+For a laptop used with different panels, set `kind = "auto"`. While
+disconnected the daemon probes for either the serial panel or any supported
+TURZX native-USB product. It stores separate layouts under
+`%LOCALAPPDATA%\usb-lcd-dashboard\profiles\` and restores the matching one when
+the KVM or cable brings that panel back. The first matching existing layout is
+migrated automatically; configure a newly seen panel once in the editor.
 
 The tray's settings editor also provides four mounting orientations, a managed
 PNG/JPEG/WebP wallpaper upload with translucent cards, and the screen-saver

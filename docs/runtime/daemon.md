@@ -33,6 +33,7 @@ Set in `__init__` (`daemon.py:20-34`):
 | Attribute | Meaning |
 | --- | --- |
 | `display` | A [`Display`](display.md), built whether or not hardware exists. |
+| `profiles` | Hardware-keyed configurations used while `display.kind` is `auto`. |
 | `store` | The [`StateStore`](../sessions/model.md). |
 | `slot_count` | How many sessions can be on screen — derived *from the layout*, not configured. |
 | `running` | Loop flag. |
