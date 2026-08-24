@@ -934,6 +934,12 @@ function drawPanels() {
 function changeDisplayKind(kind) {
   const previous = cfg.display.kind;
   cfg.display.kind = kind;
+  // Auto means hardware-selected saved profiles. Preserve the panel currently
+  // being edited so the daemon can seed its first profile from this layout.
+  if (kind === "auto") {
+    drawPanels();
+    return;
+  }
   if (kind === "turing_usb") {
     // The shipped wide-panel profile is the TURZX 1CBE:0092. Switching only
     // the transport used to retain the Rev A 480x320 canvas, so every reconnect
@@ -960,7 +966,7 @@ function changeDisplayKind(kind) {
     drawPanels();
     return;
   }
-  if (kind !== "turing_rev_a" && kind !== "auto") {
+  if (kind !== "turing_rev_a") {
     drawPanels();
     return;
   }

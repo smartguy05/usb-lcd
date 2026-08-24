@@ -164,11 +164,12 @@ keep passing:
 
 ### Switching back to the legacy LCD
 
-Choosing `turing_rev_a` or `auto` in the display-kind picker restores the
+Choosing `turing_rev_a` in the display-kind picker restores the
 orientation-correct legacy canvas (`480×320` landscape or `320×480` portrait)
 and replaces the current layout with one full-screen `legacy` tile. This prevents
-a wide-panel layout from being sent to the fixed-size Rev A serial display. Other
-display kinds retain their editable dimensions and tiles.
+a wide-panel layout from being sent to the fixed-size Rev A serial display.
+Choosing `auto` preserves the current canvas so it can seed that hardware's
+profile; later detected panels restore their own saved canvas and tiles.
 
 ## Tests
 

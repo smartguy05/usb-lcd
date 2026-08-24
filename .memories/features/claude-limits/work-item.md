@@ -9,3 +9,5 @@ Add a responsive LCD widget for Claude's 5-hour, weekly, and Fable usage limits,
 - Missing/stale sources degrade without breaking hooks or the dashboard.
 - Hook emitters stay below their configured timeout when the display or daemon is unavailable.
 - Documentation, versioned installers, metadata, smoke tests, and hashes are current.
+- Session and weekly values converge with Claude's usage UI even when no fresh
+  status-line payload has been emitted.

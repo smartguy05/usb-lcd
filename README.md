@@ -384,16 +384,16 @@ waiting on a tool call emits nothing until the tool returns, which is why work i
 flight expires on `tool_ttl_seconds` rather than the much shorter
 `active_ttl_seconds`.
 
-## The 9.2" ultra-wide panel
+## Multiple panels and the 9.2" ultra-wide panel
 
-Its transport is **not settled**. The panel's manual contains no protocol,
-driver, resolution or USB id — only safety boilerplate — and the bundled
-`smartscreen-driver` supports 320×480, 480×800 and 600×1024, not 1920×462. So it
-is either a display the OS enumerates as a monitor (`display.kind = "window"`) or
-a different vendor serial protocol. Both sit behind the same `PanelDevice`
-interface in `device.py`; `"window"` currently raises with a message saying so.
+The 9.2" TURZX panel is supported directly over native USB (`1CBE:0092`) at
+1920x462. A laptop that moves between it and the 480x320 serial panel can set
+`display.kind = "auto"`: the daemon detects the attached hardware and restores
+its saved layout from the `profiles/` directory beside `config.toml`. Configure
+each panel once in the settings editor; later KVM and location changes switch
+without editing canvas dimensions.
 
-Until the hardware is in hand, use `kind = "simulated"`, which renders the real
+For development without hardware, use `kind = "simulated"`, which renders the real
 frame at the real size to `screencap.png`. The whole layout, the widgets and the
 tile arbitration are fully exercisable that way:
 
@@ -421,8 +421,8 @@ sessions — but they are packaged differently, because the platforms differ:
 | --- | --- | --- |
 | Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
-| Size | 22.6 MB | 101.5 KB plus dependencies |
-| SHA-256 | `54fea4bb80d18bc9bfd1fd842a79afc8f8ce5549f7ef3db381c102c392471722` | `8095f612235ad82133a80281166693efb850014d06b503202235f923c56fa3e2` |
+| Size | 22.6 MB | 108.1 KB plus dependencies |
+| SHA-256 | `1e00f92cc6a895bded17b694188e0310d36d670638b7b43bd215fc5b39108746` | `405ed85483fc57139bb0777fdbd460cc30c1c4e1990f51ddbff0736b860d3cbe` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 

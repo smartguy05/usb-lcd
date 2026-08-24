@@ -52,6 +52,13 @@ def test_switching_to_the_legacy_panel_restores_its_fixed_profile():
     assert 'widget: "legacy", x: 0, y: 0' in PAGE
 
 
+def test_enabling_auto_preserves_the_current_panel_for_profile_seeding():
+    auto = PAGE.index('if (kind === "auto")')
+    legacy = PAGE.index('if (kind !== "turing_rev_a")')
+    assert auto < legacy
+    assert 'drawPanels();\n    return;' in PAGE[auto:legacy]
+
+
 def test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs():
     """The stage stays put; everything else is a tab or collapses away."""
     assert 'id="stage"' in PAGE and 'id="settingsPanel"' in PAGE

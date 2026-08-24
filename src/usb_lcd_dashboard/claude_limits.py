@@ -1,8 +1,8 @@
 """Claude subscription limit snapshots for the LCD limits widget.
 
 Claude Code supplies the shared five-hour and seven-day windows to its status
-line.  Model-scoped limits are not included there, so Fable is refreshed from
-the same OAuth usage endpoint that backs Claude's own usage UI.  Only normalized
+line.  The same windows, plus model-scoped limits, are periodically refreshed
+from the OAuth usage endpoint that backs Claude's own usage UI.  Only normalized
 percentages and timestamps are persisted; credentials and raw responses are not.
 """
 
@@ -101,6 +101,17 @@ def parse_fable(payload: Any, now: datetime) -> LimitWindow | None:
         if "fable" in name.casefold():
             return parse_window(entry.get("window") or entry.get("rate_limit") or entry, "oauth", now)
     return None
+
+
+def parse_usage(payload: Any, now: datetime) -> ClaudeLimitsSnapshot:
+    """Normalize every limit bucket returned by Claude's usage endpoint."""
+    if not isinstance(payload, dict):
+        return ClaudeLimitsSnapshot()
+    return ClaudeLimitsSnapshot(
+        five_hour=parse_window(payload.get("five_hour"), "oauth", now),
+        seven_day=parse_window(payload.get("seven_day"), "oauth", now),
+        fable=parse_fable(payload, now),
+    )
 
 
 def _account_uuid() -> str:
@@ -245,7 +256,7 @@ class ClaudeLimitsIntegration:
         with self._lock:
             return self._snapshot
 
-    def _fetch_fable(self) -> LimitWindow | None:
+    def _fetch_usage(self) -> ClaudeLimitsSnapshot:
         token, expires_ms = _credential()
         if not token or (expires_ms is not None and expires_ms <= int(time.time() * 1000)):
             raise RuntimeError("Claude OAuth credential unavailable or expired")
@@ -259,11 +270,11 @@ class ClaudeLimitsIntegration:
         )
         with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
             payload = json.load(response)
-        return parse_fable(payload, datetime.now(timezone.utc))
+        return parse_usage(payload, datetime.now(timezone.utc))
 
     def _refresh(self) -> None:
         try:
-            fable = self._fetch_fable()
+            fetched = self._fetch_usage()
         except urllib.error.HTTPError as exc:
             if exc.code == 429:
                 retry = exc.headers.get("Retry-After", "") if exc.headers else ""
@@ -284,11 +295,11 @@ class ClaudeLimitsIntegration:
             with self._lock:
                 old = self._snapshot
                 self._snapshot = ClaudeLimitsSnapshot(
-                    old.five_hour,
-                    old.seven_day,
-                    fable or old.fable,
-                    "current" if fable else old.status,
-                    "" if fable else "Fable limit unavailable",
+                    fetched.five_hour or old.five_hour,
+                    fetched.seven_day or old.seven_day,
+                    fetched.fable or old.fable,
+                    "current" if any((fetched.five_hour, fetched.seven_day, fetched.fable)) else old.status,
+                    "" if fetched.fable else "Fable limit unavailable",
                 )
                 snapshot = self._snapshot
             try:

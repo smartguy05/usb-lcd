@@ -8,3 +8,6 @@
 - Documented the limits source/security/degradation behavior and regenerated a fully covered documentation index.
 - Visually inspected the final 480x320 render and adjusted the ring, rows, title, and stale marker for LCD legibility.
 - Released version 0.9.0 artifacts: rebuilt the signed Windows installer and Debian package, then passed the Ubuntu 24.04 install/render/doctor/uninstall smoke test.
+- Fixed stale session/weekly meters by retaining all buckets from the periodic
+  OAuth usage refresh; added regression coverage and rebuilt both 0.11.0
+  installers. The full test suite and Debian smoke test pass.
