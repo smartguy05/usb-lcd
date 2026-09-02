@@ -59,13 +59,16 @@ def test_enabling_auto_preserves_the_current_panel_for_profile_seeding():
     assert 'drawPanels();\n    return;' in PAGE[auto:legacy]
 
 
-def test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs():
+def test_the_editor_is_split_into_a_stage_a_panel_and_three_tabs():
     """The stage stays put; everything else is a tab or collapses away."""
     assert 'id="stage"' in PAGE and 'id="settingsPanel"' in PAGE
     for mount in ("bgForm", "screensaverForm", "displayForm"):
         assert 'id="%s"' % mount in PAGE
     assert 'id="tabBtnLive"' in PAGE and 'id="tabBtnWidget"' in PAGE
     assert 'id="tabLive"' in PAGE and 'id="tabWidget"' in PAGE
+    # The active background is a tab of its own, with its own form mount.
+    assert 'id="tabBtnActiveBg"' in PAGE and 'id="tabActiveBg"' in PAGE
+    assert 'id="activeBgForm"' in PAGE
     # The live frame is the only thing in its tab; the stage is not inside one.
     assert PAGE.index('id="stage"') < PAGE.index('id="tabLive"')
 
@@ -190,6 +193,27 @@ def test_config_from_json_applies_edits(state):
     assert result.idle_title == "HOME"
     assert result.screensaver_idle_seconds == 1200
     assert result.tiles[0].options["title"] == "HOME"
+
+
+def test_config_to_json_omits_the_active_background_when_off():
+    assert config_to_json(Config())["active_background"] is None
+
+
+def test_config_from_json_applies_the_active_background(state):
+    st, holder = state
+    payload = config_to_json(holder["config"])
+    payload["active_background"] = {
+        "enabled": True, "scale": 0.3, "speed_min": 25,
+        "speed_max": 180, "opacity": 0.7,
+    }
+    result = config_from_json(holder["config"], payload)
+    assert result.active_background is not None
+    assert result.active_background.enabled is True
+    assert result.active_background.scale == 0.3
+    assert result.active_background.speed_max == 180
+    # And clearing it (checkbox off → null) turns the layer back off.
+    payload["active_background"] = None
+    assert config_from_json(result, payload).active_background is None
 
 
 def test_layout_rotation_payload_rotates_every_tile():

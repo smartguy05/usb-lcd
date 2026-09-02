@@ -289,6 +289,40 @@ rect and fall back to full-frame writes.
 If you would rather not raise the refresh rate, set `animate = false` and the
 crab still changes expression with the phase — it just does not move.
 
+## The active background (running fox)
+
+The **active background** is a live wallpaper rather than a tile: a red fox that
+runs across the whole panel *behind* every tile, disappears off one edge, waits a
+beat, then re-enters from the other side. It is off by default. Turn it on from
+the settings editor's **Active background** tab, or in `config.toml`:
+
+```toml
+[active_background]
+enabled = true
+scale = 0.45      # the fox's height as a fraction of the panel height
+speed_min = 40    # pixels/second when the CPU is idle
+speed_max = 220   # pixels/second when the CPU is pegged
+opacity = 1.0     # fade the whole layer, 0..1
+```
+
+Its **speed follows CPU load**: the fox ambles when the machine is quiet and
+sprints when it is busy, lerping between `speed_min` and `speed_max` from the
+live CPU percentage (via `psutil`; if that is ever missing the fox simply runs at
+a neutral speed rather than failing). This is the one thing here that cannot be a
+normal widget — a tile is a pure function of the clock, but a position that is the
+integral of a *varying* speed has to be carried between frames, so the layer is
+stepped by the daemon and composited under the tiles.
+
+Because it sits **behind** the tiles, an opaque tile card hides the fox where it
+overlaps; you see it in the gutters and margins. Set a tile's card colour to
+`transparent` to let more of it show through. The same wire limits as the crab
+apply — the fox moves in ~2.4 fps steps, not a smooth glide, and a moving object
+dirties the band it crosses — so it is deliberately a low-key backdrop.
+
+The art is a six-frame run cycle under `assets/fox/`, baked by
+`tools/make_fox_sprites.py`; drop your own equal-height RGBA `run_XX.png` frames
+in to replace it.
+
 ## The settings editor
 
 Rects are quick to render and awkward to type, so the daemon serves an editor at
@@ -299,10 +333,11 @@ widget appears there with working inputs and its own help text.
 
 The canvas is always on screen because everything else is relative to a tile on
 it. Below it sit a collapsed **Settings** panel for the things that belong to the
-whole screen — background, screen saver, display — and two tabs: **Live panel**,
-a view of the frame **actually on the panel**, which is why the editor runs
-inside the daemon rather than as a separate tool; and **Widget settings** for
-whichever tile is selected. Clicking a tile takes you there.
+whole screen — background, screen saver, display — and three tabs: **Live
+panel**, a view of the frame **actually on the panel**, which is why the editor
+runs inside the daemon rather than as a separate tool; **Widget settings** for
+whichever tile is selected (clicking a tile takes you there); and **Active
+background**, where the running fox is turned on and tuned.
 
 Settings for a *source* travel with the widget that shows it, so the Discord
 connection appears only while a `messages` tile is selected, Windows notification
@@ -419,12 +454,16 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.11.0.exe` | `usb-lcd-dashboard_0.11.0_all.deb` |
-| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb |
-| Size | 22.6 MB | 108.1 KB plus dependencies |
-| SHA-256 | `1e00f92cc6a895bded17b694188e0310d36d670638b7b43bd215fc5b39108746` | `405ed85483fc57139bb0777fdbd460cc30c1c4e1990f51ddbff0736b860d3cbe` |
+| Package | `USB-LCD-Dashboard-Setup-0.12.0.exe` | `usb-lcd-dashboard_0.12.0_all.deb` |
+| Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb/psutil |
+| Size | 22.6 MB | 172.1 KB plus dependencies |
+| SHA-256 | _pending a Windows build — see [WINDOWS.md](WINDOWS.md)_ | `4eca6f056f9b758e0ec52e21b6ab5c261f062e515e59d79864ed7bb7597f49d1` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
+
+> The 0.12.0 Windows installer is not yet in `dist/` — the identity-enabled
+> `.exe` must be built on Windows (see [WINDOWS.md](WINDOWS.md)). The 0.12.0
+> Ubuntu `.deb` above is built and smoke-tested.
 
 Both are reversible, both preserve an existing Claude status line, and neither
 displays prompts or transcript text.
@@ -436,10 +475,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.11.0.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.12.0.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.11.0.exe
+.\dist\USB-LCD-Dashboard-Setup-0.12.0.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -471,7 +510,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.11.0_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.12.0_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and

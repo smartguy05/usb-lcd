@@ -7,7 +7,8 @@ Maintainer: USB LCD Dashboard <noreply@users.noreply.github.com>
 Installed-Size: @INSTALLED_SIZE@
 Depends: python3 (>= 3.12), python3-pil (>= 10.1), python3-serial (>= 3.5),
  python3-usb (>= 1.2.1), python3-pycryptodome (>= 3.20), python3-gi,
- gir1.2-ayatanaappindicator3-0.1, python3-numpy, fonts-dejavu-core
+ gir1.2-ayatanaappindicator3-0.1, python3-numpy, python3-psutil,
+ fonts-dejavu-core
 Recommends: systemd, git, fonts-ubuntu, xdg-desktop-portal
 Homepage: https://github.com/smartguy05/usb-lcd
 Description: Live Claude Code and Codex dashboard for a USB LCD panel

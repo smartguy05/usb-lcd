@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-19T20:52:42Z",
+ "generated": "2026-09-02T20:53:29Z",
  "symbols": [
   {
    "name": "__init__",
@@ -18,6 +18,114 @@
    "signature": "module __main__",
    "summary": "",
    "parent": ""
+  },
+  {
+   "name": "active_background",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 1,
+   "signature": "module active_background",
+   "summary": "The active-background layer: an animated wallpaper drawn behind the tiles.",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 27,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "FOX_DIR",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 29,
+   "signature": "FOX_DIR = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "DWELL_SECONDS",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 34,
+   "signature": "DWELL_SECONDS = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "STRIDE_FRACTION",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 38,
+   "signature": "STRIDE_FRACTION = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_load_raw_frames",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 50,
+   "signature": "def _load_raw_frames() -> list[Image.Image]",
+   "summary": "The run-cycle frames as RGBA, in filename order; [] if none/unreadable.",
+   "parent": ""
+  },
+  {
+   "name": "_cpu_fraction",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 68,
+   "signature": "def _cpu_fraction() -> float",
+   "summary": "Live CPU load in 0..1. Neutral 0.5 when psutil is unavailable.",
+   "parent": ""
+  },
+  {
+   "name": "ActiveBackground",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 82,
+   "signature": "class ActiveBackground",
+   "summary": "Stateful fox runner. ``step`` returns this frame's overlay, or None.",
+   "parent": ""
+  },
+  {
+   "name": "ActiveBackground.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 85,
+   "signature": "def __init__(self, cfg: ActiveBackgroundConfig) -> None",
+   "summary": "",
+   "parent": "ActiveBackground"
+  },
+  {
+   "name": "ActiveBackground.reconfigure",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 99,
+   "signature": "def reconfigure(self, cfg: ActiveBackgroundConfig) -> None",
+   "summary": "Adopt edited settings without resetting the fox's position.",
+   "parent": "ActiveBackground"
+  },
+  {
+   "name": "ActiveBackground._ensure_scaled",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 105,
+   "signature": "def _ensure_scaled(self, size: tuple[int, int]) -> None",
+   "summary": "",
+   "parent": "ActiveBackground"
+  },
+  {
+   "name": "ActiveBackground.step",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/active_background.py",
+   "line": 126,
+   "signature": "def step(self, dt: float, size: tuple[int, int]) -> Image.Image | None",
+   "summary": "Advance the fox by ``dt`` seconds and return the overlay for ``size``.",
+   "parent": "ActiveBackground"
   },
   {
    "name": "activity",
@@ -95,7 +203,7 @@
    "name": "LOG",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 36,
+   "line": 43,
    "signature": "LOG = ...",
    "summary": "",
    "parent": ""
@@ -104,7 +212,7 @@
    "name": "ALLOWED_HOSTS",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 38,
+   "line": 45,
    "signature": "ALLOWED_HOSTS = ...",
    "summary": "",
    "parent": ""
@@ -113,7 +221,7 @@
    "name": "MAX_BODY_BYTES",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 39,
+   "line": 46,
    "signature": "MAX_BODY_BYTES = ...",
    "summary": "",
    "parent": ""
@@ -122,7 +230,7 @@
    "name": "MAX_IMAGE_BYTES",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 40,
+   "line": 47,
    "signature": "MAX_IMAGE_BYTES = ...",
    "summary": "",
    "parent": ""
@@ -131,7 +239,7 @@
    "name": "MAX_IMAGE_PIXELS",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 41,
+   "line": 48,
    "signature": "MAX_IMAGE_PIXELS = ...",
    "summary": "",
    "parent": ""
@@ -140,7 +248,7 @@
    "name": "DRAIN_LIMIT",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 44,
+   "line": 51,
    "signature": "DRAIN_LIMIT = ...",
    "summary": "",
    "parent": ""
@@ -149,7 +257,7 @@
    "name": "_host_is_loopback",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 47,
+   "line": 54,
    "signature": "def _host_is_loopback(header: str | None) -> bool",
    "summary": "",
    "parent": ""
@@ -158,7 +266,7 @@
    "name": "config_to_json",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 63,
+   "line": 70,
    "signature": "def config_to_json(cfg: Config) -> dict[str, Any]",
    "summary": "",
    "parent": ""
@@ -167,7 +275,7 @@
    "name": "config_from_json",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 124,
+   "line": 140,
    "signature": "def config_from_json(current: Config, payload: dict[str, Any]) -> Config",
    "summary": "Build a candidate Config from the editor's JSON.",
    "parent": ""
@@ -176,7 +284,7 @@
    "name": "AdminState",
    "kind": "class",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 243,
+   "line": 272,
    "signature": "class AdminState",
    "summary": "What the editor needs from the daemon, and nothing more.",
    "parent": ""
@@ -185,7 +293,7 @@
    "name": "AdminState.__init__",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 246,
+   "line": 275,
    "signature": "def __init__(self, config_path: Path, get_config: Callable[[], Config], get_preview: Callable[[], Image.Image | None], get_discord: Callable[[], dict[str, Any]] | None=None, save_discord_token: Callable[[str], dict[str, Any]] | None=None, disconnect_discord: Callable[[], dict[str, Any]] | None=None, refresh_discord_channels: Callable[[], Any] | None=None, clear_discord: Callable[[], dict[str, Any]] | None=None, get_windows_notifications: Callable[[], dict[str, Any]] | None=None, request_windows_notification_access: Callable[[], dict[str, Any]] | None=None, todo_store: TodoStore | None=None)",
    "summary": "",
    "parent": "AdminState"
@@ -194,7 +302,7 @@
    "name": "AdminState.save",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 278,
+   "line": 307,
    "signature": "def save(self, payload: dict[str, Any]) -> Config",
    "summary": "Validate through the loader, then replace config.toml atomically.",
    "parent": "AdminState"
@@ -203,7 +311,7 @@
    "name": "AdminState.background_dir",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 291,
+   "line": 320,
    "signature": "def background_dir(self) -> Path",
    "summary": "",
    "parent": "AdminState"
@@ -212,7 +320,7 @@
    "name": "AdminState.save_background",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 294,
+   "line": 323,
    "signature": "def save_background(self, raw: bytes) -> Path",
    "summary": "",
    "parent": "AdminState"
@@ -221,7 +329,7 @@
    "name": "AdminState._prune_managed_backgrounds",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 320,
+   "line": 349,
    "signature": "def _prune_managed_backgrounds(self, keep: Path | None) -> None",
    "summary": "",
    "parent": "AdminState"
@@ -230,7 +338,7 @@
    "name": "rotate_layout_payload",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 335,
+   "line": 364,
    "signature": "def rotate_layout_payload(payload: dict[str, Any]) -> dict[str, Any]",
    "summary": "",
    "parent": ""
@@ -239,7 +347,7 @@
    "name": "make_handler",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 360,
+   "line": 389,
    "signature": "def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]",
    "summary": "",
    "parent": ""
@@ -248,7 +356,7 @@
    "name": "start",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 676,
+   "line": 705,
    "signature": "def start(state: AdminState, port: int) -> ThreadingHTTPServer",
    "summary": "Serve the editor on a daemon thread, so it never holds up shutdown.",
    "parent": ""
@@ -560,10 +668,19 @@
    "parent": ""
   },
   {
-   "name": "_account_uuid",
+   "name": "parse_usage",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
    "line": 106,
+   "signature": "def parse_usage(payload: Any, now: datetime) -> ClaudeLimitsSnapshot",
+   "summary": "Normalize every limit bucket returned by Claude's usage endpoint.",
+   "parent": ""
+  },
+  {
+   "name": "_account_uuid",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/claude_limits.py",
+   "line": 117,
    "signature": "def _account_uuid() -> str",
    "summary": "",
    "parent": ""
@@ -572,7 +689,7 @@
    "name": "_credential",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 116,
+   "line": 127,
    "signature": "def _credential() -> tuple[str, int | None]",
    "summary": "",
    "parent": ""
@@ -581,7 +698,7 @@
    "name": "_window_json",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 132,
+   "line": 143,
    "signature": "def _window_json(window: LimitWindow | None) -> dict[str, Any] | None",
    "summary": "",
    "parent": ""
@@ -590,7 +707,7 @@
    "name": "_window_from_json",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 141,
+   "line": 152,
    "signature": "def _window_from_json(data: Any) -> LimitWindow | None",
    "summary": "",
    "parent": ""
@@ -599,7 +716,7 @@
    "name": "ClaudeLimitsIntegration",
    "kind": "class",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 152,
+   "line": 163,
    "signature": "class ClaudeLimitsIntegration",
    "summary": "Own native observations, durable state, and the background Fable fetch.",
    "parent": ""
@@ -608,7 +725,7 @@
    "name": "ClaudeLimitsIntegration.__init__",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 155,
+   "line": 166,
    "signature": "def __init__(self, path: Path | None=None) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -617,7 +734,7 @@
    "name": "ClaudeLimitsIntegration._load",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 166,
+   "line": 177,
    "signature": "def _load(self) -> ClaudeLimitsSnapshot",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -626,7 +743,7 @@
    "name": "ClaudeLimitsIntegration._save",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 182,
+   "line": 193,
    "signature": "def _save(self, snapshot: ClaudeLimitsSnapshot) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -635,7 +752,7 @@
    "name": "ClaudeLimitsIntegration.configure",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 201,
+   "line": 212,
    "signature": "def configure(self, enabled: bool) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -644,7 +761,7 @@
    "name": "ClaudeLimitsIntegration.start",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 206,
+   "line": 217,
    "signature": "def start(self) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -653,7 +770,7 @@
    "name": "ClaudeLimitsIntegration.stop",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 212,
+   "line": 223,
    "signature": "def stop(self) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -662,7 +779,7 @@
    "name": "ClaudeLimitsIntegration.observe",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 219,
+   "line": 230,
    "signature": "def observe(self, provider: str, payload: dict[str, Any]) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -671,17 +788,17 @@
    "name": "ClaudeLimitsIntegration.snapshot",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 244,
+   "line": 255,
    "signature": "def snapshot(self) -> ClaudeLimitsSnapshot",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
   },
   {
-   "name": "ClaudeLimitsIntegration._fetch_fable",
+   "name": "ClaudeLimitsIntegration._fetch_usage",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 248,
-   "signature": "def _fetch_fable(self) -> LimitWindow | None",
+   "line": 259,
+   "signature": "def _fetch_usage(self) -> ClaudeLimitsSnapshot",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
   },
@@ -689,7 +806,7 @@
    "name": "ClaudeLimitsIntegration._refresh",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 264,
+   "line": 275,
    "signature": "def _refresh(self) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -698,7 +815,7 @@
    "name": "ClaudeLimitsIntegration._run",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/claude_limits.py",
-   "line": 304,
+   "line": 315,
    "signature": "def _run(self) -> None",
    "summary": "",
    "parent": "ClaudeLimitsIntegration"
@@ -821,10 +938,64 @@
    "parent": ""
   },
   {
-   "name": "Config",
+   "name": "ActiveBackgroundConfig",
    "kind": "class",
    "file": "src/usb_lcd_dashboard/config.py",
    "line": 56,
+   "signature": "class ActiveBackgroundConfig",
+   "summary": "The animated wallpaper layer (a running fox), rendered behind the tiles.",
+   "parent": ""
+  },
+  {
+   "name": "ActiveBackgroundConfig.enabled",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 66,
+   "signature": "enabled: bool = False",
+   "summary": "",
+   "parent": "ActiveBackgroundConfig"
+  },
+  {
+   "name": "ActiveBackgroundConfig.scale",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 69,
+   "signature": "scale: float = 0.45",
+   "summary": "",
+   "parent": "ActiveBackgroundConfig"
+  },
+  {
+   "name": "ActiveBackgroundConfig.speed_min",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 71,
+   "signature": "speed_min: float = 40.0",
+   "summary": "",
+   "parent": "ActiveBackgroundConfig"
+  },
+  {
+   "name": "ActiveBackgroundConfig.speed_max",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 72,
+   "signature": "speed_max: float = 220.0",
+   "summary": "",
+   "parent": "ActiveBackgroundConfig"
+  },
+  {
+   "name": "ActiveBackgroundConfig.opacity",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 75,
+   "signature": "opacity: float = 1.0",
+   "summary": "",
+   "parent": "ActiveBackgroundConfig"
+  },
+  {
+   "name": "Config",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 79,
    "signature": "class Config",
    "summary": "",
    "parent": ""
@@ -833,7 +1004,7 @@
    "name": "Config.device",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 57,
+   "line": 80,
    "signature": "device: str = 'AUTO' if os.name == 'nt' else '/dev/turing-lcd'",
    "summary": "",
    "parent": "Config"
@@ -842,7 +1013,7 @@
    "name": "Config.display_kind",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 58,
+   "line": 81,
    "signature": "display_kind: str = 'turing_rev_a'",
    "summary": "",
    "parent": "Config"
@@ -851,7 +1022,7 @@
    "name": "Config.width",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 59,
+   "line": 82,
    "signature": "width: int = 480",
    "summary": "",
    "parent": "Config"
@@ -860,7 +1031,7 @@
    "name": "Config.height",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 60,
+   "line": 83,
    "signature": "height: int = 320",
    "summary": "",
    "parent": "Config"
@@ -869,7 +1040,7 @@
    "name": "Config.orientation",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 61,
+   "line": 84,
    "signature": "orientation: str = 'landscape'",
    "summary": "",
    "parent": "Config"
@@ -878,7 +1049,7 @@
    "name": "Config.brightness",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 62,
+   "line": 85,
    "signature": "brightness: int = 25",
    "summary": "",
    "parent": "Config"
@@ -887,7 +1058,7 @@
    "name": "Config.refresh_hz",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 63,
+   "line": 86,
    "signature": "refresh_hz: float = 2.0",
    "summary": "",
    "parent": "Config"
@@ -896,7 +1067,7 @@
    "name": "Config.background",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 67,
+   "line": 90,
    "signature": "background: 'Background | None' = None",
    "summary": "",
    "parent": "Config"
@@ -905,8 +1076,17 @@
    "name": "Config.tiles",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 70,
+   "line": 93,
    "signature": "tiles: tuple['Tile', ...] = field(default=())",
+   "summary": "",
+   "parent": "Config"
+  },
+  {
+   "name": "Config.active_background",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 96,
+   "signature": "active_background: 'ActiveBackgroundConfig | None' = None",
    "summary": "",
    "parent": "Config"
   },
@@ -914,7 +1094,7 @@
    "name": "Config.active_ttl_seconds",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 71,
+   "line": 97,
    "signature": "active_ttl_seconds: int = 180",
    "summary": "",
    "parent": "Config"
@@ -923,7 +1103,7 @@
    "name": "Config.approval_ttl_seconds",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 72,
+   "line": 98,
    "signature": "approval_ttl_seconds: int = 90",
    "summary": "",
    "parent": "Config"
@@ -932,7 +1112,7 @@
    "name": "Config.tool_ttl_seconds",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 75,
+   "line": 101,
    "signature": "tool_ttl_seconds: int = 900",
    "summary": "",
    "parent": "Config"
@@ -941,7 +1121,7 @@
    "name": "Config.switch_dwell_seconds",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 78,
+   "line": 104,
    "signature": "switch_dwell_seconds: float = 4.0",
    "summary": "",
    "parent": "Config"
@@ -950,7 +1130,7 @@
    "name": "Config.idle_title",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 79,
+   "line": 105,
    "signature": "idle_title: str = 'AI WORKBENCH'",
    "summary": "",
    "parent": "Config"
@@ -959,7 +1139,7 @@
    "name": "Config.ipc_mode",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 80,
+   "line": 106,
    "signature": "ipc_mode: str = 'tcp' if os.name == 'nt' else 'unix'",
    "summary": "",
    "parent": "Config"
@@ -968,7 +1148,7 @@
    "name": "Config.ipc_host",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 81,
+   "line": 107,
    "signature": "ipc_host: str = '127.0.0.1'",
    "summary": "",
    "parent": "Config"
@@ -977,7 +1157,7 @@
    "name": "Config.ipc_port",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 82,
+   "line": 108,
    "signature": "ipc_port: int = DEFAULT_IPC_PORT",
    "summary": "",
    "parent": "Config"
@@ -986,7 +1166,7 @@
    "name": "Config.admin_enabled",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 85,
+   "line": 111,
    "signature": "admin_enabled: bool = True",
    "summary": "",
    "parent": "Config"
@@ -995,7 +1175,7 @@
    "name": "Config.admin_port",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 86,
+   "line": 112,
    "signature": "admin_port: int = DEFAULT_ADMIN_PORT",
    "summary": "",
    "parent": "Config"
@@ -1004,7 +1184,7 @@
    "name": "Config.tray_enabled",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 92,
+   "line": 118,
    "signature": "tray_enabled: bool = True",
    "summary": "",
    "parent": "Config"
@@ -1013,7 +1193,7 @@
    "name": "Config.discord_channel_ids",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 95,
+   "line": 121,
    "signature": "discord_channel_ids: tuple[str, ...] = field(default=())",
    "summary": "",
    "parent": "Config"
@@ -1022,7 +1202,7 @@
    "name": "Config.windows_notifications_enabled",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 96,
+   "line": 122,
    "signature": "windows_notifications_enabled: bool = False",
    "summary": "",
    "parent": "Config"
@@ -1031,7 +1211,7 @@
    "name": "Config.windows_notification_app_ids",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 97,
+   "line": 123,
    "signature": "windows_notification_app_ids: tuple[str, ...] = field(default=())",
    "summary": "",
    "parent": "Config"
@@ -1040,7 +1220,7 @@
    "name": "Config.windows_notification_include_terms",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 98,
+   "line": 124,
    "signature": "windows_notification_include_terms: tuple[str, ...] = field(default=())",
    "summary": "",
    "parent": "Config"
@@ -1049,7 +1229,7 @@
    "name": "Config.windows_notification_exclude_terms",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 99,
+   "line": 125,
    "signature": "windows_notification_exclude_terms: tuple[str, ...] = field(default=())",
    "summary": "",
    "parent": "Config"
@@ -1058,7 +1238,7 @@
    "name": "Config.screensaver_enabled",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 100,
+   "line": 126,
    "signature": "screensaver_enabled: bool = True",
    "summary": "",
    "parent": "Config"
@@ -1067,7 +1247,7 @@
    "name": "Config.screensaver_idle_seconds",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 101,
+   "line": 127,
    "signature": "screensaver_idle_seconds: int = 600",
    "summary": "",
    "parent": "Config"
@@ -1076,7 +1256,7 @@
    "name": "Config.layout_error",
    "kind": "field",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 106,
+   "line": 132,
    "signature": "layout_error: str = ''",
    "summary": "",
    "parent": "Config"
@@ -1085,7 +1265,7 @@
    "name": "Config.size",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 109,
+   "line": 135,
    "signature": "def size(self) -> tuple[int, int]",
    "summary": "",
    "parent": "Config"
@@ -1094,7 +1274,7 @@
    "name": "Config.socket_path",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 113,
+   "line": 139,
    "signature": "def socket_path(self) -> Path",
    "summary": "",
    "parent": "Config"
@@ -1103,7 +1283,7 @@
    "name": "Config.ipc_address",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 118,
+   "line": 144,
    "signature": "def ipc_address(self) -> tuple[str, int]",
    "summary": "",
    "parent": "Config"
@@ -1112,7 +1292,7 @@
    "name": "Config.frame_interval",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 122,
+   "line": 148,
    "signature": "def frame_interval(self) -> float",
    "summary": "",
    "parent": "Config"
@@ -1121,7 +1301,7 @@
    "name": "DEFAULT_CONFIG_TOML",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 126,
+   "line": 152,
    "signature": "DEFAULT_CONFIG_TOML = ...",
    "summary": "",
    "parent": ""
@@ -1130,7 +1310,7 @@
    "name": "default_config_toml",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 163,
+   "line": 189,
    "signature": "def default_config_toml(device: str | None=None, ipc_mode: str | None=None) -> str",
    "summary": "The starting config, rendered from the Config defaults themselves.",
    "parent": ""
@@ -1139,7 +1319,7 @@
    "name": "_toml_value",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 200,
+   "line": 226,
    "signature": "def _toml_value(value) -> str",
    "summary": "Render a Python value as TOML.",
    "parent": ""
@@ -1148,7 +1328,7 @@
    "name": "dump_config_toml",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 224,
+   "line": 250,
    "signature": "def dump_config_toml(cfg: Config) -> str",
    "summary": "Serialise a Config back to a config.toml the loader accepts.",
    "parent": ""
@@ -1157,7 +1337,7 @@
    "name": "write_config",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 315,
+   "line": 352,
    "signature": "def write_config(cfg: Config, path: Path | None=None) -> Path",
    "summary": "Replace config.toml in one step.",
    "parent": ""
@@ -1166,7 +1346,7 @@
    "name": "default_path",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 330,
+   "line": 367,
    "signature": "def default_path() -> Path",
    "summary": "",
    "parent": ""
@@ -1175,16 +1355,25 @@
    "name": "_parse_background",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 335,
+   "line": 372,
    "signature": "def _parse_background(table: dict) -> 'Background | None'",
    "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "_parse_active_background",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/config.py",
+   "line": 400,
+   "signature": "def _parse_active_background(table: dict) -> 'ActiveBackgroundConfig | None'",
+   "summary": "An empty/absent table means no animated wallpaper (returns None).",
    "parent": ""
   },
   {
    "name": "_parse_tiles",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 363,
+   "line": 433,
    "signature": "def _parse_tiles(raw: list) -> tuple['Tile', ...]",
    "summary": "",
    "parent": ""
@@ -1193,7 +1382,7 @@
    "name": "_with_layout",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 388,
+   "line": 458,
    "signature": "def _with_layout(cfg: Config, *, strict: bool=True) -> Config",
    "summary": "Fill in and check the layout, defaulting to the legacy full-screen tile.",
    "parent": ""
@@ -1202,7 +1391,7 @@
    "name": "load_config",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 409,
+   "line": 479,
    "signature": "def load_config(path: Path | None=None, *, strict: bool=True) -> Config",
    "summary": "Load the config, validating the layout only when the caller draws it.",
    "parent": ""
@@ -1211,7 +1400,7 @@
    "name": "load_ipc_config",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 432,
+   "line": 502,
    "signature": "def load_ipc_config(path: Path | None=None) -> Config",
    "summary": "Load only the IPC address needed by short-lived hook commands.",
    "parent": ""
@@ -1220,7 +1409,7 @@
    "name": "parse_config_text",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 458,
+   "line": 528,
    "signature": "def parse_config_text(text: str) -> Config",
    "summary": "Validate a config document without going through the filesystem.",
    "parent": ""
@@ -1229,7 +1418,7 @@
    "name": "parse_config",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/config.py",
-   "line": 467,
+   "line": 537,
    "signature": "def parse_config(data: dict, *, strict: bool=True) -> Config",
    "summary": "",
    "parent": ""
@@ -1247,7 +1436,7 @@
    "name": "LOG",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 21,
+   "line": 24,
    "signature": "LOG = ...",
    "summary": "",
    "parent": ""
@@ -1256,7 +1445,7 @@
    "name": "RESUME_GAP_SECONDS",
    "kind": "constant",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 26,
+   "line": 29,
    "signature": "RESUME_GAP_SECONDS = ...",
    "summary": "",
    "parent": ""
@@ -1265,7 +1454,7 @@
    "name": "DashboardDaemon",
    "kind": "class",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 29,
+   "line": 32,
    "signature": "class DashboardDaemon",
    "summary": "",
    "parent": ""
@@ -1274,7 +1463,7 @@
    "name": "DashboardDaemon.__init__",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 30,
+   "line": 33,
    "signature": "def __init__(self, config: Config, simulate: bool=False, config_path=None)",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1283,7 +1472,7 @@
    "name": "DashboardDaemon._content_activity_token",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 53,
+   "line": 61,
    "signature": "def _content_activity_token(self)",
    "summary": "Stable identifiers for visible content that can arrive off-loop.",
    "parent": "DashboardDaemon"
@@ -1292,7 +1481,7 @@
    "name": "DashboardDaemon._notice_content_activity",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 64,
+   "line": 72,
    "signature": "def _notice_content_activity(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1301,7 +1490,7 @@
    "name": "DashboardDaemon._screensaver_active",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 70,
+   "line": 78,
    "signature": "def _screensaver_active(self) -> bool",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1310,7 +1499,7 @@
    "name": "DashboardDaemon._apply_config",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 76,
+   "line": 84,
    "signature": "def _apply_config(self, config: Config) -> None",
    "summary": "Adopt a config, whether at startup or after an edit.",
    "parent": "DashboardDaemon"
@@ -1319,7 +1508,7 @@
    "name": "DashboardDaemon._config_signature",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 99,
+   "line": 116,
    "signature": "def _config_signature(self) -> bytes | None",
    "summary": "The config's contents, as the thing to notice changes in.",
    "parent": "DashboardDaemon"
@@ -1328,7 +1517,7 @@
    "name": "DashboardDaemon._reload_config",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 112,
+   "line": 129,
    "signature": "def _reload_config(self) -> None",
    "summary": "Pick up an edited config.toml without a restart.",
    "parent": "DashboardDaemon"
@@ -1337,7 +1526,7 @@
    "name": "DashboardDaemon._start_admin",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 152,
+   "line": 170,
    "signature": "def _start_admin(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1346,7 +1535,7 @@
    "name": "DashboardDaemon._start_tray",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 178,
+   "line": 196,
    "signature": "def _start_tray(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1355,7 +1544,7 @@
    "name": "DashboardDaemon.stop",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 190,
+   "line": 208,
    "signature": "def stop(self, *_args) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1364,7 +1553,7 @@
    "name": "DashboardDaemon._connect",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 193,
+   "line": 211,
    "signature": "def _connect(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1373,7 +1562,7 @@
    "name": "DashboardDaemon._recover_after_pause",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 204,
+   "line": 239,
    "signature": "def _recover_after_pause(self) -> None",
    "summary": "Drop USB state that may have gone stale while Windows was asleep.",
    "parent": "DashboardDaemon"
@@ -1382,7 +1571,7 @@
    "name": "DashboardDaemon.run",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 215,
+   "line": 250,
    "signature": "def run(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -2742,7 +2931,7 @@
    "kind": "function",
    "file": "src/usb_lcd_dashboard/layout.py",
    "line": 162,
-   "signature": "def compose(tiles: Sequence[Tile], size: tuple[int, int], *, sessions: Sequence[SessionState | None]=(), now: datetime, background: Background | None=None, connected: bool=True, idle_title: str='', messages: MessageSnapshot | None=None, notifications: NotificationSnapshot | None=None, todos: TodoSnapshot | None=None, claude_limits: ClaudeLimitsSnapshot | None=None) -> Image.Image",
+   "signature": "def compose(tiles: Sequence[Tile], size: tuple[int, int], *, sessions: Sequence[SessionState | None]=(), now: datetime, background: Background | None=None, connected: bool=True, idle_title: str='', messages: MessageSnapshot | None=None, notifications: NotificationSnapshot | None=None, todos: TodoSnapshot | None=None, claude_limits: ClaudeLimitsSnapshot | None=None, active_background: Image.Image | None=None) -> Image.Image",
    "summary": "Render every tile and composite them into one frame.",
    "parent": ""
   },
@@ -3654,6 +3843,168 @@
    "signature": "def native_write(image: Image.Image, pos: tuple[int, int], canvas: tuple[int, int], orientation: str) -> tuple[Image.Image, tuple[int, int]]",
    "summary": "Map a logical full frame or crop into the landscape panel buffer.",
    "parent": ""
+  },
+  {
+   "name": "profiles",
+   "kind": "module",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 1,
+   "signature": "module profiles",
+   "summary": "Hardware-selected display profiles for laptops that move between panels.",
+   "parent": ""
+  },
+  {
+   "name": "LOG",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 15,
+   "signature": "LOG = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SERIAL_VID",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 16,
+   "signature": "SERIAL_VID = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SERIAL_PID",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 17,
+   "signature": "SERIAL_PID = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "SERIAL_NUMBER",
+   "kind": "constant",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 18,
+   "signature": "SERIAL_NUMBER = ...",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PanelIdentity",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 22,
+   "signature": "class PanelIdentity",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "PanelIdentity.key",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 23,
+   "signature": "key: str",
+   "summary": "",
+   "parent": "PanelIdentity"
+  },
+  {
+   "name": "PanelIdentity.kind",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 24,
+   "signature": "kind: str",
+   "summary": "",
+   "parent": "PanelIdentity"
+  },
+  {
+   "name": "PanelIdentity.size",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 25,
+   "signature": "size: tuple[int, int]",
+   "summary": "",
+   "parent": "PanelIdentity"
+  },
+  {
+   "name": "PanelIdentity.device",
+   "kind": "field",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 26,
+   "signature": "device: str = 'AUTO'",
+   "summary": "",
+   "parent": "PanelIdentity"
+  },
+  {
+   "name": "detect_panel",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 29,
+   "signature": "def detect_panel() -> PanelIdentity | None",
+   "summary": "Return the supported panel currently visible to this machine.",
+   "parent": ""
+  },
+  {
+   "name": "profile_key_for_config",
+   "kind": "function",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 55,
+   "signature": "def profile_key_for_config(config: Config) -> str | None",
+   "summary": "Infer which known panel an existing single-file config describes.",
+   "parent": ""
+  },
+  {
+   "name": "ProfileStore",
+   "kind": "class",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 71,
+   "signature": "class ProfileStore",
+   "summary": "Persist visual configurations and activate the attached panel's copy.",
+   "parent": ""
+  },
+  {
+   "name": "ProfileStore.__init__",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 74,
+   "signature": "def __init__(self, config_path: Path)",
+   "summary": "",
+   "parent": "ProfileStore"
+  },
+  {
+   "name": "ProfileStore.path_for",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 79,
+   "signature": "def path_for(self, key: str) -> Path",
+   "summary": "",
+   "parent": "ProfileStore"
+  },
+  {
+   "name": "ProfileStore.save",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 82,
+   "signature": "def save(self, key: str, config: Config) -> None",
+   "summary": "",
+   "parent": "ProfileStore"
+  },
+  {
+   "name": "ProfileStore.save_active",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 85,
+   "signature": "def save_active(self, config: Config) -> None",
+   "summary": "",
+   "parent": "ProfileStore"
+  },
+  {
+   "name": "ProfileStore.activate",
+   "kind": "method",
+   "file": "src/usb_lcd_dashboard/profiles.py",
+   "line": 89,
+   "signature": "def activate(self, panel: PanelIdentity, current: Config) -> Config",
+   "summary": "",
+   "parent": "ProfileStore"
   },
   {
    "name": "render",
@@ -6464,6 +6815,78 @@
    "parent": ""
   },
   {
+   "name": "test_the_shipped_sprites_load",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 18,
+   "signature": "def test_the_shipped_sprites_load(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_step_returns_a_full_panel_overlay_while_the_fox_is_on_screen",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 24,
+   "signature": "def test_step_returns_a_full_panel_overlay_while_the_fox_is_on_screen(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_fox_advances_rightward_with_time",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 37,
+   "signature": "def test_the_fox_advances_rightward_with_time(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_fox_dwells_off_screen_then_re_enters_from_the_other_side",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 45,
+   "signature": "def test_the_fox_dwells_off_screen_then_re_enters_from_the_other_side(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_cpu_load_scales_the_speed",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 56,
+   "signature": "def test_cpu_load_scales_the_speed(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_missing_sprites_draw_nothing",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 75,
+   "signature": "def test_missing_sprites_draw_nothing(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_opacity_fades_the_layer",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 81,
+   "signature": "def test_opacity_fades_the_layer(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_reconfigure_keeps_the_fox_where_it_was",
+   "kind": "test",
+   "file": "tests/test_active_background.py",
+   "line": 96,
+   "signature": "def test_reconfigure_keeps_the_fox_where_it_was(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
    "name": "test_descriptions_match_the_agent_status_line",
    "kind": "test",
    "file": "tests/test_activity.py",
@@ -6509,11 +6932,20 @@
    "parent": ""
   },
   {
-   "name": "test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs",
+   "name": "test_enabling_auto_preserves_the_current_panel_for_profile_seeding",
    "kind": "test",
    "file": "tests/test_admin.py",
    "line": 55,
-   "signature": "def test_the_editor_is_split_into_a_stage_a_panel_and_two_tabs(...)",
+   "signature": "def test_enabling_auto_preserves_the_current_panel_for_profile_seeding(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_editor_is_split_into_a_stage_a_panel_and_three_tabs",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 62,
+   "signature": "def test_the_editor_is_split_into_a_stage_a_panel_and_three_tabs(...)",
    "summary": "The stage stays put; everything else is a tab or collapses away.",
    "parent": ""
   },
@@ -6521,7 +6953,7 @@
    "name": "test_source_backed_sections_live_in_the_widget_tab",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 66,
+   "line": 76,
    "signature": "def test_source_backed_sections_live_in_the_widget_tab(...)",
    "summary": "Discord, notifications and todos configure a widget, so they follow it.",
    "parent": ""
@@ -6530,7 +6962,7 @@
    "name": "test_the_preview_poll_stops_while_its_tab_is_hidden",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 83,
+   "line": 93,
    "signature": "def test_the_preview_poll_stops_while_its_tab_is_hidden(...)",
    "summary": "A PNG fetched every two seconds for a tab nobody is looking at.",
    "parent": ""
@@ -6539,7 +6971,7 @@
    "name": "test_switching_to_the_turzx_panel_restores_its_wide_profile",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 88,
+   "line": 98,
    "signature": "def test_switching_to_the_turzx_panel_restores_its_wide_profile(...)",
    "summary": "The USB transport cannot retain the legacy 480x320 canvas.",
    "parent": ""
@@ -6548,7 +6980,7 @@
    "name": "test_config_to_json_carries_the_layout_and_marks_ipc_readonly",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 155,
+   "line": 165,
    "signature": "def test_config_to_json_carries_the_layout_and_marks_ipc_readonly(...)",
    "summary": "",
    "parent": ""
@@ -6557,7 +6989,7 @@
    "name": "test_json_round_trips_a_config",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 167,
+   "line": 177,
    "signature": "def test_json_round_trips_a_config(...)",
    "summary": "",
    "parent": ""
@@ -6566,8 +6998,26 @@
    "name": "test_config_from_json_applies_edits",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 174,
+   "line": 184,
    "signature": "def test_config_from_json_applies_edits(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_config_to_json_omits_the_active_background_when_off",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 198,
+   "signature": "def test_config_to_json_omits_the_active_background_when_off(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_config_from_json_applies_the_active_background",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 202,
+   "signature": "def test_config_from_json_applies_the_active_background(...)",
    "summary": "",
    "parent": ""
   },
@@ -6575,7 +7025,7 @@
    "name": "test_layout_rotation_payload_rotates_every_tile",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 188,
+   "line": 219,
    "signature": "def test_layout_rotation_payload_rotates_every_tile(...)",
    "summary": "",
    "parent": ""
@@ -6584,7 +7034,7 @@
    "name": "test_config_from_json_rejects_bad_shapes",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 218,
+   "line": 249,
    "signature": "def test_config_from_json_rejects_bad_shapes(...)",
    "summary": "",
    "parent": ""
@@ -6593,7 +7043,7 @@
    "name": "test_the_page_is_served",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 226,
+   "line": 257,
    "signature": "def test_the_page_is_served(...)",
    "summary": "",
    "parent": ""
@@ -6602,7 +7052,7 @@
    "name": "test_layout_rotation_route",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 235,
+   "line": 266,
    "signature": "def test_layout_rotation_route(...)",
    "summary": "",
    "parent": ""
@@ -6611,7 +7061,7 @@
    "name": "test_background_upload_stores_a_managed_png",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 247,
+   "line": 278,
    "signature": "def test_background_upload_stores_a_managed_png(...)",
    "summary": "",
    "parent": ""
@@ -6620,7 +7070,7 @@
    "name": "test_background_upload_rejects_non_images",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 260,
+   "line": 291,
    "signature": "def test_background_upload_rejects_non_images(...)",
    "summary": "",
    "parent": ""
@@ -6629,7 +7079,7 @@
    "name": "test_the_config_endpoint_returns_the_layout",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 267,
+   "line": 298,
    "signature": "def test_the_config_endpoint_returns_the_layout(...)",
    "summary": "",
    "parent": ""
@@ -6638,7 +7088,7 @@
    "name": "test_the_widgets_endpoint_describes_the_registry",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 276,
+   "line": 307,
    "signature": "def test_the_widgets_endpoint_describes_the_registry(...)",
    "summary": "",
    "parent": ""
@@ -6647,7 +7097,7 @@
    "name": "test_todo_routes_cover_crud_history_reopen_and_delete",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 289,
+   "line": 320,
    "signature": "def test_todo_routes_cover_crud_history_reopen_and_delete(...)",
    "summary": "",
    "parent": ""
@@ -6656,7 +7106,7 @@
    "name": "test_todo_delete_requires_confirmation",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 313,
+   "line": 344,
    "signature": "def test_todo_delete_requires_confirmation(...)",
    "summary": "",
    "parent": ""
@@ -6665,7 +7115,7 @@
    "name": "test_the_discord_status_endpoint_contains_no_token",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 323,
+   "line": 354,
    "signature": "def test_the_discord_status_endpoint_contains_no_token(...)",
    "summary": "",
    "parent": ""
@@ -6674,7 +7124,7 @@
    "name": "test_discord_actions_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 332,
+   "line": 363,
    "signature": "def test_discord_actions_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -6683,7 +7133,7 @@
    "name": "test_windows_notification_status_and_access_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 360,
+   "line": 391,
    "signature": "def test_windows_notification_status_and_access_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -6692,7 +7142,7 @@
    "name": "test_a_cross_site_form_cannot_trigger_a_discord_action",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 383,
+   "line": 414,
    "signature": "def test_a_cross_site_form_cannot_trigger_a_discord_action(...)",
    "summary": "",
    "parent": ""
@@ -6701,7 +7151,7 @@
    "name": "test_the_preview_says_so_when_no_frame_exists_yet",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 396,
+   "line": 427,
    "signature": "def test_the_preview_says_so_when_no_frame_exists_yet(...)",
    "summary": "",
    "parent": ""
@@ -6710,7 +7160,7 @@
    "name": "test_the_preview_serves_the_daemons_frame",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 403,
+   "line": 434,
    "signature": "def test_the_preview_serves_the_daemons_frame(...)",
    "summary": "",
    "parent": ""
@@ -6719,7 +7169,7 @@
    "name": "test_an_unknown_route_is_a_404",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 412,
+   "line": 443,
    "signature": "def test_an_unknown_route_is_a_404(...)",
    "summary": "",
    "parent": ""
@@ -6728,7 +7178,7 @@
    "name": "test_saving_writes_the_config_file",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 421,
+   "line": 452,
    "signature": "def test_saving_writes_the_config_file(...)",
    "summary": "",
    "parent": ""
@@ -6737,7 +7187,7 @@
    "name": "test_saving_an_overlapping_layout_is_refused_with_the_reason",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 435,
+   "line": 466,
    "signature": "def test_saving_an_overlapping_layout_is_refused_with_the_reason(...)",
    "summary": "",
    "parent": ""
@@ -6746,7 +7196,7 @@
    "name": "test_every_loader_rule_is_enforced_on_save",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 457,
+   "line": 488,
    "signature": "def test_every_loader_rule_is_enforced_on_save(...)",
    "summary": "The editor validates by round-tripping through the real loader, so it",
    "parent": ""
@@ -6755,7 +7205,7 @@
    "name": "test_invalid_json_is_reported",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 468,
+   "line": 499,
    "signature": "def test_invalid_json_is_reported(...)",
    "summary": "",
    "parent": ""
@@ -6764,7 +7214,7 @@
    "name": "test_an_implausibly_large_body_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 480,
+   "line": 511,
    "signature": "def test_an_implausibly_large_body_is_refused(...)",
    "summary": "",
    "parent": ""
@@ -6773,7 +7223,7 @@
    "name": "test_only_loopback_hosts_are_accepted",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 508,
+   "line": 539,
    "signature": "def test_only_loopback_hosts_are_accepted(...)",
    "summary": "",
    "parent": ""
@@ -6782,7 +7232,7 @@
    "name": "test_a_foreign_host_header_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 512,
+   "line": 543,
    "signature": "def test_a_foreign_host_header_is_refused(...)",
    "summary": "Blunts DNS rebinding: a page on the web resolving its own name to",
    "parent": ""
@@ -6791,7 +7241,7 @@
    "name": "test_the_server_binds_loopback_only",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 523,
+   "line": 554,
    "signature": "def test_the_server_binds_loopback_only(...)",
    "summary": "",
    "parent": ""
@@ -6908,7 +7358,7 @@
    "name": "test_native_window_parsing_clamps_and_requires_a_reset",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 13,
+   "line": 14,
    "signature": "def test_native_window_parsing_clamps_and_requires_a_reset(...)",
    "summary": "",
    "parent": ""
@@ -6917,8 +7367,17 @@
    "name": "test_fable_parser_accepts_direct_legacy_and_dynamic_scopes",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 24,
+   "line": 25,
    "signature": "def test_fable_parser_accepts_direct_legacy_and_dynamic_scopes(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_usage_parser_includes_session_weekly_and_fable",
+   "kind": "test",
+   "file": "tests/test_claude_limits.py",
+   "line": 36,
+   "signature": "def test_usage_parser_includes_session_weekly_and_fable(...)",
    "summary": "",
    "parent": ""
   },
@@ -6926,7 +7385,7 @@
    "name": "test_native_observation_persists_without_credentials",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 35,
+   "line": 48,
    "signature": "def test_native_observation_persists_without_credentials(...)",
    "summary": "",
    "parent": ""
@@ -6935,7 +7394,7 @@
    "name": "test_cache_is_ignored_after_account_switch",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 51,
+   "line": 64,
    "signature": "def test_cache_is_ignored_after_account_switch(...)",
    "summary": "",
    "parent": ""
@@ -6944,7 +7403,7 @@
    "name": "test_refresh_keeps_cached_fable_on_failure",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 58,
+   "line": 71,
    "signature": "def test_refresh_keeps_cached_fable_on_failure(...)",
    "summary": "",
    "parent": ""
@@ -6953,8 +7412,17 @@
    "name": "test_refresh_keeps_cached_fable_when_response_omits_bucket",
    "kind": "test",
    "file": "tests/test_claude_limits.py",
-   "line": 68,
+   "line": 81,
    "signature": "def test_refresh_keeps_cached_fable_when_response_omits_bucket(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_refresh_updates_session_from_oauth_usage",
+   "kind": "test",
+   "file": "tests/test_claude_limits.py",
+   "line": 102,
+   "signature": "def test_refresh_updates_session_from_oauth_usage(...)",
    "summary": "",
    "parent": ""
   },
@@ -7094,10 +7562,37 @@
    "parent": ""
   },
   {
-   "name": "test_dump_survives_a_windows_path_in_the_background_image",
+   "name": "test_active_background_round_trips_and_validates",
    "kind": "test",
    "file": "tests/test_config.py",
    "line": 236,
+   "signature": "def test_active_background_round_trips_and_validates(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_active_background_absent_by_default",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 250,
+   "signature": "def test_active_background_absent_by_default(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_active_background_rejects_bad_values",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 265,
+   "signature": "def test_active_background_rejects_bad_values(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_dump_survives_a_windows_path_in_the_background_image",
+   "kind": "test",
+   "file": "tests/test_config.py",
+   "line": 271,
    "signature": "def test_dump_survives_a_windows_path_in_the_background_image(...)",
    "summary": "",
    "parent": ""
@@ -7106,7 +7601,7 @@
    "name": "test_write_config_replaces_the_file_atomically",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 248,
+   "line": 283,
    "signature": "def test_write_config_replaces_the_file_atomically(...)",
    "summary": "",
    "parent": ""
@@ -7115,7 +7610,7 @@
    "name": "test_write_config_creates_the_parent_directory",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 258,
+   "line": 293,
    "signature": "def test_write_config_creates_the_parent_directory(...)",
    "summary": "",
    "parent": ""
@@ -7124,7 +7619,7 @@
    "name": "test_the_admin_editor_is_enabled_on_a_loopback_port_by_default",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 266,
+   "line": 301,
    "signature": "def test_the_admin_editor_is_enabled_on_a_loopback_port_by_default(...)",
    "summary": "",
    "parent": ""
@@ -7133,7 +7628,7 @@
    "name": "test_the_admin_block_is_parsed",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 273,
+   "line": 308,
    "signature": "def test_the_admin_block_is_parsed(...)",
    "summary": "",
    "parent": ""
@@ -7142,7 +7637,7 @@
    "name": "test_a_bad_admin_port_is_rejected",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 286,
+   "line": 321,
    "signature": "def test_a_bad_admin_port_is_rejected(...)",
    "summary": "",
    "parent": ""
@@ -7151,7 +7646,7 @@
    "name": "test_a_missing_config_file_still_gets_the_legacy_layout",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 291,
+   "line": 326,
    "signature": "def test_a_missing_config_file_still_gets_the_legacy_layout(...)",
    "summary": "",
    "parent": ""
@@ -7160,7 +7655,7 @@
    "name": "test_a_broken_layout_is_still_fatal_when_the_caller_draws",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 319,
+   "line": 354,
    "signature": "def test_a_broken_layout_is_still_fatal_when_the_caller_draws(...)",
    "summary": "",
    "parent": ""
@@ -7169,7 +7664,7 @@
    "name": "test_a_broken_layout_does_not_stop_a_caller_that_never_draws",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 326,
+   "line": 361,
    "signature": "def test_a_broken_layout_does_not_stop_a_caller_that_never_draws(...)",
    "summary": "",
    "parent": ""
@@ -7178,7 +7673,7 @@
    "name": "test_everything_but_the_layout_is_still_checked_when_lenient",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 344,
+   "line": 379,
    "signature": "def test_everything_but_the_layout_is_still_checked_when_lenient(...)",
    "summary": "A wrong ipc.port would send the events nowhere, silently. Only the",
    "parent": ""
@@ -7187,7 +7682,7 @@
    "name": "test_an_overlapping_layout_is_also_forgiven_when_lenient",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 353,
+   "line": 388,
    "signature": "def test_an_overlapping_layout_is_also_forgiven_when_lenient(...)",
    "summary": "",
    "parent": ""
@@ -7196,7 +7691,7 @@
    "name": "test_windows_notification_filters_round_trip",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 365,
+   "line": 400,
    "signature": "def test_windows_notification_filters_round_trip(...)",
    "summary": "",
    "parent": ""
@@ -7205,7 +7700,7 @@
    "name": "test_windows_notification_filters_must_be_lists",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 378,
+   "line": 413,
    "signature": "def test_windows_notification_filters_must_be_lists(...)",
    "summary": "",
    "parent": ""
@@ -7214,7 +7709,7 @@
    "name": "test_notification_rotation_must_be_in_range",
    "kind": "test",
    "file": "tests/test_config.py",
-   "line": 383,
+   "line": 418,
    "signature": "def test_notification_rotation_must_be_in_range(...)",
    "summary": "",
    "parent": ""
@@ -8354,10 +8849,28 @@
    "parent": ""
   },
   {
-   "name": "test_wallpaper_makes_the_legacy_card_translucent",
+   "name": "test_the_active_background_overlay_paints_over_the_wallpaper_and_under_tiles",
    "kind": "test",
    "file": "tests/test_layout.py",
    "line": 218,
+   "signature": "def test_the_active_background_overlay_paints_over_the_wallpaper_and_under_tiles(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_an_active_background_overlay_disables_the_full_screen_fast_path",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 235,
+   "signature": "def test_an_active_background_overlay_disables_the_full_screen_fast_path(...)",
+   "summary": "An opaque full-screen tile would otherwise be handed straight back.",
+   "parent": ""
+  },
+  {
+   "name": "test_wallpaper_makes_the_legacy_card_translucent",
+   "kind": "test",
+   "file": "tests/test_layout.py",
+   "line": 248,
    "signature": "def test_wallpaper_makes_the_legacy_card_translucent(...)",
    "summary": "",
    "parent": ""
@@ -8575,6 +9088,42 @@
    "file": "tests/test_orientation.py",
    "line": 47,
    "signature": "def test_portrait_partial_write_becomes_a_landscape_crop(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_existing_configs_map_to_stable_hardware_keys",
+   "kind": "test",
+   "file": "tests/test_profiles.py",
+   "line": 8,
+   "signature": "def test_existing_configs_map_to_stable_hardware_keys(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_first_activation_preserves_an_existing_matching_layout",
+   "kind": "test",
+   "file": "tests/test_profiles.py",
+   "line": 13,
+   "signature": "def test_first_activation_preserves_an_existing_matching_layout(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_switching_panels_restores_each_saved_profile",
+   "kind": "test",
+   "file": "tests/test_profiles.py",
+   "line": 31,
+   "signature": "def test_switching_panels_restores_each_saved_profile(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_new_panel_gets_a_valid_full_canvas_layout",
+   "kind": "test",
+   "file": "tests/test_profiles.py",
+   "line": 49,
+   "signature": "def test_a_new_panel_gets_a_valid_full_canvas_layout(...)",
    "summary": "",
    "parent": ""
   },

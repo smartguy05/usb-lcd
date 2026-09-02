@@ -19,6 +19,7 @@ from .todos import TodoStore
 from .claude_limits import ClaudeLimitsIntegration
 from .screensaver import render_screensaver
 from .profiles import ProfileStore, detect_panel
+from .active_background import ActiveBackground
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,10 @@ class DashboardDaemon:
         self.windows_notifications = WindowsNotificationIntegration()
         self.todos = TodoStore(self.config_path.parent / "todos.sqlite3")
         self.claude_limits = ClaudeLimitsIntegration(self.config_path.parent / "claude-limits.json")
+        # The animated wallpaper layer, built by _apply_config when enabled. It is
+        # stateful, so it lives across frames rather than being rebuilt each one.
+        self.active_bg = None
+        self._last_fox_tick = time.monotonic()
         self._apply_config(config)
         self.running = True
         self.next_connect = 0.0
@@ -93,6 +98,15 @@ class DashboardDaemon:
             config.windows_notification_exclude_terms,
         )
         self.claude_limits.configure(any(tile.widget == "claude_limits" for tile in config.tiles))
+        # The active-background layer, kept across edits so a config save does not
+        # teleport the fox back to the edge; reconfigure adjusts its speed/scale.
+        ab_cfg = config.active_background
+        if ab_cfg is None or not ab_cfg.enabled:
+            self.active_bg = None
+        elif self.active_bg is None:
+            self.active_bg = ActiveBackground(ab_cfg)
+        else:
+            self.active_bg.reconfigure(ab_cfg)
         # getattr, because this runs once before the tray exists.
         if getattr(self, "tray", None) is not None:
             # The tooltip names the device and the menu offers the editor, both
@@ -285,10 +299,20 @@ class DashboardDaemon:
                 now = utc_now()
                 sessions = self.store.assign(self.slot_count, now)
                 self._notice_content_activity()
+                # Wall-clock delta for the stateful fox. Clamped so a suspend or a
+                # stalled loop makes it pause, not teleport across the panel.
+                tick = time.monotonic()
+                fox_dt = min(max(0.0, tick - self._last_fox_tick), 1.0)
+                self._last_fox_tick = tick
                 try:
                     if self._screensaver_active():
                         frame = render_screensaver(self.config.size, now)
                     else:
+                        overlay = (
+                            self.active_bg.step(fox_dt, self.config.size)
+                            if self.active_bg is not None
+                            else None
+                        )
                         frame = compose(
                             self.config.tiles,
                             self.config.size,
@@ -301,6 +325,7 @@ class DashboardDaemon:
                             notifications=self.windows_notifications.snapshot(),
                             todos=self.todos.snapshot(),
                             claude_limits=self.claude_limits.snapshot(),
+                            active_background=overlay,
                         )
                 except Exception:
                     # compose already isolates a single widget's fault to its own

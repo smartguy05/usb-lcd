@@ -1,3 +1,12 @@
+usb-lcd-dashboard (0.12.0) noble; urgency=medium
+
+  * Add an "active background" layer: a red fox that runs across the panel
+    behind every tile, dwells off-screen, then re-enters from the other side.
+    Its speed follows CPU usage. Configure it from the settings editor's new
+    Active background tab; depend on python3-psutil for the CPU reading.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Wed, 02 Sep 2026 12:00:00 +0000
+
 usb-lcd-dashboard (0.11.0) noble; urgency=medium
 
   * Auto-detect the attached panel and restore a separately saved layout for

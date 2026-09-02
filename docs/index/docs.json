@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-19T20:52:42Z",
+ "generated": "2026-09-02T20:53:29Z",
  "documents": [
   {
    "path": "docs/README.md",
@@ -56,7 +56,7 @@
     "admin_page.py:609",
     "admin_page.py:710"
    ],
-   "words": 1394
+   "words": 1406
   },
   {
    "path": "docs/admin/tray.md",
@@ -174,7 +174,7 @@
     "src/usb_lcd_dashboard/claude_limits.py"
    ],
    "citations": [],
-   "words": 261
+   "words": 288
   },
   {
    "path": "docs/integration/cli.md",
@@ -348,7 +348,7 @@
    ],
    "covers": [],
    "citations": [],
-   "words": 600
+   "words": 640
   },
   {
    "path": "docs/reference/phases.md",
@@ -378,6 +378,31 @@
    "covers": [],
    "citations": [],
    "words": 218
+  },
+  {
+   "path": "docs/rendering/active-background.md",
+   "title": "active_background.py \u2014 the animated wallpaper layer",
+   "headings": [
+    "API",
+    "How it fits together",
+    "Degradation",
+    "Art"
+   ],
+   "covers": [
+    "src/usb_lcd_dashboard/active_background.py"
+   ],
+   "citations": [
+    "active_background.py:126",
+    "active_background.py:34",
+    "active_background.py:50",
+    "active_background.py:68",
+    "active_background.py:82",
+    "active_background.py:99",
+    "config.py:400",
+    "config.py:56",
+    "layout.py:175"
+   ],
+   "words": 327
   },
   {
    "path": "docs/rendering/crab.md",
@@ -537,7 +562,7 @@
     "config.py:356",
     "config.py:55"
    ],
-   "words": 772
+   "words": 803
   },
   {
    "path": "docs/runtime/daemon.md",
@@ -567,14 +592,14 @@
     "daemon.py:64",
     "daemon.py:67"
    ],
-   "words": 1121
+   "words": 1132
   },
   {
    "path": "docs/runtime/device.md",
    "title": "device.py \u2014 the wire to a panel",
    "headings": [
     "The protocol",
-    "`auto` decides on size, not by probing",
+    "`auto` selects a hardware profile",
     "SerialPanel",
     "Four mounting orientations",
     "`health_check` exists because the driver lies",
@@ -587,7 +612,8 @@
    "covers": [
     "src/usb_lcd_dashboard/device.py",
     "src/usb_lcd_dashboard/turing_usb.py",
-    "src/usb_lcd_dashboard/orientation.py"
+    "src/usb_lcd_dashboard/orientation.py",
+    "src/usb_lcd_dashboard/profiles.py"
    ],
    "citations": [
     "device.py:113",
@@ -600,7 +626,7 @@
     "device.py:42",
     "device.py:98"
    ],
-   "words": 969
+   "words": 1067
   },
   {
    "path": "docs/runtime/display.md",

@@ -53,6 +53,29 @@ def runtime_dir() -> Path:
 
 
 @dataclass(frozen=True, slots=True)
+class ActiveBackgroundConfig:
+    """The animated wallpaper layer (a running fox), rendered behind the tiles.
+
+    Unlike a tile, this has no rect: it always spans the whole panel and is
+    stateful (its position is integrated frame to frame in the daemon), because
+    its speed follows live CPU usage and so cannot be a pure function of the
+    clock the way the stateless tile widgets are. Absent from the config means
+    the layer is off, which is why the field on Config defaults to None.
+    """
+
+    enabled: bool = False
+    # The sprite's height as a fraction of the panel height. Width follows the
+    # art's aspect ratio.
+    scale: float = 0.45
+    # Pixels per second at 0% and 100% CPU; the fox lerps between them.
+    speed_min: float = 40.0
+    speed_max: float = 220.0
+    # Whole-layer opacity, so the fox can read as a faint backdrop rather than
+    # competing with the foreground tiles.
+    opacity: float = 1.0
+
+
+@dataclass(frozen=True, slots=True)
 class Config:
     device: str = "AUTO" if os.name == "nt" else "/dev/turing-lcd"
     display_kind: str = "turing_rev_a"
@@ -68,6 +91,9 @@ class Config:
     # Empty means the 3.5" panel's single full-screen layout, synthesized at load
     # time, so an existing config keeps working with no edits.
     tiles: tuple["Tile", ...] = field(default=())
+    # None means no animated wallpaper. Kept off by default so existing configs
+    # and the shipped defaults render exactly as before.
+    active_background: "ActiveBackgroundConfig | None" = None
     active_ttl_seconds: int = 180
     approval_ttl_seconds: int = 90
     # A tool call can run for many minutes without the session emitting anything,
@@ -247,6 +273,17 @@ def dump_config_toml(cfg: Config) -> str:
         ]
         if cfg.background.image is not None:
             lines.append(f"image = {_toml_value(cfg.background.image)}")
+    if cfg.active_background is not None:
+        ab = cfg.active_background
+        lines += [
+            "",
+            "[active_background]",
+            f"enabled = {_toml_value(ab.enabled)}",
+            f"scale = {_toml_value(ab.scale)}",
+            f"speed_min = {_toml_value(ab.speed_min)}",
+            f"speed_max = {_toml_value(ab.speed_max)}",
+            f"opacity = {_toml_value(ab.opacity)}",
+        ]
     lines += [
         "",
         "[screensaver]",
@@ -358,6 +395,39 @@ def _parse_background(table: dict) -> "Background | None":
     if "color" in table:
         background = replace(background, color=str(table["color"]))
     return background
+
+
+def _parse_active_background(table: dict) -> "ActiveBackgroundConfig | None":
+    """An empty/absent table means no animated wallpaper (returns None)."""
+    if not table:
+        return None
+    default = ActiveBackgroundConfig()
+
+    def number(key: str, fallback: float) -> float:
+        try:
+            return float(table.get(key, fallback))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"active_background.{key} must be a number") from exc
+
+    scale = number("scale", default.scale)
+    speed_min = number("speed_min", default.speed_min)
+    speed_max = number("speed_max", default.speed_max)
+    opacity = number("opacity", default.opacity)
+    if not 0 < scale <= 1:
+        raise ValueError("active_background.scale must be between 0 and 1")
+    if speed_min < 0 or speed_max < 0:
+        raise ValueError("active_background.speed_min/speed_max must be non-negative")
+    if speed_max < speed_min:
+        raise ValueError("active_background.speed_max must be >= speed_min")
+    if not 0 <= opacity <= 1:
+        raise ValueError("active_background.opacity must be between 0 and 1")
+    return ActiveBackgroundConfig(
+        enabled=bool(table.get("enabled", default.enabled)),
+        scale=scale,
+        speed_min=speed_min,
+        speed_max=speed_max,
+        opacity=opacity,
+    )
 
 
 def _parse_tiles(raw: list) -> tuple["Tile", ...]:
@@ -496,6 +566,7 @@ def parse_config(data: dict, *, strict: bool = True) -> Config:
         width=int(display.get("width", cfg.width)),
         height=int(display.get("height", cfg.height)),
         background=_parse_background(display.get("background") or {}),
+        active_background=_parse_active_background(data.get("active_background") or {}),
         tiles=_parse_tiles(data.get("tile") or []),
         orientation=str(display.get("orientation", cfg.orientation)),
         brightness=int(display.get("brightness", cfg.brightness)),
