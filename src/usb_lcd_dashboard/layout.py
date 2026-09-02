@@ -172,21 +172,31 @@ def compose(
     notifications: NotificationSnapshot | None = None,
     todos: TodoSnapshot | None = None,
     claude_limits: ClaudeLimitsSnapshot | None = None,
+    active_background: Image.Image | None = None,
 ) -> Image.Image:
     """Render every tile and composite them into one frame.
 
     `sessions` supplies one entry per session-wanting tile, in tile order; slots
     are numbered here rather than in config so the user never hand-numbers them.
+
+    `active_background` is a full-panel RGBA overlay (the animated wallpaper)
+    painted over the background image and under every tile. Its presence also
+    disables the byte-identical full-screen fast path, which would otherwise hand
+    a single opaque tile straight back and skip the base layer entirely.
     """
     from .widgets import WIDGETS
 
     full_screen = (
-        len(tiles) == 1
+        active_background is None
+        and len(tiles) == 1
         and tiles[0].origin == (0, 0)
         and tiles[0].size == size
     )
     slot = -1
     frame: Image.Image | None = None
+    if active_background is not None:
+        frame = background_layer(background or Background(), size)
+        frame.paste(active_background, (0, 0), active_background)
 
     for tile in tiles:
         spec = WIDGETS[tile.widget]

@@ -215,6 +215,36 @@ def test_a_full_screen_opaque_tile_is_returned_directly():
     assert frame.getpixel((50, 50)) == (0, 255, 0)
 
 
+def test_the_active_background_overlay_paints_over_the_wallpaper_and_under_tiles():
+    overlay = Image.new("RGBA", (100, 100), (0, 0, 0, 0))
+    # A patch that would show through the gap, and one hidden behind a tile.
+    overlay.paste((255, 128, 0, 255), (60, 60, 90, 90))
+    overlay.paste((255, 128, 0, 255), (0, 0, 10, 10))
+    frame = compose(
+        [Tile("red", 0, 0, 10, 10)], (100, 100),
+        now=NOW, background=Background(color="#000000"), active_background=overlay,
+    )
+    # The tile still wins where it sits.
+    assert frame.getpixel((1, 1)) == (255, 0, 0)
+    # The overlay shows in the gap the tile does not cover.
+    assert frame.getpixel((70, 70)) == (255, 128, 0)
+    # Bare background elsewhere.
+    assert frame.getpixel((40, 40)) == (0, 0, 0)
+
+
+def test_an_active_background_overlay_disables_the_full_screen_fast_path():
+    """An opaque full-screen tile would otherwise be handed straight back."""
+    overlay = Image.new("RGBA", (100, 100), (0, 0, 0, 0))
+    frame = compose(
+        [Tile("opaque", 0, 0, 100, 100)], (100, 100),
+        now=NOW, active_background=overlay,
+    )
+    # The tile is opaque, so it still covers the overlay — but the frame went
+    # through the compositing path (a base layer was built), not the fast return.
+    assert frame.mode == "RGB"
+    assert frame.getpixel((50, 50)) == (0, 255, 0)
+
+
 def test_wallpaper_makes_the_legacy_card_translucent(tmp_path):
     wallpaper = tmp_path / "wallpaper.png"
     Image.new("RGB", (480, 320), "#ff00ff").save(wallpaper)

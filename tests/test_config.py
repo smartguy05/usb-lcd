@@ -233,6 +233,41 @@ def test_dump_preserves_tile_options_of_every_type(tmp_path):
     assert again == original
 
 
+def test_active_background_round_trips_and_validates(tmp_path):
+    text = (
+        "[active_background]\nenabled = true\nscale = 0.35\n"
+        "speed_min = 30\nspeed_max = 190\nopacity = 0.6\n"
+    )
+    original = load_config(write(tmp_path, text))
+    assert original.active_background is not None
+    assert original.active_background.enabled is True
+    assert original.active_background.scale == 0.35
+    assert original.active_background.speed_max == 190
+    again = load_config(write(tmp_path, dump_config_toml(original)))
+    assert again == original
+
+
+def test_active_background_absent_by_default(tmp_path):
+    assert load_config(tmp_path / "absent.toml").active_background is None
+
+
+@pytest.mark.parametrize(
+    "table,match",
+    [
+        ("scale = 0\n", "scale must be between"),
+        ("scale = 1.5\n", "scale must be between"),
+        ("speed_min = -1\n", "non-negative"),
+        ("speed_min = 100\nspeed_max = 50\n", "speed_max must be >="),
+        ("opacity = 2\n", "opacity must be between"),
+        ("scale = \"big\"\n", "scale must be a number"),
+    ],
+)
+def test_active_background_rejects_bad_values(tmp_path, table, match):
+    text = "[active_background]\nenabled = true\n" + table
+    with pytest.raises(ValueError, match=match):
+        load_config(write(tmp_path, text))
+
+
 def test_dump_survives_a_windows_path_in_the_background_image(tmp_path):
     wallpaper = tmp_path / "wall.png"
     wallpaper.write_bytes(b"")

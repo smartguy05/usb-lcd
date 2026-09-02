@@ -209,6 +209,8 @@ PAGE = r"""<!doctype html>
             aria-selected="true" aria-controls="tabLive">Live panel</button>
     <button class="tab" id="tabBtnWidget" role="tab"
             aria-selected="false" aria-controls="tabWidget">Widget settings</button>
+    <button class="tab" id="tabBtnActiveBg" role="tab"
+            aria-selected="false" aria-controls="tabActiveBg">Active background</button>
   </div>
 
   <div id="tabLive" role="tabpanel" aria-labelledby="tabBtnLive">
@@ -248,6 +250,15 @@ PAGE = r"""<!doctype html>
     <section id="secReadonly">
       <h2>Not editable here</h2>
       <div class="ro" id="roInfo"></div>
+    </section>
+  </div>
+
+  <div id="tabActiveBg" role="tabpanel" aria-labelledby="tabBtnActiveBg" hidden>
+    <section>
+      <h2>Active background</h2>
+      <p class="hint">A red fox that runs across the panel behind every tile.
+        It speeds up as the CPU gets busier.</p>
+      <div id="activeBgForm"></div>
     </section>
   </div>
 </main>
@@ -310,14 +321,19 @@ function markDirty() {
 }
 
 // ---------------------------------------------------------------------- tabs
+const TABS = [
+  ["live", "tabBtnLive", "tabLive"],
+  ["widget", "tabBtnWidget", "tabWidget"],
+  ["activeBg", "tabBtnActiveBg", "tabActiveBg"],
+];
 function showTab(name) {
-  const live = name === "live";
-  $("tabLive").hidden = !live;
-  $("tabWidget").hidden = live;
-  $("tabBtnLive").setAttribute("aria-selected", String(live));
-  $("tabBtnWidget").setAttribute("aria-selected", String(!live));
+  for (const [key, btn, panel] of TABS) {
+    const on = key === name;
+    $(panel).hidden = !on;
+    $(btn).setAttribute("aria-selected", String(on));
+  }
   // Unhide first: refreshPreview() declines to fetch while the tab is hidden.
-  if (live) refreshPreview();
+  if (name === "live") refreshPreview();
 }
 
 const liveTabShowing = () => !$("tabLive").hidden;
@@ -923,11 +939,53 @@ function drawReadonly() {
     "the editor port would cut off this page — edit config.toml for those.</p>";
 }
 
+function drawActiveBgForm() {
+  const a = $("activeBgForm");
+  a.innerHTML = "";
+  const on = document.createElement("div");
+  on.className = "check";
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.checked = cfg.active_background !== null && cfg.active_background !== undefined;
+  const tag = document.createElement("label");
+  tag.textContent = "Run the fox";
+  on.append(box, tag);
+  a.appendChild(on);
+  box.addEventListener("change", () => {
+    cfg.active_background = box.checked
+      ? { enabled: true, scale: 0.45, speed_min: 40, speed_max: 220, opacity: 1 }
+      : null;
+    markDirty();
+    drawActiveBgForm();
+  });
+  if (cfg.active_background) {
+    const ab = cfg.active_background;
+    // Presence of the block is the on/off switch, so keep enabled in step.
+    ab.enabled = true;
+    field(a, "Height (fraction of panel)", ab.scale, "number",
+      (v) => { ab.scale = v; }, "0 to 1", {min: 0.05, max: 1, step: 0.05});
+    field(a, "Speed at idle CPU (px/s)", ab.speed_min, "number",
+      (v) => { ab.speed_min = v; }, "How fast it runs when the CPU is quiet",
+      {min: 0, step: 5});
+    field(a, "Speed at full CPU (px/s)", ab.speed_max, "number",
+      (v) => { ab.speed_max = v; }, "How fast it runs when the CPU is pegged",
+      {min: 0, step: 5});
+    field(a, "Opacity", ab.opacity, "number",
+      (v) => { ab.opacity = v; }, "0 to 1", {min: 0, max: 1, step: 0.05});
+    const note = document.createElement("div");
+    note.className = "hint";
+    note.textContent = "Runs behind the tiles; set a tile's card colour to " +
+      "transparent to let more of the fox show through.";
+    a.appendChild(note);
+  }
+}
+
 function drawPanels() {
   drawDisplayForm();
   drawBackgroundForm();
   drawScreensaverForm();
   drawDashForm();
+  drawActiveBgForm();
   drawReadonly();
 }
 
@@ -1050,6 +1108,7 @@ async function save() {
     body: JSON.stringify({
       display: cfg.display,
       background: cfg.background,
+      active_background: cfg.active_background,
       screensaver: cfg.screensaver,
       dashboard: cfg.dashboard,
       discord: cfg.discord,
@@ -1090,6 +1149,7 @@ $("reload").addEventListener("click", () => {
 });
 $("tabBtnLive").addEventListener("click", () => showTab("live"));
 $("tabBtnWidget").addEventListener("click", () => showTab("widget"));
+$("tabBtnActiveBg").addEventListener("click", () => showTab("activeBg"));
 $("add").addEventListener("click", () => {
   const name = $("newWidget").value;
   const size = Math.min(cfg.display.height - 24, 300);

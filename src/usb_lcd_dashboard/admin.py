@@ -27,7 +27,14 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .admin_page import PAGE
 from .background import Background
-from .config import ADMIN_HOST, Config, dump_config_toml, parse_config_text, write_config
+from .config import (
+    ADMIN_HOST,
+    ActiveBackgroundConfig,
+    Config,
+    dump_config_toml,
+    parse_config_text,
+    write_config,
+)
 from .layout import Tile
 from .orientation import ORIENTATIONS, rotate_layout
 from .widgets import describe
@@ -80,6 +87,15 @@ def config_to_json(cfg: Config) -> dict[str, Any]:
             else cfg.background.image.as_posix(),
             "fit": cfg.background.fit,
             "card_opacity": cfg.background.card_opacity,
+        },
+        "active_background": None
+        if cfg.active_background is None
+        else {
+            "enabled": cfg.active_background.enabled,
+            "scale": cfg.active_background.scale,
+            "speed_min": cfg.active_background.speed_min,
+            "speed_max": cfg.active_background.speed_max,
+            "opacity": cfg.active_background.opacity,
         },
         "screensaver": {
             "enabled": cfg.screensaver_enabled,
@@ -194,6 +210,18 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
             card_opacity=number(raw_background, "card_opacity", float, Background().card_opacity),
         )
 
+    raw_active_bg = payload.get("active_background")
+    active_background = None
+    if isinstance(raw_active_bg, dict):
+        default = ActiveBackgroundConfig()
+        active_background = ActiveBackgroundConfig(
+            enabled=bool(raw_active_bg.get("enabled", True)),
+            scale=number(raw_active_bg, "scale", float, default.scale),
+            speed_min=number(raw_active_bg, "speed_min", float, default.speed_min),
+            speed_max=number(raw_active_bg, "speed_max", float, default.speed_max),
+            opacity=number(raw_active_bg, "opacity", float, default.opacity),
+        )
+
     return replace(
         current,
         display_kind=str(display.get("kind", current.display_kind)),
@@ -217,6 +245,7 @@ def config_from_json(current: Config, payload: dict[str, Any]) -> Config:
             dashboard, "switch_dwell_seconds", float, current.switch_dwell_seconds
         ),
         idle_title=str(dashboard.get("idle_title", current.idle_title)),
+        active_background=active_background,
         screensaver_enabled=bool(
             screensaver.get("enabled", current.screensaver_enabled)
         ),

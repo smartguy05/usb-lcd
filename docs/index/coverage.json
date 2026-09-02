@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-19T20:52:42Z",
+ "generated": "2026-09-02T20:53:29Z",
  "by_source": {
   "src/usb_lcd_dashboard/admin.py": [
    "docs/admin/settings-editor.md"
@@ -91,6 +91,9 @@
   "packaging/windows/config.example.toml": [
    "docs/packaging/windows.md"
   ],
+  "src/usb_lcd_dashboard/active_background.py": [
+   "docs/rendering/active-background.md"
+  ],
   "src/usb_lcd_dashboard/widgets/crab.py": [
    "docs/rendering/crab.md"
   ],
@@ -146,6 +149,9 @@
    "docs/runtime/device.md"
   ],
   "src/usb_lcd_dashboard/orientation.py": [
+   "docs/runtime/device.md"
+  ],
+  "src/usb_lcd_dashboard/profiles.py": [
    "docs/runtime/device.md"
   ],
   "src/usb_lcd_dashboard/display.py": [
