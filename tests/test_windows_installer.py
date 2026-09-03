@@ -68,3 +68,22 @@ def test_windows_upgrade_stops_only_processes_from_install_directory() -> None:
     assert "ExecutablePath" in helper
     assert "StartsWith($root" in helper
     assert "Stop-Process -Id $_.ProcessId" in helper
+
+
+def test_start_menu_has_a_launcher_not_only_diagnostics() -> None:
+    """The Start-menu folder must be able to start the dashboard.
+
+    It once held only Diagnostics and Uninstall, so the only launcher lived in
+    the Startup folder. Clicking the app in the Start menu ran `doctor`, which
+    prints and exits under pythonw with no console and no tray icon -- the
+    dashboard looked like it refused to come back after a quit. Both cli.py
+    (which turns a second `run` into a reconnect request) and WINDOWS.md assume
+    this shortcut exists.
+    """
+    script = INSTALLER.read_text()
+
+    launcher = script.index(
+        r'CreateShortCut "$SMPROGRAMS\USB LCD Dashboard\USB LCD Dashboard.lnk"'
+    )
+    assert "-m usb_lcd_dashboard run" in script[launcher : launcher + 300]
+    assert "pythonw.exe" in script[launcher : launcher + 300]

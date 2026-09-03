@@ -57,7 +57,9 @@ Ordered contract:
    with a message box if it is missing. A half-installed state is not accepted.
 5. Shortcuts: `$SMSTARTUP\USB LCD Dashboard.lnk` → `pythonw.exe -m usb_lcd_dashboard run`
    (this *is* the autostart mechanism — no service, no scheduled task), plus
-   Start-menu **Diagnostics** (`doctor`) and **Uninstall**.
+   three in the Start-menu folder: **USB LCD Dashboard** (the same `run`
+   command, so it starts the daemon or, if one is already up, asks it to
+   reconnect — see `cli.py`), **Diagnostics** (`doctor`) and **Uninstall**.
 6. `HKCU` registry: `InstallDir`, plus the standard Uninstall key with
    `DisplayName`, `DisplayVersion`, `UninstallString` and `QuietUninstallString`
    — which is what puts it in **Settings → Apps**.

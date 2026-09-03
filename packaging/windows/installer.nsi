@@ -181,6 +181,10 @@ Section "Install" SEC_MAIN
     CreateDirectory "$SMPROGRAMS\USB LCD Dashboard"
     SetOutPath "$INSTDIR"
     CreateShortCut "$SMSTARTUP\USB LCD Dashboard.lnk" "$INSTDIR\pythonw.exe" "-m usb_lcd_dashboard run" "$INSTDIR\pythonw.exe" 0 SW_SHOWMINIMIZED "" "Start the USB LCD dashboard at login"
+    ; The same command as the Startup shortcut, on purpose: cli.py turns a
+    ; second launch into an LCD reconnect request rather than a port-in-use
+    ; failure, so this doubles as the way to restart or recover the dashboard.
+    CreateShortCut "$SMPROGRAMS\USB LCD Dashboard\USB LCD Dashboard.lnk" "$INSTDIR\pythonw.exe" "-m usb_lcd_dashboard run" "$INSTDIR\pythonw.exe" 0 SW_SHOWMINIMIZED "" "Start or reconnect the USB LCD dashboard"
     CreateShortCut "$SMPROGRAMS\USB LCD Dashboard\Diagnostics.lnk" "$INSTDIR\python.exe" "-m usb_lcd_dashboard doctor" "$INSTDIR\python.exe" 0 SW_SHOWNORMAL "" "Check LCD, hooks, and autostart"
     CreateShortCut "$SMPROGRAMS\USB LCD Dashboard\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 

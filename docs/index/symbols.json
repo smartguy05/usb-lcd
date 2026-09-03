@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-02T20:53:29Z",
+ "generated": "2026-09-03T15:22:05Z",
  "symbols": [
   {
    "name": "__init__",
@@ -9989,6 +9989,15 @@
    "line": 61,
    "signature": "def test_windows_upgrade_stops_only_processes_from_install_directory(...)",
    "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_start_menu_has_a_launcher_not_only_diagnostics",
+   "kind": "test",
+   "file": "tests/test_windows_installer.py",
+   "line": 73,
+   "signature": "def test_start_menu_has_a_launcher_not_only_diagnostics(...)",
+   "summary": "The Start-menu folder must be able to start the dashboard.",
    "parent": ""
   }
  ]
