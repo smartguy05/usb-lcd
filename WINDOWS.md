@@ -5,14 +5,10 @@
 the pinned SmartScreen driver, and the dashboard application. Python does not
 need to be installed separately.
 
-> **Pending a Windows build.** The 0.12.0 installer (which adds the active
-> background / running fox) must be built on Windows — the identity-enabled
-> installer cannot be produced from Linux. Run
-> `packaging/windows/build-installer.sh` from Windows Git Bash, then record the
-> resulting `dist/USB-LCD-Dashboard-Setup-0.12.0.exe` and its sha256 here. The
-> most recent built installer in `dist/` is `USB-LCD-Dashboard-Setup-0.11.0.exe`
-> (sha256 `1e00f92cc6a895bded17b694188e0310d36d670638b7b43bd215fc5b39108746`),
-> which predates this feature.
+```text
+dist/USB-LCD-Dashboard-Setup-0.12.0.exe
+sha256 004b49cfc531c137a3203d27d65c9ceee4923667c10618a7f7eefc34ba46a010
+```
 
 ## Install
 

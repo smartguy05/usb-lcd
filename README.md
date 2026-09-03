@@ -456,14 +456,10 @@ sessions — but they are packaged differently, because the platforms differ:
 | --- | --- | --- |
 | Package | `USB-LCD-Dashboard-Setup-0.12.0.exe` | `usb-lcd-dashboard_0.12.0_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb/psutil |
-| Size | 22.6 MB | 172.1 KB plus dependencies |
-| SHA-256 | _pending a Windows build — see [WINDOWS.md](WINDOWS.md)_ | `4eca6f056f9b758e0ec52e21b6ab5c261f062e515e59d79864ed7bb7597f49d1` |
+| Size | 22.7 MB | 172.1 KB plus dependencies |
+| SHA-256 | `004b49cfc531c137a3203d27d65c9ceee4923667c10618a7f7eefc34ba46a010` | `4eca6f056f9b758e0ec52e21b6ab5c261f062e515e59d79864ed7bb7597f49d1` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
-
-> The 0.12.0 Windows installer is not yet in `dist/` — the identity-enabled
-> `.exe` must be built on Windows (see [WINDOWS.md](WINDOWS.md)). The 0.12.0
-> Ubuntu `.deb` above is built and smoke-tested.
 
 Both are reversible, both preserve an existing Claude status line, and neither
 displays prompts or transcript text.
