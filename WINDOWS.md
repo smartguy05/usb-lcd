@@ -1,13 +1,13 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.12.0.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.12.1.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, psutil,
 the pinned SmartScreen driver, and the dashboard application. Python does not
 need to be installed separately.
 
 ```text
-dist/USB-LCD-Dashboard-Setup-0.12.0.exe
-sha256 004b49cfc531c137a3203d27d65c9ceee4923667c10618a7f7eefc34ba46a010
+dist/USB-LCD-Dashboard-Setup-0.12.1.exe
+sha256 58f0d7f41790df8d1122fe35bc1a446b7cfa31dd9de4256e96f6ab63cc96e813
 ```
 
 ## Install
@@ -37,6 +37,11 @@ green with the LCD attached, grey while it is still looking for it, with the
 resolved COM port in the hover text. Left-click opens the settings editor;
 right-click offers the editor, the log folder, and **Quit**, which stops the
 background process the same way the uninstaller does.
+
+After **Quit**, start it again from **Start → USB LCD Dashboard → USB LCD
+Dashboard**. That shortcut runs the same command as the login one, so it also
+serves as the restart: if a background process is somehow still up, it asks that
+one to reconnect rather than failing on the busy port.
 
 Windows 11 puts a newly registered icon behind the chevron (`^`) at the left of
 the notification area. Drag it out onto the taskbar to keep it in view.
@@ -123,4 +128,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.12.0.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.12.1.exe`.

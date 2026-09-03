@@ -1,19 +1,6 @@
 {
- "generated": "2026-09-02T20:53:29Z",
+ "generated": "2026-09-03T15:22:05Z",
  "documents": [
-  {
-   "path": "docs/README.md",
-   "title": "Documentation",
-   "headings": [
-    "The map",
-    "Common tasks",
-    "How this documentation is kept honest",
-    "What is not here"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 452
-  },
   {
    "path": "docs/admin/README.md",
    "title": "Admin surfaces",
@@ -91,17 +78,6 @@
    "words": 1003
   },
   {
-   "path": "docs/architecture/README.md",
-   "title": "Architecture",
-   "headings": [
-    "The one-paragraph version",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 183
-  },
-  {
    "path": "docs/architecture/frame-budget.md",
    "title": "The frame budget",
    "headings": [
@@ -155,16 +131,15 @@
    "words": 458
   },
   {
-   "path": "docs/integration/README.md",
-   "title": "Integration",
+   "path": "docs/architecture/README.md",
+   "title": "Architecture",
    "headings": [
-    "Where to start",
-    "The rule that governs this whole area",
+    "The one-paragraph version",
     "See also"
    ],
    "covers": [],
    "citations": [],
-   "words": 229
+   "words": 183
   },
   {
    "path": "docs/integration/claude-limits.md",
@@ -236,6 +211,18 @@
    "words": 160
   },
   {
+   "path": "docs/integration/README.md",
+   "title": "Integration",
+   "headings": [
+    "Where to start",
+    "The rule that governs this whole area",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 229
+  },
+  {
    "path": "docs/integration/todos.md",
    "title": "Human todos",
    "headings": [],
@@ -245,19 +232,6 @@
    ],
    "citations": [],
    "words": 147
-  },
-  {
-   "path": "docs/packaging/README.md",
-   "title": "Packaging",
-   "headings": [
-    "Why they differ",
-    "Build",
-    "Two traps",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 245
   },
   {
    "path": "docs/packaging/linux.md",
@@ -291,6 +265,19 @@
    "words": 1171
   },
   {
+   "path": "docs/packaging/README.md",
+   "title": "Packaging",
+   "headings": [
+    "Why they differ",
+    "Build",
+    "Two traps",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 245
+  },
+  {
    "path": "docs/packaging/windows.md",
    "title": "The Windows installer",
    "headings": [
@@ -307,17 +294,20 @@
     "packaging/windows/config.example.toml"
    ],
    "citations": [],
-   "words": 775
+   "words": 804
   },
   {
-   "path": "docs/reference/README.md",
-   "title": "Reference",
+   "path": "docs/README.md",
+   "title": "Documentation",
    "headings": [
-    "See also"
+    "The map",
+    "Common tasks",
+    "How this documentation is kept honest",
+    "What is not here"
    ],
    "covers": [],
    "citations": [],
-   "words": 90
+   "words": 452
   },
   {
    "path": "docs/reference/commands.md",
@@ -368,16 +358,14 @@
    "words": 409
   },
   {
-   "path": "docs/rendering/README.md",
-   "title": "Rendering",
+   "path": "docs/reference/README.md",
+   "title": "Reference",
    "headings": [
-    "Where to start",
-    "Two things that look like bugs and are not",
     "See also"
    ],
    "covers": [],
    "citations": [],
-   "words": 218
+   "words": 90
   },
   {
    "path": "docs/rendering/active-background.md",
@@ -465,6 +453,18 @@
    "words": 814
   },
   {
+   "path": "docs/rendering/README.md",
+   "title": "Rendering",
+   "headings": [
+    "Where to start",
+    "Two things that look like bugs and are not",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 218
+  },
+  {
    "path": "docs/rendering/render.md",
    "title": "render.py \u2014 palette, fonts, text helpers, legacy card",
    "headings": [
@@ -530,17 +530,6 @@
     "widgets/__init__.py:60"
    ],
    "words": 808
-  },
-  {
-   "path": "docs/runtime/README.md",
-   "title": "Runtime",
-   "headings": [
-    "Where to start",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 173
   },
   {
    "path": "docs/runtime/config.md",
@@ -654,6 +643,17 @@
    "words": 505
   },
   {
+   "path": "docs/runtime/README.md",
+   "title": "Runtime",
+   "headings": [
+    "Where to start",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 173
+  },
+  {
    "path": "docs/runtime/transport.md",
    "title": "transport.py \u2014 the IPC wire",
    "headings": [
@@ -684,18 +684,6 @@
     "transport.py:92"
    ],
    "words": 525
-  },
-  {
-   "path": "docs/sessions/README.md",
-   "title": "Sessions",
-   "headings": [
-    "Where to start",
-    "The subtlest code in the repository",
-    "See also"
-   ],
-   "covers": [],
-   "citations": [],
-   "words": 193
   },
   {
    "path": "docs/sessions/model.md",
@@ -747,6 +735,18 @@
     "normalize.py:75"
    ],
    "words": 661
+  },
+  {
+   "path": "docs/sessions/README.md",
+   "title": "Sessions",
+   "headings": [
+    "Where to start",
+    "The subtlest code in the repository",
+    "See also"
+   ],
+   "covers": [],
+   "citations": [],
+   "words": 193
   },
   {
    "path": "docs/testing/README.md",

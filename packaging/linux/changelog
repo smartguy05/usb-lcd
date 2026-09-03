@@ -1,3 +1,12 @@
+usb-lcd-dashboard (0.12.1) noble; urgency=medium
+
+  * Windows: add a Start-menu shortcut that starts the dashboard. The Start-menu
+    folder previously held only Diagnostics and Uninstall, so the sole launcher
+    was the Startup-folder shortcut; clicking the app in the Start menu ran the
+    diagnostics and exited, and the tray icon never returned after a quit.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Thu, 03 Sep 2026 12:00:00 +0000
+
 usb-lcd-dashboard (0.12.0) noble; urgency=medium
 
   * Add an "active background" layer: a red fox that runs across the panel

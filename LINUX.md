@@ -1,6 +1,6 @@
 # Ubuntu package
 
-`usb-lcd-dashboard_0.12.0_all.deb` installs the dashboard on Ubuntu 24.04 LTS
+`usb-lcd-dashboard_0.12.1_all.deb` installs the dashboard on Ubuntu 24.04 LTS
 (noble) and later.
 
 Unlike the Windows installer it does **not** bundle a Python runtime. Ubuntu
@@ -15,14 +15,14 @@ The package is architecture-independent: nothing in it is compiled.
 Built 2026-09-02 from the current source tree and smoke-tested on Ubuntu 24.04:
 
 ```text
-dist/usb-lcd-dashboard_0.12.0_all.deb
-sha256 4eca6f056f9b758e0ec52e21b6ab5c261f062e515e59d79864ed7bb7597f49d1
+dist/usb-lcd-dashboard_0.12.1_all.deb
+sha256 14c3fdd006344f35338d43e0e42479ded6ff2a3e6e5e64334e7360b2aeefaebf
 ```
 
 ## Install
 
 ```bash
-sudo apt install ./usb-lcd-dashboard_0.12.0_all.deb
+sudo apt install ./usb-lcd-dashboard_0.12.1_all.deb
 ```
 
 That is the system-wide half: the program, and the udev rule that grants you
