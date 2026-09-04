@@ -1,3 +1,9 @@
+usb-lcd-dashboard (0.12.3) noble; urgency=medium
+
+  * Keep legacy Rev A LCD controllers awake during static and idle-clock frames.
+
+ -- USB LCD Dashboard <usb-lcd-dashboard@localhost>  Fri, 04 Sep 2026 13:00:00 -0600
+
 usb-lcd-dashboard (0.12.2) noble; urgency=medium
 
   * Add a Reconnect LCD action to the web settings. It queues the daemon's

@@ -20,3 +20,7 @@
   junction. Verification succeeded with a fresh explicit `--basetemp` and the
   pytest dead-symlink cleanup hook disabled; the dedicated temp trees were then
   removed explicitly.
+- Follow-up reproduction: with `screensaver.idle_seconds = 600`, the Rev A
+  panel went completely dark at the idle transition while the daemon and COM10
+  remained healthy. Static/idle frames had no serial traffic between paints;
+  periodic `screen_on` keep-alive is the selected repair.

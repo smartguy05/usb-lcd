@@ -81,6 +81,42 @@ def test_serial_partial_writes_are_mapped_for_a_flipped_mount():
     assert calls[0][0].getpixel((0, 0)) == (0, 0, 255)
 
 
+def test_legacy_health_check_keeps_a_static_panel_awake(monkeypatch):
+    panel = SerialPanel(LEGACY)
+    lcd = type("Lcd", (), {"lcd_serial": object(), "screen_on": lambda self: calls.append("on")})()
+    calls = []
+    panel.lcd = lcd
+    panel.serial_handle = lcd.lcd_serial
+    clock = iter((100.0, 161.0))
+    monkeypatch.setattr("usb_lcd_dashboard.device.time.monotonic", lambda: next(clock))
+    panel._next_keep_awake = 160.0
+    panel.health_check()
+    assert calls == []
+    panel.health_check()
+    assert calls == ["on"]
+
+
+def test_legacy_keep_awake_detects_driver_reopen(monkeypatch):
+    panel = SerialPanel(LEGACY)
+    original = object()
+    replacement = object()
+    calls = []
+    lcd = type("Lcd", (), {"lcd_serial": original, "screen_on": lambda self: calls.append("on")})()
+    panel.lcd = lcd
+    panel.serial_handle = original
+    panel._next_keep_awake = 0.0
+    monkeypatch.setattr("usb_lcd_dashboard.device.time.monotonic", lambda: 1.0)
+
+    def screen_on(self):
+        calls.append("on")
+        self.lcd_serial = replacement
+
+    lcd.screen_on = screen_on.__get__(lcd)
+    with pytest.raises(ConnectionError, match="reopened"):
+        panel.health_check()
+    assert calls == ["on"]
+
+
 def test_the_window_kind_is_an_explicit_stub():
     config = replace(WIDE, display_kind="window")
     with pytest.raises(NotImplementedError, match="not implemented yet"):

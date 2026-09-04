@@ -16,3 +16,5 @@
   tests and documented the recovery action.
 - Released the change as 0.12.2: full test suite and docs checks passed, both
   installers rebuilt, Debian smoke test passed, and metadata/hashes synchronized.
+- Fixed the legacy Rev A idle blackout by sending `screen_on` every 60 seconds
+  from its existing health-check path, including when frames are unchanged.

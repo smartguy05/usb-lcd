@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
@@ -20,6 +21,7 @@ from .orientation import native_size, native_write
 LOG = logging.getLogger(__name__)
 
 LEGACY_SIZE = (480, 320)
+LEGACY_KEEP_AWAKE_SECONDS = 60.0
 
 
 @runtime_checkable
@@ -53,6 +55,7 @@ class SerialPanel:
         self.device = config.device
         self.lcd = None
         self.serial_handle = None
+        self._next_keep_awake = 0.0
 
     def open(self) -> None:
         from smartscreen_driver.lcd_comm import Orientation
@@ -74,6 +77,7 @@ class SerialPanel:
         self.device = lcd.com_port
         self.lcd = lcd
         self.serial_handle = getattr(lcd, "lcd_serial", None)
+        self._next_keep_awake = time.monotonic() + LEGACY_KEEP_AWAKE_SECONDS
 
     def close(self) -> None:
         if self.lcd is not None:
@@ -82,6 +86,7 @@ class SerialPanel:
             finally:
                 self.lcd = None
                 self.serial_handle = None
+                self._next_keep_awake = 0.0
 
     def write(self, image: Image.Image, pos: tuple[int, int] = (0, 0)) -> None:
         if self.lcd is None:
@@ -108,6 +113,16 @@ class SerialPanel:
             return
         if getattr(self.lcd, "lcd_serial", None) is not self.serial_handle:
             raise ConnectionError("serial port was reopened by the driver")
+        now = time.monotonic()
+        if now < self._next_keep_awake:
+            return
+        # Rev A controllers can blank their backlight after a period without
+        # serial traffic.  Display.paint calls health_check even for unchanged
+        # frames, so this also protects static dashboards and the idle clock.
+        self.lcd.screen_on()
+        if getattr(self.lcd, "lcd_serial", None) is not self.serial_handle:
+            raise ConnectionError("serial port was reopened by the driver")
+        self._next_keep_awake = now + LEGACY_KEEP_AWAKE_SECONDS
 
 
 class SimulatedPanel:

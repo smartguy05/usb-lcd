@@ -458,10 +458,10 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.12.2.exe` | `usb-lcd-dashboard_0.12.2_all.deb` |
+| Package | `USB-LCD-Dashboard-Setup-0.12.3.exe` | `usb-lcd-dashboard_0.12.3_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb/psutil |
 | Size | 22.7 MB | 178.0 KB plus dependencies |
-| SHA-256 | `7d4de8d8197b6fdc95456766b9f3da88db22d901ec4eebf75efdb83cfbbe5df5` | `bf8fb37af60013130fcd98861de466a5cfd5dc86b3fd04273cd0fa9f136955e7` |
+| SHA-256 | `434865001bffc989b68d69cc9829175404e951331c2016cd1aada7ec5768cdad` | `12c5ede8b183d8f8d91d015673e96859e8aff3a5dd6caa09aad4d7312e4be91a` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 
@@ -475,10 +475,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.12.2.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.12.3.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.12.2.exe
+.\dist\USB-LCD-Dashboard-Setup-0.12.3.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -510,7 +510,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.12.2_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.12.3_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and
