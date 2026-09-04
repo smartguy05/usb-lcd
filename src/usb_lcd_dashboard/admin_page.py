@@ -199,7 +199,13 @@ PAGE = r"""<!doctype html>
       </details>
       <details class="sub" id="secDisplay">
         <summary>Display</summary>
-        <div class="sub-body" id="displayForm"></div>
+        <div class="sub-body">
+          <div id="displayForm"></div>
+          <div class="connection">
+            <button id="reconnectDisplay">Reconnect LCD</button>
+            <span class="hint">Reopens the device and repaints the full screen.</span>
+          </div>
+        </div>
       </details>
     </div>
   </details>
@@ -1143,7 +1149,29 @@ function refreshPreview() {
   img.src = "api/preview.png?t=" + Date.now();
 }
 
+async function reconnectDisplay() {
+  const button = $("reconnectDisplay");
+  button.disabled = true;
+  setStatus("Requesting LCD reconnect…", "busy");
+  try {
+    const response = await fetch("api/display/reconnect", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: "{}",
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || "LCD reconnect failed");
+    setStatus("LCD reconnect requested", "ok");
+    setTimeout(refreshPreview, 2500);
+  } catch (error) {
+    setStatus(String(error), "err");
+  } finally {
+    button.disabled = false;
+  }
+}
+
 $("save").addEventListener("click", save);
+$("reconnectDisplay").addEventListener("click", reconnectDisplay);
 $("reload").addEventListener("click", () => {
   if (!dirty || confirm("Discard unsaved changes?")) load();
 });

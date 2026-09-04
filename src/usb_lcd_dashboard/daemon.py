@@ -14,7 +14,7 @@ from .layout import agent_slots, compose
 from .model import StateStore, utc_now
 from .normalize import normalize_event
 from .notifications import WindowsNotificationIntegration
-from .transport import bind_socket, poll_timeout, receive_event
+from .transport import bind_socket, poll_timeout, receive_event, send_control
 from .todos import TodoStore
 from .claude_limits import ClaudeLimitsIntegration
 from .screensaver import render_screensaver
@@ -185,6 +185,12 @@ class DashboardDaemon:
                     clear_discord=self.discord.clear,
                     get_windows_notifications=self.windows_notifications.status,
                     request_windows_notification_access=self.windows_notifications.request_access,
+                    # Cross the HTTP-worker/daemon-loop boundary through the
+                    # existing IPC control path. The editor thread must never
+                    # close or replace the display while the loop is painting.
+                    request_display_reconnect=lambda: send_control(
+                        self.config, "reconnect"
+                    ),
                     todo_store=self.todos,
                 ),
                 self.config.admin_port,

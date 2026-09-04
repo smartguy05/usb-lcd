@@ -1,7 +1,8 @@
 # Todos
 
-- [x] Run focused and full tests (533 passed, one skipped; one transient loopback test passed on retry).
-- [x] Update documentation.
-- [x] Rebuild Debian and Windows installers.
-- [x] Verify metadata and SHA-256 hashes.
-- [x] Rebuild and verify installers after correcting the TURZX settings transition.
+- [ ] Reproduce the post-resume legacy LCD black-screen recurrence and capture
+      the exact elapsed time plus USB/serial state.
+- [ ] Add automatic recovery only after identifying a reliable stale-panel
+      signal; avoid resetting a healthy display on every frame.
+- [ ] Install the 0.12.2 Windows package so the documented
+      Start-menu reconnect shortcut is available on this machine.

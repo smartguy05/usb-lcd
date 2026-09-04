@@ -1,3 +1,5 @@
+import json
+import urllib.request
 from dataclasses import replace
 
 from PIL import Image
@@ -222,6 +224,34 @@ def test_the_editor_starts_when_enabled(tmp_path):
     finally:
         daemon.admin.shutdown()
         daemon.admin.server_close()
+
+
+def test_the_editor_reconnect_action_uses_daemon_ipc(tmp_path, monkeypatch):
+    daemon, _ = daemon_for(
+        tmp_path, WIDE.replace("enabled = false", "enabled = true")
+    )
+    daemon.config = replace(daemon.config, admin_port=0)
+    controls = []
+    monkeypatch.setattr(
+        "usb_lcd_dashboard.daemon.send_control",
+        lambda config, control: controls.append((config, control)) or True,
+    )
+    daemon._start_admin()
+    try:
+        port = daemon.admin.server_address[1]
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{port}/api/display/reconnect",
+            data=b"{}",
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=5) as response:
+            assert response.status == 202
+            assert json.loads(response.read()) == {"accepted": True}
+    finally:
+        daemon.admin.shutdown()
+        daemon.admin.server_close()
+    assert controls == [(daemon.config, "reconnect")]
 
 
 def test_a_port_already_in_use_does_not_stop_the_daemon(tmp_path, caplog):

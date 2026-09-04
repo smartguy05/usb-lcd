@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-03T15:22:05Z",
+ "generated": "2026-09-04T14:04:28Z",
  "documents": [
   {
    "path": "docs/admin/README.md",
@@ -43,7 +43,7 @@
     "admin_page.py:609",
     "admin_page.py:710"
    ],
-   "words": 1406
+   "words": 1479
   },
   {
    "path": "docs/admin/tray.md",

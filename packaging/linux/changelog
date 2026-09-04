@@ -1,3 +1,11 @@
+usb-lcd-dashboard (0.12.2) noble; urgency=medium
+
+  * Add a Reconnect LCD action to the web settings. It queues the daemon's
+    existing safe reconnect control, reopens the device, reapplies display
+    initialization and forces a full repaint.
+
+ -- USB LCD Dashboard <noreply@users.noreply.github.com>  Fri, 04 Sep 2026 12:00:00 +0000
+
 usb-lcd-dashboard (0.12.1) noble; urgency=medium
 
   * Windows: add a Start-menu shortcut that starts the dashboard. The Start-menu
