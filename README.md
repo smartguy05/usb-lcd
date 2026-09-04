@@ -339,6 +339,10 @@ runs inside the daemon rather than as a separate tool; **Widget settings** for
 whichever tile is selected (clicking a tile takes you there); and **Active
 background**, where the running fox is turned on and tuned.
 
+If the LCD goes black while the daemon still reports it as connected, open
+**Settings → Display** and click **Reconnect LCD**. The daemon safely reopens
+the device, reapplies its initialization and repaints the complete frame.
+
 Settings for a *source* travel with the widget that shows it, so the Discord
 connection appears only while a `messages` tile is selected, Windows notification
 access only with a `notifications` tile, the human todo list only with a `todos`
@@ -347,7 +351,7 @@ tile, and the session timings only with a tile that takes a session.
 Saving validates by round-tripping the candidate through the same loader the
 daemon uses, so the editor cannot accept a config the daemon would then refuse to
 start on, and a rejection reports the offending field or tile and writes nothing.
-The file is replaced atomically; the daemon notices the new mtime and reloads
+The file is replaced atomically; the daemon notices the changed bytes and reloads
 within a second, with no restart. A config that will not load is logged and
 ignored, so a bad hand-edit never takes the panel down.
 
@@ -454,10 +458,10 @@ sessions — but they are packaged differently, because the platforms differ:
 
 | | Windows 11 | Ubuntu 24.04+ |
 | --- | --- | --- |
-| Package | `USB-LCD-Dashboard-Setup-0.12.1.exe` | `usb-lcd-dashboard_0.12.1_all.deb` |
+| Package | `USB-LCD-Dashboard-Setup-0.12.3.exe` | `usb-lcd-dashboard_0.12.3_all.deb` |
 | Python | Bundled — nothing to install first | Uses the system `python3` and apt's Pillow/pySerial/numpy/pyusb/psutil |
-| Size | 22.7 MB | 177.6 KB plus dependencies |
-| SHA-256 | `58f0d7f41790df8d1122fe35bc1a446b7cfa31dd9de4256e96f6ab63cc96e813` | `14c3fdd006344f35338d43e0e42479ded6ff2a3e6e5e64334e7360b2aeefaebf` |
+| Size | 22.7 MB | 178.0 KB plus dependencies |
+| SHA-256 | `434865001bffc989b68d69cc9829175404e951331c2016cd1aada7ec5768cdad` | `12c5ede8b183d8f8d91d015673e96859e8aff3a5dd6caa09aad4d7312e4be91a` |
 | Runs at login | Startup shortcut, with a tray icon | `systemd --user` service, with a tray icon |
 | Hooks wired by | The installer, automatically | You, with one command |
 
@@ -471,10 +475,10 @@ Dashboard definitions, or it will never emit anything.
 
 ### Windows 11
 
-Double-click `dist\USB-LCD-Dashboard-Setup-0.12.1.exe`, or from a terminal:
+Double-click `dist\USB-LCD-Dashboard-Setup-0.12.3.exe`, or from a terminal:
 
 ```powershell
-.\dist\USB-LCD-Dashboard-Setup-0.12.1.exe
+.\dist\USB-LCD-Dashboard-Setup-0.12.3.exe
 ```
 
 It installs per-user into `%LOCALAPPDATA%\Programs\USB LCD Dashboard` — no
@@ -506,7 +510,7 @@ Installing is two steps, because the package covers two different scopes. The
 first is system-wide and needs root:
 
 ```bash
-sudo apt install ./dist/usb-lcd-dashboard_0.12.1_all.deb
+sudo apt install ./dist/usb-lcd-dashboard_0.12.3_all.deb
 ```
 
 That lays down the program and the udev rule that creates `/dev/turing-lcd` and

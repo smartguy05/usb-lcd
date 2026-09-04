@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-03T15:22:05Z",
+ "generated": "2026-09-04T14:04:28Z",
  "symbols": [
   {
    "name": "__init__",
@@ -294,7 +294,7 @@
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
    "line": 275,
-   "signature": "def __init__(self, config_path: Path, get_config: Callable[[], Config], get_preview: Callable[[], Image.Image | None], get_discord: Callable[[], dict[str, Any]] | None=None, save_discord_token: Callable[[str], dict[str, Any]] | None=None, disconnect_discord: Callable[[], dict[str, Any]] | None=None, refresh_discord_channels: Callable[[], Any] | None=None, clear_discord: Callable[[], dict[str, Any]] | None=None, get_windows_notifications: Callable[[], dict[str, Any]] | None=None, request_windows_notification_access: Callable[[], dict[str, Any]] | None=None, todo_store: TodoStore | None=None)",
+   "signature": "def __init__(self, config_path: Path, get_config: Callable[[], Config], get_preview: Callable[[], Image.Image | None], get_discord: Callable[[], dict[str, Any]] | None=None, save_discord_token: Callable[[str], dict[str, Any]] | None=None, disconnect_discord: Callable[[], dict[str, Any]] | None=None, refresh_discord_channels: Callable[[], Any] | None=None, clear_discord: Callable[[], dict[str, Any]] | None=None, get_windows_notifications: Callable[[], dict[str, Any]] | None=None, request_windows_notification_access: Callable[[], dict[str, Any]] | None=None, request_display_reconnect: Callable[[], bool] | None=None, todo_store: TodoStore | None=None)",
    "summary": "",
    "parent": "AdminState"
   },
@@ -302,7 +302,7 @@
    "name": "AdminState.save",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 307,
+   "line": 309,
    "signature": "def save(self, payload: dict[str, Any]) -> Config",
    "summary": "Validate through the loader, then replace config.toml atomically.",
    "parent": "AdminState"
@@ -311,7 +311,7 @@
    "name": "AdminState.background_dir",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 320,
+   "line": 322,
    "signature": "def background_dir(self) -> Path",
    "summary": "",
    "parent": "AdminState"
@@ -320,7 +320,7 @@
    "name": "AdminState.save_background",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 323,
+   "line": 325,
    "signature": "def save_background(self, raw: bytes) -> Path",
    "summary": "",
    "parent": "AdminState"
@@ -329,7 +329,7 @@
    "name": "AdminState._prune_managed_backgrounds",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 349,
+   "line": 351,
    "signature": "def _prune_managed_backgrounds(self, keep: Path | None) -> None",
    "summary": "",
    "parent": "AdminState"
@@ -338,7 +338,7 @@
    "name": "rotate_layout_payload",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 364,
+   "line": 366,
    "signature": "def rotate_layout_payload(payload: dict[str, Any]) -> dict[str, Any]",
    "summary": "",
    "parent": ""
@@ -347,7 +347,7 @@
    "name": "make_handler",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 389,
+   "line": 391,
    "signature": "def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]",
    "summary": "",
    "parent": ""
@@ -356,7 +356,7 @@
    "name": "start",
    "kind": "function",
    "file": "src/usb_lcd_dashboard/admin.py",
-   "line": 705,
+   "line": 724,
    "signature": "def start(state: AdminState, port: int) -> ThreadingHTTPServer",
    "summary": "Serve the editor on a daemon thread, so it never holds up shutdown.",
    "parent": ""
@@ -1535,7 +1535,7 @@
    "name": "DashboardDaemon._start_tray",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 196,
+   "line": 202,
    "signature": "def _start_tray(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1544,7 +1544,7 @@
    "name": "DashboardDaemon.stop",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 208,
+   "line": 214,
    "signature": "def stop(self, *_args) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1553,7 +1553,7 @@
    "name": "DashboardDaemon._connect",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 211,
+   "line": 217,
    "signature": "def _connect(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -1562,7 +1562,7 @@
    "name": "DashboardDaemon._recover_after_pause",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 239,
+   "line": 245,
    "signature": "def _recover_after_pause(self) -> None",
    "summary": "Drop USB state that may have gone stale while Windows was asleep.",
    "parent": "DashboardDaemon"
@@ -1571,7 +1571,7 @@
    "name": "DashboardDaemon.run",
    "kind": "method",
    "file": "src/usb_lcd_dashboard/daemon.py",
-   "line": 250,
+   "line": 256,
    "signature": "def run(self) -> None",
    "summary": "",
    "parent": "DashboardDaemon"
@@ -7052,8 +7052,26 @@
    "name": "test_layout_rotation_route",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 266,
+   "line": 267,
    "signature": "def test_layout_rotation_route(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_display_reconnect_action_is_forwarded",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 279,
+   "signature": "def test_display_reconnect_action_is_forwarded(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_display_reconnect_reports_when_the_daemon_cannot_accept_it",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 301,
+   "signature": "def test_display_reconnect_reports_when_the_daemon_cannot_accept_it(...)",
    "summary": "",
    "parent": ""
   },
@@ -7061,7 +7079,7 @@
    "name": "test_background_upload_stores_a_managed_png",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 278,
+   "line": 308,
    "signature": "def test_background_upload_stores_a_managed_png(...)",
    "summary": "",
    "parent": ""
@@ -7070,7 +7088,7 @@
    "name": "test_background_upload_rejects_non_images",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 291,
+   "line": 321,
    "signature": "def test_background_upload_rejects_non_images(...)",
    "summary": "",
    "parent": ""
@@ -7079,7 +7097,7 @@
    "name": "test_the_config_endpoint_returns_the_layout",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 298,
+   "line": 328,
    "signature": "def test_the_config_endpoint_returns_the_layout(...)",
    "summary": "",
    "parent": ""
@@ -7088,7 +7106,7 @@
    "name": "test_the_widgets_endpoint_describes_the_registry",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 307,
+   "line": 337,
    "signature": "def test_the_widgets_endpoint_describes_the_registry(...)",
    "summary": "",
    "parent": ""
@@ -7097,7 +7115,7 @@
    "name": "test_todo_routes_cover_crud_history_reopen_and_delete",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 320,
+   "line": 350,
    "signature": "def test_todo_routes_cover_crud_history_reopen_and_delete(...)",
    "summary": "",
    "parent": ""
@@ -7106,7 +7124,7 @@
    "name": "test_todo_delete_requires_confirmation",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 344,
+   "line": 374,
    "signature": "def test_todo_delete_requires_confirmation(...)",
    "summary": "",
    "parent": ""
@@ -7115,7 +7133,7 @@
    "name": "test_the_discord_status_endpoint_contains_no_token",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 354,
+   "line": 384,
    "signature": "def test_the_discord_status_endpoint_contains_no_token(...)",
    "summary": "",
    "parent": ""
@@ -7124,7 +7142,7 @@
    "name": "test_discord_actions_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 363,
+   "line": 393,
    "signature": "def test_discord_actions_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -7133,7 +7151,7 @@
    "name": "test_windows_notification_status_and_access_are_forwarded",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 391,
+   "line": 421,
    "signature": "def test_windows_notification_status_and_access_are_forwarded(...)",
    "summary": "",
    "parent": ""
@@ -7142,8 +7160,17 @@
    "name": "test_a_cross_site_form_cannot_trigger_a_discord_action",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 414,
+   "line": 444,
    "signature": "def test_a_cross_site_form_cannot_trigger_a_discord_action(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_a_cross_site_form_cannot_trigger_a_display_reconnect",
+   "kind": "test",
+   "file": "tests/test_admin.py",
+   "line": 457,
+   "signature": "def test_a_cross_site_form_cannot_trigger_a_display_reconnect(...)",
    "summary": "",
    "parent": ""
   },
@@ -7151,7 +7178,7 @@
    "name": "test_the_preview_says_so_when_no_frame_exists_yet",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 427,
+   "line": 470,
    "signature": "def test_the_preview_says_so_when_no_frame_exists_yet(...)",
    "summary": "",
    "parent": ""
@@ -7160,7 +7187,7 @@
    "name": "test_the_preview_serves_the_daemons_frame",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 434,
+   "line": 477,
    "signature": "def test_the_preview_serves_the_daemons_frame(...)",
    "summary": "",
    "parent": ""
@@ -7169,7 +7196,7 @@
    "name": "test_an_unknown_route_is_a_404",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 443,
+   "line": 486,
    "signature": "def test_an_unknown_route_is_a_404(...)",
    "summary": "",
    "parent": ""
@@ -7178,7 +7205,7 @@
    "name": "test_saving_writes_the_config_file",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 452,
+   "line": 495,
    "signature": "def test_saving_writes_the_config_file(...)",
    "summary": "",
    "parent": ""
@@ -7187,7 +7214,7 @@
    "name": "test_saving_an_overlapping_layout_is_refused_with_the_reason",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 466,
+   "line": 509,
    "signature": "def test_saving_an_overlapping_layout_is_refused_with_the_reason(...)",
    "summary": "",
    "parent": ""
@@ -7196,7 +7223,7 @@
    "name": "test_every_loader_rule_is_enforced_on_save",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 488,
+   "line": 531,
    "signature": "def test_every_loader_rule_is_enforced_on_save(...)",
    "summary": "The editor validates by round-tripping through the real loader, so it",
    "parent": ""
@@ -7205,7 +7232,7 @@
    "name": "test_invalid_json_is_reported",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 499,
+   "line": 542,
    "signature": "def test_invalid_json_is_reported(...)",
    "summary": "",
    "parent": ""
@@ -7214,7 +7241,7 @@
    "name": "test_an_implausibly_large_body_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 511,
+   "line": 554,
    "signature": "def test_an_implausibly_large_body_is_refused(...)",
    "summary": "",
    "parent": ""
@@ -7223,7 +7250,7 @@
    "name": "test_only_loopback_hosts_are_accepted",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 539,
+   "line": 582,
    "signature": "def test_only_loopback_hosts_are_accepted(...)",
    "summary": "",
    "parent": ""
@@ -7232,7 +7259,7 @@
    "name": "test_a_foreign_host_header_is_refused",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 543,
+   "line": 586,
    "signature": "def test_a_foreign_host_header_is_refused(...)",
    "summary": "Blunts DNS rebinding: a page on the web resolving its own name to",
    "parent": ""
@@ -7241,7 +7268,7 @@
    "name": "test_the_server_binds_loopback_only",
    "kind": "test",
    "file": "tests/test_admin.py",
-   "line": 554,
+   "line": 597,
    "signature": "def test_the_server_binds_loopback_only(...)",
    "summary": "",
    "parent": ""
@@ -7961,7 +7988,7 @@
    "name": "test_the_slot_count_comes_from_the_agent_tiles",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 50,
+   "line": 52,
    "signature": "def test_the_slot_count_comes_from_the_agent_tiles(...)",
    "summary": "",
    "parent": ""
@@ -7970,7 +7997,7 @@
    "name": "test_the_store_takes_its_timings_from_the_config",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 56,
+   "line": 58,
    "signature": "def test_the_store_takes_its_timings_from_the_config(...)",
    "summary": "",
    "parent": ""
@@ -7979,7 +8006,7 @@
    "name": "test_screensaver_activates_at_the_configured_delay",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 61,
+   "line": 63,
    "signature": "def test_screensaver_activates_at_the_configured_delay(...)",
    "summary": "",
    "parent": ""
@@ -7988,7 +8015,7 @@
    "name": "test_disabled_screensaver_never_activates",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 70,
+   "line": 72,
    "signature": "def test_disabled_screensaver_never_activates(...)",
    "summary": "",
    "parent": ""
@@ -7997,7 +8024,7 @@
    "name": "test_todo_content_wakes_the_screen_saver",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 78,
+   "line": 80,
    "signature": "def test_todo_content_wakes_the_screen_saver(...)",
    "summary": "",
    "parent": ""
@@ -8006,7 +8033,7 @@
    "name": "test_an_edited_layout_is_picked_up_without_a_restart",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 87,
+   "line": 89,
    "signature": "def test_an_edited_layout_is_picked_up_without_a_restart(...)",
    "summary": "",
    "parent": ""
@@ -8015,7 +8042,7 @@
    "name": "test_a_save_in_the_same_timestamp_tick_is_still_noticed",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 97,
+   "line": 99,
    "signature": "def test_a_save_in_the_same_timestamp_tick_is_still_noticed(...)",
    "summary": "The regression this pins: an edit landing inside the same filesystem",
    "parent": ""
@@ -8024,7 +8051,7 @@
    "name": "test_edited_timings_reach_the_store",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 113,
+   "line": 115,
    "signature": "def test_edited_timings_reach_the_store(...)",
    "summary": "",
    "parent": ""
@@ -8033,7 +8060,7 @@
    "name": "test_an_invalid_config_is_ignored_and_the_last_good_one_kept",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 122,
+   "line": 124,
    "signature": "def test_an_invalid_config_is_ignored_and_the_last_good_one_kept(...)",
    "summary": "",
    "parent": ""
@@ -8042,7 +8069,7 @@
    "name": "test_an_unchanged_file_is_not_reloaded",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 133,
+   "line": 135,
    "signature": "def test_an_unchanged_file_is_not_reloaded(...)",
    "summary": "",
    "parent": ""
@@ -8051,7 +8078,7 @@
    "name": "test_the_reload_is_throttled",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 141,
+   "line": 143,
    "signature": "def test_the_reload_is_throttled(...)",
    "summary": "Stat-per-frame at 2Hz is cheap, but there is no reason to do it twice.",
    "parent": ""
@@ -8060,7 +8087,7 @@
    "name": "test_a_resized_display_forces_a_reconnect",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 150,
+   "line": 152,
    "signature": "def test_a_resized_display_forces_a_reconnect(...)",
    "summary": "",
    "parent": ""
@@ -8069,7 +8096,7 @@
    "name": "test_a_layout_only_change_keeps_the_panel_open",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 163,
+   "line": 165,
    "signature": "def test_a_layout_only_change_keeps_the_panel_open(...)",
    "summary": "",
    "parent": ""
@@ -8078,7 +8105,7 @@
    "name": "test_a_missing_config_file_does_not_trigger_a_reload",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 173,
+   "line": 175,
    "signature": "def test_a_missing_config_file_does_not_trigger_a_reload(...)",
    "summary": "",
    "parent": ""
@@ -8087,7 +8114,7 @@
    "name": "test_a_long_runtime_pause_drops_the_stale_display",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 182,
+   "line": 184,
    "signature": "def test_a_long_runtime_pause_drops_the_stale_display(...)",
    "summary": "",
    "parent": ""
@@ -8096,7 +8123,7 @@
    "name": "test_a_normal_frame_does_not_reconnect_the_display",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 195,
+   "line": 197,
    "signature": "def test_a_normal_frame_does_not_reconnect_the_display(...)",
    "summary": "",
    "parent": ""
@@ -8105,7 +8132,7 @@
    "name": "test_the_editor_is_not_started_when_disabled",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 208,
+   "line": 210,
    "signature": "def test_the_editor_is_not_started_when_disabled(...)",
    "summary": "",
    "parent": ""
@@ -8114,8 +8141,17 @@
    "name": "test_the_editor_starts_when_enabled",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 215,
+   "line": 217,
    "signature": "def test_the_editor_starts_when_enabled(...)",
+   "summary": "",
+   "parent": ""
+  },
+  {
+   "name": "test_the_editor_reconnect_action_uses_daemon_ipc",
+   "kind": "test",
+   "file": "tests/test_daemon.py",
+   "line": 229,
+   "signature": "def test_the_editor_reconnect_action_uses_daemon_ipc(...)",
    "summary": "",
    "parent": ""
   },
@@ -8123,7 +8159,7 @@
    "name": "test_a_port_already_in_use_does_not_stop_the_daemon",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 227,
+   "line": 257,
    "signature": "def test_a_port_already_in_use_does_not_stop_the_daemon(...)",
    "summary": "The editor is a convenience; the panel is the job.",
    "parent": ""
@@ -8132,7 +8168,7 @@
    "name": "test_the_tray_is_not_started_when_disabled",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 266,
+   "line": 296,
    "signature": "def test_the_tray_is_not_started_when_disabled(...)",
    "summary": "",
    "parent": ""
@@ -8141,7 +8177,7 @@
    "name": "test_a_failing_tray_does_not_stop_the_daemon",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 272,
+   "line": 302,
    "signature": "def test_a_failing_tray_does_not_stop_the_daemon(...)",
    "summary": "",
    "parent": ""
@@ -8150,7 +8186,7 @@
    "name": "test_quitting_from_the_tray_stops_the_daemon",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 285,
+   "line": 315,
    "signature": "def test_quitting_from_the_tray_stops_the_daemon(...)",
    "summary": "The menu's Quit is wired to the same stop() that SIGTERM is.",
    "parent": ""
@@ -8159,7 +8195,7 @@
    "name": "test_an_edited_config_reaches_the_tray",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 293,
+   "line": 323,
    "signature": "def test_an_edited_config_reaches_the_tray(...)",
    "summary": "",
    "parent": ""
@@ -8168,7 +8204,7 @@
    "name": "test_the_preview_frame_starts_empty",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 302,
+   "line": 332,
    "signature": "def test_the_preview_frame_starts_empty(...)",
    "summary": "",
    "parent": ""
@@ -8177,7 +8213,7 @@
    "name": "test_the_editor_reads_the_daemons_live_config_and_frame",
    "kind": "test",
    "file": "tests/test_daemon.py",
-   "line": 307,
+   "line": 337,
    "signature": "def test_the_editor_reads_the_daemons_live_config_and_frame(...)",
    "summary": "",
    "parent": ""

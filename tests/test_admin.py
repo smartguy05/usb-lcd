@@ -261,6 +261,7 @@ def test_the_page_is_served(server):
     assert headers["Content-Type"].startswith("text/html")
     assert b"USB LCD settings" in body
     assert b"Human todos" in body
+    assert b"Reconnect LCD" in body
 
 
 def test_layout_rotation_route(server):
@@ -273,6 +274,35 @@ def test_layout_rotation_route(server):
     assert status == 200
     assert body["tiles"][0]["x"] == 75
     assert body["tiles"][0]["y"] == 34
+
+
+def test_display_reconnect_action_is_forwarded(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(WIDE, encoding="utf-8")
+    actions = []
+    state = AdminState(
+        path,
+        lambda: load_config(path),
+        lambda: None,
+        request_display_reconnect=lambda: actions.append("reconnect") or True,
+    )
+    srv = admin.start(state, 0)
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
+    try:
+        status, body = post(base, "/api/display/reconnect", {})
+    finally:
+        srv.shutdown()
+        srv.server_close()
+    assert status == 202
+    assert body == {"accepted": True}
+    assert actions == ["reconnect"]
+
+
+def test_display_reconnect_reports_when_the_daemon_cannot_accept_it(server):
+    base, _, _ = server
+    status, body = post(base, "/api/display/reconnect", {})
+    assert status == 503
+    assert body["error"] == "display reconnect is unavailable"
 
 
 def test_background_upload_stores_a_managed_png(server):
@@ -415,6 +445,19 @@ def test_a_cross_site_form_cannot_trigger_a_discord_action(server):
     base, _, _ = server
     request = urllib.request.Request(
         base + "/api/integrations/discord/clear",
+        data=b"",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(request, timeout=5)
+    assert exc.value.code == 415
+
+
+def test_a_cross_site_form_cannot_trigger_a_display_reconnect(server):
+    base, _, _ = server
+    request = urllib.request.Request(
+        base + "/api/display/reconnect",
         data=b"",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         method="POST",

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "usb-lcd-dashboard"
-version = "0.12.1"
+version = "0.12.3"
 description = "Live Claude Code and Codex dashboard for a Turing 3.5-inch USB LCD"
 readme = "README.md"
 requires-python = ">=3.12"

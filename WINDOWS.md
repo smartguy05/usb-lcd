@@ -1,13 +1,13 @@
 # Windows 11 installer
 
-`USB-LCD-Dashboard-Setup-0.12.1.exe` is a self-contained, offline installer for
+`USB-LCD-Dashboard-Setup-0.12.3.exe` is a self-contained, offline installer for
 64-bit Windows 11. It includes its own Python runtime, Pillow, pySerial, psutil,
 the pinned SmartScreen driver, and the dashboard application. Python does not
 need to be installed separately.
 
 ```text
-dist/USB-LCD-Dashboard-Setup-0.12.1.exe
-sha256 58f0d7f41790df8d1122fe35bc1a446b7cfa31dd9de4256e96f6ab63cc96e813
+dist/USB-LCD-Dashboard-Setup-0.12.3.exe
+sha256 7d4de8d8197b6fdc95456766b9f3da88db22d901ec4eebf75efdb83cfbbe5df5
 ```
 
 ## Install
@@ -81,7 +81,9 @@ PNG/JPEG/WebP wallpaper upload with translucent cards, and the screen-saver
 enable/delay controls, all under its collapsible **Settings** panel. Portrait
 selections rotate the canvas and every tile;
 the default screen saver shows a moving clock after ten minutes and wakes on
-new dashboard activity.
+new dashboard activity. On the older 3.5-inch Rev A panel, the daemon also sends
+a low-rate keep-awake command so this idle clock does not trigger the controller's
+backlight timeout.
 
 ### After unplugging the display
 
@@ -111,6 +113,10 @@ Dashboard** again from the Start menu: when the background process is already
 running, the shortcut requests the same reconnect instead of silently exiting
 because the dashboard port is in use.
 
+The web settings page has the same recovery action under **Settings → Display →
+Reconnect LCD**. It reopens the device, reapplies screen, brightness and
+orientation initialization, then repaints the full frame.
+
 ## Remove
 
 Use **Settings → Apps → Installed apps → USB LCD Dashboard → Uninstall**. The
@@ -128,4 +134,4 @@ packaging/windows/build-installer.sh
 Podman serves the Docker API, so it needs no configuration beyond a started
 machine. Set `CONTAINER_RUNTIME=podman` to call it directly instead.
 
-The result is written to `dist/USB-LCD-Dashboard-Setup-0.12.1.exe`.
+The result is written to `dist/USB-LCD-Dashboard-Setup-0.12.3.exe`.

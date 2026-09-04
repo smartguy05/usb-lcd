@@ -1,4 +1,4 @@
 """Claude Code and Codex dashboard for Turing USB LCDs."""
 
-__version__ = "0.12.0"
+__version__ = "0.12.3"
 

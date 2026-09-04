@@ -34,6 +34,7 @@ All guarded by `_guard()` first.
 | POST | `/api/config` | `200` the saved config, `400` bad JSON or invalid config, `413` oversized body. |
 | POST | `/api/layout/rotate` | Rotate the canvas and every tile between mounting orientations. |
 | POST | `/api/background-image` | Validate and stage a managed PNG/JPEG/WebP wallpaper. |
+| POST | `/api/display/reconnect` | Queue a safe device reopen and full repaint through daemon IPC. |
 | any | anything else | `404`. |
 | any | non-loopback `Host` | `403`. |
 
@@ -54,6 +55,8 @@ Three stacked regions, in this order:
    measured container, so it does not care what is hidden below it.
 2. **Settings** — a collapsed `<details>` holding Background, Screen saver and
    Display: the settings that belong to the whole screen rather than to a tile.
+   Display also has **Reconnect LCD**, which queues the daemon's existing
+   reconnect control rather than touching the device from the HTTP worker.
    `<details>` does the collapsing; there is no JS state behind it.
 3. **A tabstrip** — *Live panel* (the frame currently on the panel) and *Widget
    settings* (everything about the selected tile).
@@ -112,6 +115,10 @@ to start on, and there is no second copy of the validation rules. A rejection
 names the offending field or tile and writes nothing.
 
 The write itself is `write_config`, which replaces the file atomically.
+
+The reconnect action is deliberately not another shared-state channel. Its
+HTTP worker sends the existing `reconnect` IPC control envelope back to the
+daemon loop, which alone closes the handle, reconnects and forces a full frame.
 
 Wallpaper uploads are decoded with Pillow, limited to 10 MiB and 25 megapixels,
 EXIF-oriented, stripped to RGB PNG, and stored under a content-derived name in

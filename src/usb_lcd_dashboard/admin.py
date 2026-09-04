@@ -284,6 +284,7 @@ class AdminState:
         clear_discord: Callable[[], dict[str, Any]] | None = None,
         get_windows_notifications: Callable[[], dict[str, Any]] | None = None,
         request_windows_notification_access: Callable[[], dict[str, Any]] | None = None,
+        request_display_reconnect: Callable[[], bool] | None = None,
         todo_store: TodoStore | None = None,
     ):
         self.config_path = config_path
@@ -302,6 +303,7 @@ class AdminState:
             lambda: {"status": "unsupported", "error": "", "updated_at": None, "apps": [], "matching": 0}
         )
         self.request_windows_notification_access = request_windows_notification_access
+        self.request_display_reconnect = request_display_reconnect
         self.todo_store = todo_store
 
     def save(self, payload: dict[str, Any]) -> Config:
@@ -526,6 +528,23 @@ def make_handler(state: AdminState) -> type[BaseHTTPRequestHandler]:
                     self._json(500, {"error": f"could not store background: {exc}"})
                     return
                 self._json(201, {"image": image_path.as_posix()})
+                return
+            if route == "/api/display/reconnect":
+                if self._read_json() is None:
+                    return
+                if state.request_display_reconnect is None:
+                    self._json(503, {"error": "display reconnect is unavailable"})
+                    return
+                try:
+                    accepted = state.request_display_reconnect()
+                except Exception as exc:
+                    LOG.exception("Display reconnect request failed")
+                    self._json(502, {"error": str(exc)})
+                    return
+                if not accepted:
+                    self._json(503, {"error": "daemon did not accept reconnect request"})
+                    return
+                self._json(202, {"accepted": True})
                 return
             if route == "/api/todos" or route.startswith("/api/todos/"):
                 store = self._todo_store()
